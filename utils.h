@@ -6,6 +6,7 @@ using namespace std;
 using filesystem::path;
 using i64 = int64_t;
 using f64 = double;
+using Triplet = array<int, 3>;
 using MaxHeap = priority_queue<int>;
 using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 
@@ -26,6 +27,18 @@ template <int N> struct Mint {
     return *this;
   }
 };
+
+vector<vector<int>> matrix(int n, int m) {
+  vector<vector<int>> ans(n);
+  for (int i = 0; i < n; i++) {
+    auto &row = ans[i];
+    row.resize(m);
+    for (int j = 0; j < m; j++) {
+      cin >> row[j];
+    }
+  }
+  return ans;
+}
 
 vector<int> zfunc(const string &s) {
   const int n = s.size();
