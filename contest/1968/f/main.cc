@@ -1,18 +1,20 @@
 /**
- * https://codeforces.com/contest/1968/submission/267259391
+ * https://codeforces.com/contest/1968/submission/267964756
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using filesystem::path;
-using i64 = int64_t;
-using f64 = double;
+
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
+};
 
 void solve(int t) {
-  int n, q;
-  cin >> n >> q;
+  Int n, q;
   vector<int> b(n + 1);
   map<int, vector<int>> p;
   p[0].push_back(0);
@@ -30,21 +32,20 @@ void solve(int t) {
     auto t = ranges::lower_bound(p[bl], r);
     return *s < *prev(t);
   };
-  for (int i = 0, l, r; i < q; ++i) {
-    cin >> l >> r;
-    auto ans = f(l, r) ? "YES" : "NO";
-    cout << ans << endl;
+  for (int i = 0; i < q; ++i) {
+    Int l, r;
+    cout << (f(l, r) ? "YES" : "NO") << endl;
   }
   cout << endl;
 }
 
 int main() {
 #ifdef LOCAL
-  freopen(path(__FILE__).replace_filename("input.txt").c_str(), "r", stdin);
+  using filesystem::path;
+  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  int t;
-  cin >> t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

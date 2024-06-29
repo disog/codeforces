@@ -1,33 +1,34 @@
 /**
- * https://codeforces.com/contest/1968/submission/267255425
+ * https://codeforces.com/contest/1968/submission/267963400
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using filesystem::path;
-using i64 = int64_t;
-using f64 = double;
+
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
+};
 
 void solve(int t) {
-  int n;
-  cin >> n;
-  int a = 501;
-  for (int i = 0, x; i < n - 1; i++, a += x) {
-    cout << a << ' ';
-    cin >> x;
+  Int n;
+  int ans = 501;
+  for (int i = 0, x; i < n - 1; i++, cin >> x, ans += x) {
+    cout << ans << ' ';
   }
-  cout << a << endl;
+  cout << ans << endl;
 }
 
 int main() {
 #ifdef LOCAL
-  freopen(path(__FILE__).replace_filename("input.txt").c_str(), "r", stdin);
+  using filesystem::path;
+  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  int t;
-  cin >> t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

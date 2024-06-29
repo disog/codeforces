@@ -26,7 +26,7 @@ void solve(int t) {
 
 int main() {
 #ifdef LOCAL
-  freopen(path(__FILE__).replace_filename("input.txt").c_str(), "r", stdin);
+  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   int t;

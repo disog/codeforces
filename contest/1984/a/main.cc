@@ -10,6 +10,12 @@ using filesystem::path;
 using i64 = int64_t;
 using f64 = double;
 
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
+};
+
 template <typename T = int> struct Vec : vector<T> {
   Vec(int n, int s = 0) : vector<int>(n + s) {
     for (int i = s; i < n + s; i++) {
@@ -19,8 +25,7 @@ template <typename T = int> struct Vec : vector<T> {
 };
 
 void solve(int t) {
-  int n;
-  cin >> n;
+  Int n;
   Vec a(n);
   if (a.front() == a.back()) {
     cout << "NO" << endl;
@@ -33,7 +38,7 @@ void solve(int t) {
 
 int main() {
 #ifdef LOCAL
-  freopen(path(__FILE__).replace_filename("input.txt").c_str(), "r", stdin);
+  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   int t;
