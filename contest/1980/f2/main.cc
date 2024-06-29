@@ -1,21 +1,24 @@
 /**
- * https://codeforces.com/contest/1980/submission/267832408
+ * https://codeforces.com/contest/1980/submission/267982003
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using filesystem::path;
 using i64 = int64_t;
-using f64 = double;
+
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
+};
 
 void solve(int t) {
-  int n, m, k;
-  cin >> n >> m >> k;
+  Int n, m, k;
   map<int, map<int, int>> frows;
-  for (int i = 0, r, c; i < k; i++) { // O(k*log k)
-    cin >> r >> c;
+  for (int i = 0; i < k; i++) { // O(k*log k)
+    Int r, c;
     auto &rows = frows[c];
     rows[r] = i;
     if (rows.size() > 2) {
@@ -50,11 +53,11 @@ void solve(int t) {
 
 int main() {
 #ifdef LOCAL
+  using filesystem::path;
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  int t;
-  cin >> t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

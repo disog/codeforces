@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/267970045
+ * https://codeforces.com/contest/1971/submission/267971688
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -17,8 +17,9 @@ struct Int {
 void solve(int t) {
   Int n, k, q;
   vector<Int> a(k), b(k);
+  less<int> cmp;
   auto f = [&](int d) -> int {
-    int j = upper_bound(a.begin(), a.end(), d) - a.begin();
+    int j = ranges::upper_bound(a, d, cmp) - a.begin();
     if (j == a.size()) {
       return b.back();
     }

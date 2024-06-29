@@ -1,39 +1,39 @@
 /**
- * https://codeforces.com/contest/1980/submission/267942169
+ * https://codeforces.com/contest/1980/submission/267981721
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using filesystem::path;
 using i64 = int64_t;
-using f64 = double;
 
-template <typename T = int> struct Vec2I : vector<array<T, 3>> {
-  Vec2I(int n, int s = 0) : vector<array<T, 3>>(n + s) {
-    for (int i = s, x, y; i < n + s; i++) {
-      cin >> x >> y;
-      (*this)[i] = {x, y, i};
-    }
-  }
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
 };
 
-auto cmp = [](Vec2I<int>::value_type &a, Vec2I<int>::value_type &b) {
-  auto [ra, ca, _a] = a;
-  auto [rb, cb, _b] = b;
+using Cell = pair<array<Int, 2>, int>;
+
+auto cmp = [](Cell &a, Cell &b) {
+  auto [ra, ca] = a.first;
+  auto [rb, cb] = b.first;
   return ra > rb || (ra == rb && ca < cb);
 };
 
 void solve(int t) {
-  int n, m, k;
-  cin >> n >> m >> k;
-  Vec2I fs(k);
+  Int n, m, k;
+  vector<Cell> fs(k);
+  for (int i = 0; i < k; i++) {
+    fs[i].second = i;
+  }
   ranges::sort(fs, cmp); // O(k*log k)
   vector<int> ans(k);
   i64 a = 0;
   int x = n, y = m + 1;
-  for (auto &&[r, c, i] : fs) { // O(k)
+  for (auto &&[rc, i] : fs) { // O(k)
+    auto [r, c] = rc;
     if (c < y) {
       a += i64(x - r) * (y - 1);
       x = r, y = c;
@@ -50,11 +50,11 @@ void solve(int t) {
 
 int main() {
 #ifdef LOCAL
+  using filesystem::path;
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  int t;
-  cin >> t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

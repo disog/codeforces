@@ -1,33 +1,26 @@
 /**
- * https://codeforces.com/contest/1980/submission/267936524
+ * https://codeforces.com/contest/1980/submission/267973097
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using filesystem::path;
-using i64 = int64_t;
-using f64 = double;
 
-template <typename T = int> struct Vec : vector<T> {
-  Vec(int n, int s = 0) : vector<int>(n + s) {
-    for (int i = s; i < n + s; i++) {
-      cin >> (*this)[i];
-    }
-  }
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
 };
 
 void solve(int t) {
-  int n, m;
-  cin >> n;
-  Vec a(n), b(n);
-  cin >> m;
+  Int n;
+  vector<Int> a(n), b(n);
+  Int m;
+  vector<Int> d(m);
   map<int, int> count;
-  int d;
-  for (int i = 0; i < m; ++i) {
-    cin >> d;
-    count[d]++;
+  for (auto &&di : d) {
+    count[di]++;
   }
   auto ans = "NO";
   for (int i = 0; i < n; ++i) {
@@ -35,7 +28,7 @@ void solve(int t) {
       ans = "NO";
       break;
     }
-    if (b[i] == d) {
+    if (b[i] == d.back()) {
       ans = "YES";
     }
   }
@@ -44,11 +37,11 @@ void solve(int t) {
 
 int main() {
 #ifdef LOCAL
+  using filesystem::path;
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  int t;
-  cin >> t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }
