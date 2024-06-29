@@ -1,26 +1,30 @@
 /**
- * https://codeforces.com/contest/1986/submission/267295609
+ * https://codeforces.com/contest/1986/submission/267989431
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using filesystem::path;
-using i64 = int64_t;
-using f64 = double;
+
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
+};
+
+struct Str : string {
+  Str() { cin >> *this; }
+};
 
 void solve(int t) {
-  int n, m;
-  string s, c;
-  cin >> n >> m >> s;
-  vector<int> ind(m);
-  for (auto &&i : ind) {
-    cin >> i;
-  }
-  cin >> c;
-  ranges::sort(ind);
-  ranges::sort(c);
+  Int n, m;
+  Str s;
+  vector<Int> ind(m);
+  Str c;
+  less<int> cmp;
+  ranges::sort(ind, cmp);
+  ranges::sort(c, cmp);
   for (int i = 0, j = 0, prev = -1; i < m; i++) {
     if (ind[i] != prev) {
       prev = ind[i];
@@ -32,11 +36,11 @@ void solve(int t) {
 
 int main() {
 #ifdef LOCAL
+  using filesystem::path;
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  int t;
-  cin >> t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

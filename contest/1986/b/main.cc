@@ -1,34 +1,34 @@
 /**
- * https://codeforces.com/contest/1986/submission/267295180
+ * https://codeforces.com/contest/1986/submission/267989121
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using filesystem::path;
-using i64 = int64_t;
-using f64 = double;
+
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
+};
 
 void solve(int t) {
-  int n, m;
-  cin >> n >> m;
-  int matrix[n][m];
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < m; j++) {
-      cin >> matrix[i][j];
-    }
+  Int n, m;
+  vector<vector<Int>> a(n);
+  for (auto &&row : a) {
+    row.resize(m);
   }
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
-      auto u = i > 0 ? matrix[i - 1][j] : 0;
-      auto l = j > 0 ? matrix[i][j - 1] : 0;
-      auto d = i < n - 1 ? matrix[i + 1][j] : 0;
-      auto r = j < m - 1 ? matrix[i][j + 1] : 0;
+      auto u = i > 0 ? a[i - 1][j] : 0;
+      auto l = j > 0 ? a[i][j - 1] : 0;
+      auto d = i < n - 1 ? a[i + 1][j] : 0;
+      auto r = j < m - 1 ? a[i][j + 1] : 0;
       auto mx = max(u, max(l, max(d, r)));
-      auto &cell = matrix[i][j];
+      auto &cell = a[i][j];
       if (cell > mx) {
-        cell = mx;
+        cell.x = mx;
       }
       cout << cell << ' ';
     }
@@ -38,11 +38,11 @@ void solve(int t) {
 
 int main() {
 #ifdef LOCAL
+  using filesystem::path;
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  int t;
-  cin >> t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

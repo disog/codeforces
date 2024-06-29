@@ -1,22 +1,24 @@
 /**
- * https://codeforces.com/contest/1986/submission/267296317
+ * https://codeforces.com/contest/1986/submission/267989939
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using filesystem::path;
-using i64 = int64_t;
-using f64 = double;
+
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
+};
 
 void solve(int t) {
-  int n, k;
-  cin >> n >> k;
+  Int n, k;
+  vector<Int> a(n);
   map<int, vector<int>> mods;
-  for (int i = 0, a; i < n; i++) {
-    cin >> a;
-    mods[a % k].push_back(a);
+  for (auto &&ai : a) {
+    mods[ai % k].push_back(ai);
   }
   int ans = 0, odd = 0;
   for (auto &[_, b] : mods) {
@@ -46,11 +48,11 @@ void solve(int t) {
 
 int main() {
 #ifdef LOCAL
+  using filesystem::path;
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  int t;
-  cin >> t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

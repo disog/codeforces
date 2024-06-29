@@ -1,19 +1,25 @@
 /**
- * https://codeforces.com/contest/1986/submission/267295953
+ * https://codeforces.com/contest/1986/submission/267989671
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using filesystem::path;
-using i64 = int64_t;
-using f64 = double;
+
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
+};
+
+struct Str : string {
+  Str() { cin >> *this; }
+};
 
 void solve(int t) {
-  int n;
-  string s;
-  cin >> n >> s;
+  Int n;
+  Str s;
   int ans = INT_MAX;
   for (int i = 0; i < n - 1; i++) {
     int sum = (s[i] - '0') * 10 + s[i + 1] - '0';
@@ -40,11 +46,11 @@ void solve(int t) {
 
 int main() {
 #ifdef LOCAL
+  using filesystem::path;
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  int t;
-  cin >> t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

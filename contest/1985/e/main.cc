@@ -1,26 +1,30 @@
 /**
- * https://codeforces.com/contest/1985/submission/267294074
+ * https://codeforces.com/contest/1985/submission/267987237
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using filesystem::path;
 using i64 = int64_t;
-using f64 = double;
+
+struct Int {
+  int x;
+  Int() { cin >> x; }
+  operator int() { return x; }
+};
 
 void solve(int t) {
-  int x, y, z;
+  Int x, y, z;
   i64 k;
-  cin >> x >> y >> z >> k;
+  cin >> k;
   i64 ans = 0;
   for (int a = 1; a <= x; a++) {
     for (int b = 1; b <= y; b++) {
       if (k % (a * b)) {
         continue;
       }
-      i64 c = k / (a * b);
+      auto c = k / (a * b);
       if (c > z) {
         continue;
       }
@@ -32,11 +36,11 @@ void solve(int t) {
 
 int main() {
 #ifdef LOCAL
+  using filesystem::path;
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  int t;
-  cin >> t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }
