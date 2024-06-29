@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/267631206
+ * https://codeforces.com/contest/1971/submission/267935175
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -11,17 +11,24 @@ using i64 = int64_t;
 using f64 = double;
 using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 
+template <typename T = int> struct Vec : vector<T> {
+  Vec(int n, int s = 0) : vector<int>(n + s) {
+    for (int i = s; i < n + s; i++) {
+      cin >> (*this)[i];
+    }
+  }
+};
+
 void solve(int t) {
   int n;
   cin >> n;
-  vector<int> a(n);
+  Vec a(n);
   map<int, MinHeap> groups;
-  for (int i = 0; i < n; i++) {
-    cin >> a[i];
-    groups[a[i] >> 2].push(a[i]);
+  for (auto &ai : a) {
+    groups[ai >> 2].push(ai);
   }
-  for (int i = 0; i < n; i++) {
-    auto &heap = groups[a[i] >> 2];
+  for (auto &ai : a) {
+    auto &heap = groups[ai >> 2];
     cout << heap.top() << ' ';
     heap.pop();
   }

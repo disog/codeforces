@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/267275233
+ * https://codeforces.com/contest/1980/submission/267936524
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -10,16 +10,18 @@ using filesystem::path;
 using i64 = int64_t;
 using f64 = double;
 
+template <typename T = int> struct Vec : vector<T> {
+  Vec(int n, int s = 0) : vector<int>(n + s) {
+    for (int i = s; i < n + s; i++) {
+      cin >> (*this)[i];
+    }
+  }
+};
+
 void solve(int t) {
   int n, m;
   cin >> n;
-  vector<int> a(n), b(n);
-  for (int i = 0; i < n; ++i) {
-    cin >> a[i];
-  }
-  for (int i = 0; i < n; ++i) {
-    cin >> b[i];
-  }
+  Vec a(n), b(n);
   cin >> m;
   map<int, int> count;
   int d;
@@ -27,20 +29,17 @@ void solve(int t) {
     cin >> d;
     count[d]++;
   }
-  bool ans = false;
+  auto ans = "NO";
   for (int i = 0; i < n; ++i) {
-    if (a[i] != b[i]) {
-      auto c = count[b[i]]--;
-      if (!c) {
-        cout << "NO" << endl;
-        return;
-      }
+    if (b[i] != a[i] && !count[b[i]]--) {
+      ans = "NO";
+      break;
     }
     if (b[i] == d) {
-      ans = true;
+      ans = "YES";
     }
   }
-  cout << (ans ? "YES" : "NO") << endl;
+  cout << ans << endl;
 }
 
 int main() {

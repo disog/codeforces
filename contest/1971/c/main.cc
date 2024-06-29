@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/267263832
+ * https://codeforces.com/contest/1971/submission/267934812
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -17,7 +17,7 @@ void solve(int t) {
     cin >> a >> b;
     lines[a] = lines[b] = i;
   }
-  int prev = 0;
+  int prev = lines.rbegin()->second;
   for (auto &&[_, line] : lines) {
     if (line == prev) {
       cout << "NO" << endl;

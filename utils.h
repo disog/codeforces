@@ -19,9 +19,19 @@ template <typename T = int> struct Vec : vector<T> {
 };
 
 template <typename T = int> struct Mat : vector<vector<T>> {
-  Vec(int n, int m) : vector<vector<T>>(n) {
+  Mat(int n, int m) : vector<vector<T>>(n) {
     for (int i = 0; i < n; i++) {
       (*this)[i] = Vec(m);
+    }
+  }
+};
+
+template <typename T = int, int M = 2> struct VecM : vector<array<T, M>> {
+  Vec(int n, int s = 0) : vector<int>(n + s) {
+    for (int i = s; i < n + s; i++) {
+      for (int j = 0; i < M; j++) {
+        cin >> (*this)[i][j];
+      }
     }
   }
 };
@@ -37,7 +47,6 @@ template <typename T> struct Zfn : vector<int> {
       for (; i + c < s.size() && s[i + c] == s[c]; c++, j = i)
         ;
     }
-    return z;
   }
 };
 

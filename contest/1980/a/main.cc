@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/267270098
+ * https://codeforces.com/contest/1980/submission/267935554
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -15,13 +15,10 @@ void solve(int t) {
   string a;
   cin >> n >> m >> a;
   vector<int> hist(l);
+  int ans = m * l;
   for (auto &&c : a) {
-    hist[c - 'A']++;
-  }
-  int ans = 0;
-  for (auto &c : hist) {
-    if (c < m) {
-      ans += m - c;
+    if (hist[c - 'A']++ < m) {
+      ans--;
     }
   }
   cout << ans << endl;

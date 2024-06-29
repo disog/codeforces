@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/267267828
+ * https://codeforces.com/contest/1971/submission/267934966
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -10,23 +10,24 @@ using filesystem::path;
 using i64 = int64_t;
 using f64 = double;
 
+template <typename T = int> struct Vec : vector<T> {
+  Vec(int n, int s = 0) : vector<int>(n + s) {
+    for (int i = s; i < n + s; i++) {
+      cin >> (*this)[i];
+    }
+  }
+};
+
 void solve(int t) {
   int n, k, q;
   cin >> n >> k >> q;
-  vector<int> a(k + 1), b(k + 1);
-  for (int i = 1; i <= k; ++i) {
-    cin >> a[i];
-  }
-  for (int i = 1; i <= k; ++i) {
-    cin >> b[i];
-  }
-  auto f = [&](int d) {
-    int j = prev(ranges::upper_bound(a, d)) - a.begin();
-    if (j < a.size() - 1) {
-      int ans = b[j] + i64(d - a[j]) * (b[j + 1] - b[j]) / (a[j + 1] - a[j]);
-      return ans;
+  Vec a(k, 1), b(k, 1);
+  auto f = [&](int d) -> int {
+    int j = ranges::upper_bound(a, d) - a.begin() - 1;
+    if (j >= a.size() - 1) {
+      return b.back();
     }
-    return b.back();
+    return b[j] + i64(d - a[j]) * (b[j + 1] - b[j]) / (a[j + 1] - a[j]);
   };
   for (int i = 0, d; i < q; ++i) {
     cin >> d;

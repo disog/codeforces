@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/267648211
+ * https://codeforces.com/contest/1980/submission/267938691
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -10,51 +10,42 @@ using filesystem::path;
 using i64 = int64_t;
 using f64 = double;
 
+template <typename T = int> struct Vec : vector<T> {
+  Vec(int n, int s = 0) : vector<int>(n + s) {
+    for (int i = s; i < n + s; i++) {
+      cin >> (*this)[i];
+    }
+  }
+};
+
 void solve(int t) {
   int n;
   cin >> n;
-  vector<int> a(n + 1);
+  Vec a(n, 1);
   a[0] = 1;
-  for (int i = 1; i <= n; i++) {
-    cin >> a[i];
-  }
-  int j = 0;
-  for (int i = 1, prevg = 1; i <= n; i++) {
-    auto curg = gcd(a[i], a[i - 1]);
-    if (curg < prevg) {
-      j = i - 1;
-      break;
-    }
-    prevg = curg;
-  }
-  if (j == 0) {
-    cout << "YES" << endl;
-    return;
-  }
-  assert(j > 1 && j < n);
-  for (int k = 0; k < 3; k++) {
-    bool ok = true;
-    for (int i = 1, prevg = 1; i <= n; i++) {
-      int cura = a[i], preva = a[i - 1];
-      if (i + 1 == j + k) {
-        if (i == n) {
-          break;
-        }
-        cura = a[++i];
+  auto f = [&](int k) {
+    for (int i = 0, prev = 1; i < n && k < n; i++) {
+      auto a0 = a[i], a1 = a[(i + 1 == k ? ++i : i) + 1];
+      auto cur = gcd(a0, a1);
+      if (cur < prev) {
+        return i;
       }
-      auto curg = gcd(cura, preva);
-      if (curg < prevg) {
-        ok = false;
+      prev = cur;
+    };
+    return 0;
+  };
+  auto ans = "YES";
+  int j = f(0);
+  if (j > 0) {
+    ans = "NO";
+    for (int k = 0; k < 3; k++) {
+      if (f(j + k - 1) == 0) {
+        ans = "YES";
         break;
       }
-      prevg = curg;
-    }
-    if (ok) {
-      cout << "YES" << endl;
-      return;
     }
   }
-  cout << "NO" << endl;
+  cout << ans << endl;
 }
 
 int main() {

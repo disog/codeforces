@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/267273941
+ * https://codeforces.com/contest/1980/submission/267935947
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -10,20 +10,24 @@ using filesystem::path;
 using i64 = int64_t;
 using f64 = double;
 
+template <typename T = int> struct Vec : vector<T> {
+  Vec(int n, int s = 0) : vector<int>(n + s) {
+    for (int i = s; i < n + s; i++) {
+      cin >> (*this)[i];
+    }
+  }
+};
+
 void solve(int t) {
   int n, f, k;
   cin >> n >> f >> k;
-  vector<int> a(n + 1);
-  for (int i = 1; i <= n; ++i) {
-    cin >> a[i];
+  Vec a(n, 1);
+  auto ans = "YES";
+  if (k < n) {
+    auto x = a[f];
+    ranges::sort(a, greater<int>());
+    ans = a[k - 1] > x ? "NO" : (a[k] < x ? "YES" : "MAYBE");
   }
-  if (k == n) {
-    cout << "YES" << endl;
-    return;
-  }
-  auto x = a[f];
-  ranges::sort(a, greater<int>());
-  auto ans = a[k - 1] > x ? "NO" : (a[k] < x ? "YES" : "MAYBE");
   cout << ans << endl;
 }
 

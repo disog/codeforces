@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1968/submission/267605353
+ * https://codeforces.com/contest/1968/submission/267934699
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -10,24 +10,25 @@ using filesystem::path;
 using i64 = int64_t;
 using f64 = double;
 
-vector<int> zfunc(const string &s) {
-  const int n = s.size();
-  vector<int> z(n);
-  for (int i = 1, j = 1; i < n; i++) {
-    if (i < j + z[j]) {
-      z[i] = min(j + z[j] - i, z[i - j]);
+template <typename T> struct Zfn : vector<int> {
+  Zfn(const T &s) : vector<int>(s.size()) {
+    for (int i = 1, j = 1; i < s.size(); i++) {
+      auto &c = (*this)[i];
+      auto r = j + (*this)[j];
+      if (i < r) {
+        c = min(r - i, (*this)[i - j]);
+      }
+      for (; i + c < s.size() && s[i + c] == s[c]; c++, j = i)
+        ;
     }
-    for (; i + z[i] < n && s[i + z[i]] == s[z[i]]; z[i]++, j = i)
-      ;
   }
-  return z;
-}
+};
 
 void solve(int t) {
   int n, l, r;
   string s;
   cin >> n >> l >> r >> s;
-  auto z = zfunc(s);
+  Zfn z(s);
   auto f1 = [&](int x) {
     int ans = 1;
     for (int i = x; i <= n - x; i++) {

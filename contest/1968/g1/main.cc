@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1968/submission/267599226
+ * https://codeforces.com/contest/1968/submission/267934638
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -10,25 +10,26 @@ using filesystem::path;
 using i64 = int64_t;
 using f64 = double;
 
-vector<int> zfunc(const string &s) {
-  const int n = s.size();
-  vector<int> z(n);
-  for (int i = 1, j = 1; i < n; i++) {
-    if (i < j + z[j]) {
-      z[i] = min(j + z[j] - i, z[i - j]);
+template <typename T> struct Zfn : vector<int> {
+  Zfn(const T &s) : vector<int>(s.size()) {
+    for (int i = 1, j = 1; i < s.size(); i++) {
+      auto &c = (*this)[i];
+      auto r = j + (*this)[j];
+      if (i < r) {
+        c = min(r - i, (*this)[i - j]);
+      }
+      for (; i + c < s.size() && s[i + c] == s[c]; c++, j = i)
+        ;
     }
-    for (; i + z[i] < n && s[i + z[i]] == s[z[i]]; z[i]++, j = i)
-      ;
   }
-  return z;
-}
+};
 
 void solve(int t) {
   int n, k;
   string s;
   cin >> n >> k >> k >> s;
-  auto z = zfunc(s);
-  auto f = [&](int x) {
+  Zfn z(s);
+  auto f1 = [&](int x) {
     int c = 1;
     for (int i = x; i <= n - x; i++) {
       if (z[i] >= x) {
@@ -38,16 +39,19 @@ void solve(int t) {
     }
     return c;
   };
-  int ans = 1;
-  for (int end = n; ans <= end;) {
-    auto mid = (ans + end) / 2;
-    if (f(mid) >= k) {
-      ans = mid + 1;
-    } else {
-      end = mid - 1;
+  auto f2 = [&](int k) {
+    int ans = 1;
+    for (int end = n; ans <= end;) {
+      auto mid = (ans + end) / 2;
+      if (f1(mid) >= k) {
+        ans = mid + 1;
+      } else {
+        end = mid - 1;
+      }
     }
-  }
-  cout << ans - 1 << endl;
+    return ans - 1;
+  };
+  cout << f2(k) << endl;
 }
 
 int main() {
