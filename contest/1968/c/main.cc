@@ -14,7 +14,7 @@ void solve(int t) {
   int n;
   cin >> n;
   int a = 501;
-  for (int i = 0, x; i < n - 1; ++i, a += x) {
+  for (int i = 0, x; i < n - 1; i++, a += x) {
     cout << a << ' ';
     cin >> x;
   }

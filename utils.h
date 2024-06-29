@@ -10,6 +10,37 @@ using Triplet = array<int, 3>;
 using MaxHeap = priority_queue<int>;
 using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 
+template <typename T = int> struct Vec : vector<T> {
+  Vec(int n, int s = 0) : vector<int>(n + s) {
+    for (int i = s; i < n + s; i++) {
+      cin >> (*this)[i];
+    }
+  }
+};
+
+template <typename T = int> struct Mat : vector<vector<T>> {
+  Vec(int n, int m) : vector<vector<T>>(n) {
+    for (int i = 0; i < n; i++) {
+      (*this)[i] = Vec(m);
+    }
+  }
+};
+
+template <typename T> struct Zfn : vector<int> {
+  Zfn(const T &s) : vector<int>(s.size()) {
+    for (int i = 1, j = 1; i < s.size(); i++) {
+      auto &c = (*this)[i];
+      auto r = j + (*this)[j];
+      if (i < r) {
+        c = min(r - i, (*this)[i - j]);
+      }
+      for (; i + c < s.size() && s[i + c] == s[c]; c++, j = i)
+        ;
+    }
+    return z;
+  }
+};
+
 template <int N> struct Mint {
   int x;
   Mint(int a = 0) : x(a) {}
@@ -28,46 +59,17 @@ template <int N> struct Mint {
   }
 };
 
-vector<vector<int>> matrix(int n, int m) {
-  vector<vector<int>> ans(n);
-  for (int i = 0; i < n; i++) {
-    auto &row = ans[i];
-    row.resize(m);
-    for (int j = 0; j < m; j++) {
-      cin >> row[j];
+struct Fact : vector<int> {
+  Fact(i64 x) {
+    for (; x && x & 1 == 0; x >>= 1) {
+      push_back(2);
+    }
+    for (int i = 3; x > 1; i += 2) {
+      for (int r = x / i; r * i == x; x = r, r /= i) {
+        push_back(i);
+      }
     }
   }
-  return ans;
-}
-
-vector<int> zfunc(const string &s) {
-  const int n = s.size();
-  vector<int> z(n);
-  for (int i = 1, j = 1; i < n; i++) {
-    if (i < j + z[j]) {
-      z[i] = min(j + z[j] - i, z[i - j]);
-    }
-    for (; i + z[i] < n && s[i + z[i]] == s[z[i]]; z[i]++, j = i)
-      ;
-  }
-  return z;
-}
-
-vector<int> factor(int x) {
-  vector<int> ans;
-  for (; x && x & 1 == 0; x >>= 1) {
-    ans.push_back(2);
-  }
-  for (int i = 3; x > 1; i += 2) {
-    for (int r = x / i; r * i == x; x = r, r /= i) {
-      ans.push_back(i);
-    }
-  }
-  return ans;
-}
-
-namespace std {
-string to_string(const string &s) { return s; }
-} // namespace std
+};
 
 // cout << fixed << setprecision(20);

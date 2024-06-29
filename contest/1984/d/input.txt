@@ -1,15 +1,9 @@
-7
-3 3 3
-aba
-3 3 3
-aaa
-7 2 2
-abacaba
-9 4 4
-abababcab
-10 1 1
-codeforces
-9 3 3
-abafababa
-5 3 3
-zpozp
+8
+aaaaa
+baba
+cabacb
+aaabaaa
+bitset
+ab
+abbaaaabbb
+yearnineteeneightyfour
