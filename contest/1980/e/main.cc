@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/267939289
+ * https://codeforces.com/contest/1980/submission/267941556
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -26,21 +26,26 @@ template <typename T = int> struct Mat : vector<vector<T>> {
   }
 };
 
+template <typename T = int> struct MatP : vector<array<int, 2>> {
+  MatP(int n, int m, int s = 0) : vector<array<int, 2>>(n * m + s) {
+    for (int i = 0; i < n; i++) {
+      for (int j = 0, x; j < m; j++) {
+        cin >> x;
+        (*this)[x] = {i, j};
+      }
+    }
+  }
+};
+
 void solve(int t) {
   int n, m;
   cin >> n >> m;
   Mat a(n, m);
-  vector<pair<int, int>> b(n * m + 1);
-  for (int i = 0; i < n; i++) {
-    for (int j = 0, x; j < m; j++) {
-      cin >> x;
-      b[x] = {i, j};
-    }
-  }
+  MatP b(n, m, 1);
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
-      if ((j < m - 1 && b[a[i][j]].first != b[a[i][j + 1]].first) ||
-          (i < n - 1 && b[a[i][j]].second != b[a[i + 1][j]].second)) {
+      if ((j < m - 1 && b[a[i][j]][0] != b[a[i][j + 1]][0]) ||
+          (i < n - 1 && b[a[i][j]][1] != b[a[i + 1][j]][1])) {
         cout << "NO" << endl;
         return;
       }

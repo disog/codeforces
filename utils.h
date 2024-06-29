@@ -10,6 +10,24 @@ using Triplet = array<int, 3>;
 using MaxHeap = priority_queue<int>;
 using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 
+template <int N> struct Mint {
+  int x;
+  Mint(int a = 0) : x(a) {}
+  operator int() { return x; }
+  Mint &operator+=(int rhs) {
+    if ((x += rhs) >= N) {
+      x -= N;
+    }
+    return *this;
+  }
+  Mint &operator-=(int rhs) {
+    if ((x -= rhs) < 0) {
+      x += N;
+    }
+    return *this;
+  }
+};
+
 template <typename T = int> struct Vec : vector<T> {
   Vec(int n, int s = 0) : vector<int>(n + s) {
     for (int i = s; i < n + s; i++) {
@@ -26,11 +44,39 @@ template <typename T = int> struct Mat : vector<vector<T>> {
   }
 };
 
-template <typename T = int, int M = 2> struct VecM : vector<array<T, M>> {
-  Vec(int n, int s = 0) : vector<int>(n + s) {
-    for (int i = s; i < n + s; i++) {
-      for (int j = 0; i < M; j++) {
-        cin >> (*this)[i][j];
+template <typename T = int> struct VecP : vector<T> {
+  VecP(int n, int s = 0) : vector<int>(n + s) {
+    for (int i = s, x; i < n + s; i++) {
+      cin >> x;
+      (*this)[x] = i;
+    }
+  }
+};
+
+template <typename T = int> struct Vec2 : vector<array<T, 2>> {
+  Vec2(int n, int s = 0) : vector<array<T, 2>>(n + s) {
+    for (int i = s, x, y; i < n + s; i++) {
+      cin >> x >> y;
+      (*this)[i] = {x, y};
+    }
+  }
+};
+
+template <typename T = int> struct Vec2I : vector<array<T, 3>> {
+  Vec2I(int n, int s = 0) : vector<array<T, 2>>(n + s) {
+    for (int i = s, x, y; i < n + s; i++) {
+      cin >> x >> y;
+      (*this)[i] = {x, y, i};
+    }
+  }
+};
+
+template <typename T = int> struct MatP : vector<array<int, 2>> {
+  MatP(int n, int m, int s = 0) : : vector<array<int, 2>>(n * m + s) {
+    for (int i = 0; i < n; i++) {
+      for (int j = 0, x; j < m; j++) {
+        cin >> x;
+        (*this)[x] = {i, j};
       }
     }
   }
@@ -47,24 +93,6 @@ template <typename T> struct Zfn : vector<int> {
       for (; i + c < s.size() && s[i + c] == s[c]; c++, j = i)
         ;
     }
-  }
-};
-
-template <int N> struct Mint {
-  int x;
-  Mint(int a = 0) : x(a) {}
-  operator int() { return x; }
-  Mint &operator+=(int rhs) {
-    if ((x += rhs) >= N) {
-      x -= N;
-    }
-    return *this;
-  }
-  Mint &operator-=(int rhs) {
-    if ((x -= rhs) < 0) {
-      x += N;
-    }
-    return *this;
   }
 };
 

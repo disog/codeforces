@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/267829815
+ * https://codeforces.com/contest/1980/submission/267942169
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -9,9 +9,17 @@ using namespace std;
 using filesystem::path;
 using i64 = int64_t;
 using f64 = double;
-using Triplet = array<int, 3>;
 
-auto cmp = [](Triplet &a, Triplet &b) {
+template <typename T = int> struct Vec2I : vector<array<T, 3>> {
+  Vec2I(int n, int s = 0) : vector<array<T, 3>>(n + s) {
+    for (int i = s, x, y; i < n + s; i++) {
+      cin >> x >> y;
+      (*this)[i] = {x, y, i};
+    }
+  }
+};
+
+auto cmp = [](Vec2I<int>::value_type &a, Vec2I<int>::value_type &b) {
   auto [ra, ca, _a] = a;
   auto [rb, cb, _b] = b;
   return ra > rb || (ra == rb && ca < cb);
@@ -20,11 +28,7 @@ auto cmp = [](Triplet &a, Triplet &b) {
 void solve(int t) {
   int n, m, k;
   cin >> n >> m >> k;
-  vector<Triplet> fs(k);
-  for (int i = 0, r, c; i < k; i++) {
-    cin >> r >> c;
-    fs[i] = {r, c, i};
-  }
+  Vec2I fs(k);
   ranges::sort(fs, cmp); // O(k*log k)
   vector<int> ans(k);
   i64 a = 0;

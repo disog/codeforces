@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/267276625
+ * https://codeforces.com/contest/1984/submission/267942373
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -10,13 +10,18 @@ using filesystem::path;
 using i64 = int64_t;
 using f64 = double;
 
+template <typename T = int> struct Vec : vector<T> {
+  Vec(int n, int s = 0) : vector<int>(n + s) {
+    for (int i = s; i < n + s; i++) {
+      cin >> (*this)[i];
+    }
+  }
+};
+
 void solve(int t) {
   int n;
   cin >> n;
-  vector<int> a(n);
-  for (int i = 0; i < n; ++i) {
-    cin >> a[i];
-  }
+  Vec a(n);
   if (a.front() == a.back()) {
     cout << "NO" << endl;
     return;
