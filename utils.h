@@ -25,8 +25,8 @@ template <int N> struct Mint {
   int x;
   Mint(int a = 0) : x(a) {}
   operator int() { return x; }
-  int operator+=(int rhs) { return x += rhs >= N ? x -= N : x; }
-  int operator-=(int rhs) { return x -= rhs < 0 ? x += N : x; }
+  int operator+=(int rhs) { return (x += rhs) >= N ? x -= N : x; }
+  int operator-=(int rhs) { return (x -= rhs) < 0 ? x += N : x; }
 };
 
 struct Graph : vector<vector<int>> {
