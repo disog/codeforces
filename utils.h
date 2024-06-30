@@ -1,5 +1,5 @@
 /**
- * Submission
+ * Utils
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -14,7 +14,8 @@ using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 struct Int {
   int x;
   Int() { cin >> x; }
-  operator int() { return x; }
+  Int(int a) : x(a) {}
+  operator int &() { return x; }
 };
 
 struct Str : string {
@@ -23,7 +24,7 @@ struct Str : string {
 
 template <int N> struct Mint {
   int x;
-  Mint(int a = 0) : x(a) {}
+  Mint(int a = 0) : Int(a % N) {}
   operator int() { return x; }
   int operator+=(int rhs) { return (x += rhs) >= N ? x -= N : x; }
   int operator-=(int rhs) { return (x -= rhs) < 0 ? x += N : x; }
@@ -68,7 +69,7 @@ struct WDGraph : vector<vector<pair<int, int>>> {
 };
 
 struct Zfn : vector<int> {
-  Zfn(const string &s) : vector<int>(s.size()) {
+  Zfn(const auto &s) : vector<int>(s.size()) {
     auto n = s.size();
     for (int i = 1, j = 1; i < n; i++) {
       auto &c = (*this)[i], r = j + (*this)[j];
