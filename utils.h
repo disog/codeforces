@@ -69,16 +69,13 @@ struct WDGraph : vector<vector<pair<int, int>>> {
 };
 
 struct Zfn : vector<int> {
-  Zfn(const auto &s) : vector<int>(s.size()) {
-    auto n = s.size();
+  Zfn(const auto &s) : Zfn(s, s.size()) {}
+  Zfn(const auto &s, int n) : vector<int>(n) {
+    auto &z = *this;
     for (int i = 1, j = 1; i < n; i++) {
-      auto &c = (*this)[i], r = j + (*this)[j];
-      if (i < r) {
-        c = min(r - i, (*this)[i - j]);
-      }
-      while (i + c < n && s[i + c] == s[c]) {
-        c++, j = i;
-      }
+      auto &c = z[i] = max(0, min(j + z[j] - i, z[i - j]));
+      for (; i + c < n && s[i + c] == s[c]; c++, j = i)
+        ;
     }
   }
 };
