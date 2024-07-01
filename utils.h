@@ -31,39 +31,61 @@ template <int N> struct Mint {
 };
 
 struct Graph : vector<vector<int>> {
-  Graph(int n, int m) : vector<vector<int>>(n) {
-    for (int i = 0; i < m; i++) {
-      Int u, v;
-      (*this)[u].push_back(v);
-      (*this)[v].push_back(u);
+  vector<array<Int, 2>> e;
+  Graph(int n, int m) : vector<vector<int>>(n), e(m) {
+    auto &g = *this;
+    for (auto &[u, v] : e) {
+      g[u].push_back(v);
+      g[v].push_back(u);
+    }
+  }
+};
+
+struct Match : vector<int> {
+  int c = 0;
+  Match(Graph &g, int u) : vector<int>(g.size(), -1) { dfs(g, u); }
+  void dfs(Graph &g, int u, int p = -1) {
+    auto &m = *this;
+    for (auto &v : g[u]) {
+      if (v != p) {
+        dfs(g, v, u); // post-order (visit leaves first)
+        if (m[u] == m[v]) {
+          m[u] = v;
+          m[v] = u;
+          c++;
+        }
+      }
     }
   }
 };
 
 struct DGraph : vector<vector<int>> {
-  DGraph(int n, int m) : vector<vector<int>>(n) {
-    for (int i = 0; i < m; i++) {
-      Int u, v;
-      (*this)[u].push_back(v);
+  vector<array<Int, 2>> e;
+  DGraph(int n, int m) : vector<vector<int>>(n), e(m) {
+    auto &g = *this;
+    for (auto &[u, v] : e) {
+      g[u].push_back(v);
     }
   }
 };
 
-struct WGraph : vector<vector<pair<int, int>>> {
-  WGraph(int n, int m) : vector<vector<pair<int, int>>>(n) {
-    for (int i = 0; i < m; i++) {
-      Int u, v, w;
-      (*this)[u].emplace_back(v, w);
-      (*this)[v].emplace_back(u, w);
+struct WGraph : vector<vector<array<int, 2>>> {
+  vector<array<Int, 3>> e;
+  WGraph(int n, int m) : vector<vector<array<int, 2>>>(n), e(m) {
+    auto &g = *this;
+    for (auto &[u, v, w] : e) {
+      g[u].emplace_back(v, w);
+      g[v].emplace_back(u, w);
     }
   }
 };
 
-struct WDGraph : vector<vector<pair<int, int>>> {
-  WDGraph(int n, int m) : vector<vector<pair<int, int>>>(n) {
-    for (int i = 0; i < m; i++) {
-      Int u, v, w;
-      (*this)[u].emplace_back(v, w);
+struct WDGraph : vector<vector<array<int, 3>>> {
+  vector<array<Int, 3>> e;
+  WDGraph(int n, int m) : vector<vector<array<int, 3>>>(n), e(m) {
+    auto &g = *this;
+    for (auto &[u, v, w] : e) {
+      g[u].emplace_back(v, w);
     }
   }
 };
