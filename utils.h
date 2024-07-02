@@ -11,27 +11,27 @@ using f64 = double;
 using MaxHeap = priority_queue<int>;
 using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  Int(int a) : x(a) {}
-  operator int &() { return x; }
+template <typename T = int> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
 };
 
 struct Str : string {
   Str() { cin >> *this; }
 };
 
-template <int N> struct Mint {
+template <int N = 998244353> struct Mint {
   int x;
-  Mint(int a = 0) : Int(a % N) {}
+  Mint(int a) : x(a % N) {}
   operator int() { return x; }
   int operator+=(int rhs) { return (x += rhs) >= N ? x -= N : x; }
   int operator-=(int rhs) { return (x -= rhs) < 0 ? x += N : x; }
 };
 
 struct Graph : vector<vector<int>> {
-  vector<array<Int, 2>> e;
+  vector<array<Num<>, 2>> e;
   Graph(int n, int m) : vector<vector<int>>(n), e(m) {
     auto &g = *this;
     for (auto &[u, v] : e) {
@@ -60,7 +60,7 @@ struct Match : vector<int> {
 };
 
 struct DGraph : vector<vector<int>> {
-  vector<array<Int, 2>> e;
+  vector<array<Num<>, 2>> e;
   DGraph(int n, int m) : vector<vector<int>>(n), e(m) {
     auto &g = *this;
     for (auto &[u, v] : e) {
@@ -70,7 +70,7 @@ struct DGraph : vector<vector<int>> {
 };
 
 struct WGraph : vector<vector<array<int, 2>>> {
-  vector<array<Int, 3>> e;
+  vector<array<Num<>, 3>> e;
   WGraph(int n, int m) : vector<vector<array<int, 2>>>(n), e(m) {
     auto &g = *this;
     for (auto &[u, v, w] : e) {
@@ -81,7 +81,7 @@ struct WGraph : vector<vector<array<int, 2>>> {
 };
 
 struct WDGraph : vector<vector<array<int, 3>>> {
-  vector<array<Int, 3>> e;
+  vector<array<Num<>, 3>> e;
   WDGraph(int n, int m) : vector<vector<array<int, 3>>>(n), e(m) {
     auto &g = *this;
     for (auto &[u, v, w] : e) {
@@ -123,7 +123,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Int t;
+  Num t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }
