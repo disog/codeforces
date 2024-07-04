@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/268425055
+ * https://codeforces.com/contest/1984/submission/268447336
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -13,6 +13,10 @@ template <typename T = int> struct Num {
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+};
+
+template <typename T = int> struct Vec : vector<Num<T>> {
+  Vec(int n, int s = 0) : vector<Num<T>>(s, 0) { this->resize(n + s); }
 };
 
 struct Str : string {
@@ -31,8 +35,7 @@ void solve(int t) {
   Num n, m;
   Str s;
   s.assign('P' + s + 'S');
-  vector<Num<i64>> b(n);
-  b.insert(b.begin(), 0);
+  Vec<i64> b(n, 1);
   b.push_back(0);
   auto f = [&](i64 sum) {
     array<Mint<>, 2> dp = {1, 0};
@@ -40,9 +43,9 @@ void solve(int t) {
       array<Mint<>, 2> dp1 = {0, 0};
       i64 x = b[i - 1] + b[i] - sum;
       i64 y = b[i - 1] - b[i];
-      bool check[2] = {s[i] != 'S', s[i] != 'P'};
       i64 value[2][2] = {{y, x}, {x, y}};
       i64 limit[2][2] = {{m, 0}, {2 * m, m}};
+      bool check[2] = {s[i] != 'S', s[i] != 'P'};
       for (int j = 0; j < 2; j++) {   // prev
         for (int k = 0; k < 2; k++) { // curr
           if (check[k]) {

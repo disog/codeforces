@@ -18,16 +18,30 @@ template <typename T = int> struct Num {
   operator T &() { return x; }
 };
 
+template <typename T = int> struct Vec : vector<Num<T>> {
+  Vec(int n, int s = 0) : vector<Num<T>>(s, 0) { this->resize(n + s); }
+};
+
 struct Str : string {
   Str() { cin >> *this; }
 };
 
-template <int N = 998244353> struct Mint {
-  int x;
-  Mint(int a) : x(a % N) {}
+struct Mod {
+  int x, m;
+  Mod(int a, int b) : x(a % b), m(b) {}
   operator int() { return x; }
-  int operator+=(int rhs) { return (x += rhs) >= N ? x -= N : x; }
-  int operator-=(int rhs) { return (x -= rhs) < 0 ? x += N : x; }
+  int operator+(int rhs) {
+    return rhs < 0 ? operator-(-rhs) : (x + rhs >= m ? x - m : x) + rhs;
+  }
+  int operator-(int rhs) {
+    return rhs < 0 ? operator+(-rhs) : (x - rhs < 0 ? x + m : x) - rhs;
+  }
+  int operator+=(int rhs) { return x = operator+(rhs); }
+  int operator-=(int rhs) { return x = operator-(rhs); }
+};
+
+template <int N = 998244353> struct Mint : Mod {
+  Mint(int a) : Mod(a, N) {}
 };
 
 struct Graph : vector<vector<int>> {
@@ -91,12 +105,12 @@ struct WDGraph : vector<vector<array<int, 3>>> {
 };
 
 struct Zfn : vector<int> {
-  Zfn(const auto &v, int s = 0) : Zfn(v, s, v.size()) {}
-  Zfn(const auto &v, int s, int e) : vector<int>(e - s) {
+  Zfn(auto &a, int s = 0) : Zfn(a, s, a.size()) {}
+  Zfn(auto &a, int s, int e) : vector<int>(e - s) {
     auto &z = *this;
     for (int i = 1, j = 1; i + s < e; i++) {
       auto &c = z[i] = max(0, min(j + z[j] - i, z[i - j]));
-      for (; i + c < e && v[i + c + s] == v[c + s]; c++, j = i)
+      for (; i + c < e && a[i + c + s] == a[c + s]; c++, j = i)
         ;
     }
   }
@@ -114,6 +128,36 @@ struct Fact : vector<int> {
     }
   }
 };
+
+pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
+  int inv = 0, shift = a[sa] - sp, n = a.size();
+  for (int i = sa, sum = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      if (a[i] > a[j]) {
+        inv++;
+      }
+    }
+    if (shift >= 0) {
+      auto d = a[i] - sp - (i - sa);
+      if (shift != (n - sa + d) % (n - sa)) {
+        shift = -1;
+      }
+    }
+  }
+  return {inv, shift};
+}
+
+int binsearch(const auto &f, int s, int e) {
+  while (s < e) {
+    auto m = (s + e + 1) / 2;
+    if (f(m)) {
+      s = m + 1;
+    } else {
+      e = m - 1;
+    }
+  }
+  return e;
+}
 
 void solve(int t) {}
 
