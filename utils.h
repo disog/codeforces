@@ -36,8 +36,10 @@ struct Mod {
   int operator-(int rhs) {
     return rhs < 0 ? operator+(-rhs) : (x - rhs < 0 ? x + m : x) - rhs;
   }
+  int operator*(int rhs) { return (x * i64(rhs)) % m; }
   int operator+=(int rhs) { return x = operator+(rhs); }
   int operator-=(int rhs) { return x = operator-(rhs); }
+  int operator*=(int rhs) { return x = operator*(rhs); }
 };
 
 template <int N = 998244353> struct Mint : Mod {
@@ -145,6 +147,16 @@ pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
     }
   }
   return {inv, shift};
+}
+
+Mod modpow(Mod x, int y) {
+  Mod ans(x != 0, x.m);
+  for (; x && y; y = y >> 1, x *= x) {
+    if (y & 1) {
+      ans *= x;
+    }
+  }
+  return ans;
 }
 
 int binsearch(const auto &f, int s, int e) {

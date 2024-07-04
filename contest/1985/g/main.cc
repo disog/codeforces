@@ -1,19 +1,56 @@
 /**
- * Submission
+ * https://codeforces.com/contest/1985/submission/268808554
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+using i64 = int64_t;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T = int> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
 };
 
-void solve(int t) {}
+struct Mod {
+  int x, m;
+  Mod(int a, int b) : x(a % b), m(b) {}
+  operator int() { return x; }
+  int operator+(int rhs) {
+    return rhs < 0 ? operator-(-rhs) : (x + rhs >= m ? x - m : x) + rhs;
+  }
+  int operator-(int rhs) {
+    return rhs < 0 ? operator+(-rhs) : (x - rhs < 0 ? x + m : x) - rhs;
+  }
+  int operator*(int rhs) { return (i64(x) * rhs) % m; }
+  int operator+=(int rhs) { return x = operator+(rhs); }
+  int operator-=(int rhs) { return x = operator-(rhs); }
+  int operator*=(int rhs) { return x = operator*(rhs); }
+};
+
+template <int N = 1000000007> struct Mint : Mod {
+  Mint(int a) : Mod(a, N) {}
+};
+
+Mod modpow(Mod x, int y) {
+  Mod ans(x != 0, x.m);
+  for (; x && y; y = y >> 1, x *= x) {
+    if (y & 1) {
+      ans *= x;
+    }
+  }
+  return ans;
+}
+
+void solve(int t) {
+  Num l, r, k;
+  Mint ans = 9 / k + 1;
+  ans = modpow(ans, r) - modpow(ans, l);
+  cout << ans << endl;
+}
 
 int main() {
 #ifdef LOCAL
@@ -21,7 +58,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Int t;
+  Num t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }
