@@ -150,11 +150,7 @@ pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
 int binsearch(const auto &f, int s, int e) {
   while (s < e) {
     auto m = (s + e + 1) / 2;
-    if (f(m)) {
-      s = m + 1;
-    } else {
-      e = m - 1;
-    }
+    f(m) ? s = m + 1 : e = m - 1;
   }
   return e;
 }

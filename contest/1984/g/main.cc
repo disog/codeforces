@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/268774329
+ * https://codeforces.com/contest/1984/submission/268776322
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -53,8 +53,8 @@ pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
 void solve(int t) {
   Num n;
   Vec a(n);
-  auto [inv, shift] = invshift(a);
   vector<array<int, 2>> ops;
+  auto [inv, shift] = invshift(a);
   int ans = n;
   if (shift > 0) {
     for (ans--; shift--;) {
@@ -82,17 +82,17 @@ void solve(int t) {
     }
     const array<int, 2> fwd1{2, 1}, bwd1{1, 2}, fwd2{3, 1}, bwd2{1, 3};
     Mod c(n - 1, n);
-    auto f0 = [&](int i, int d) {
+    auto findpos = [&](int i, int d) {
       int k = 0;
       for (; a.at(c - (k - d)) != i && a.at(c + (k + d)) != i && k < n; k += 2)
         ;
       return a.at(c - (k - d)) == i ? make_pair(-k, bwd2) : make_pair(k, fwd2);
     };
     auto f = [&](int i, bool move) {
-      auto [dist, op] = f0(i, 0);
+      auto [dist, op] = findpos(i, 0);
       auto fix = abs(dist) == n;
       if (fix) {
-        tie(dist, op) = f0(i, -1);
+        tie(dist, op) = findpos(i, -1);
       }
       c += dist;
       for (int j = abs(dist); j > 0; j -= 2) {
