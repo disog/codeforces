@@ -57,41 +57,35 @@ struct Graph : vector<vector<int>> {
   }
 };
 
-struct Bridge : vector<int> {
-  Bridge(Graph g, int s) : vector<int>(g.size()) {
-    vector<int> low(g.size());
-    int timer = 1;
-    auto f = [&](auto &f, int u, int p) -> void {
-      auto tx = low[u] = timer++;
-      for (auto &&v : g[u]) {
-        if (v != p) {
-          if (!low[v]) {
-            f(f, v, u);
-            if (low[v] > tx) { // bridge
-              (*this)[u] = v;
-              (*this)[v] = u;
-            }
+struct Bridge : vector<pair<int, int>> {
+  vector<int> low;
+  Bridge(Graph g, int s) : low(g.size(), -1) { dfs(g, s, s, s); }
+  void dfs(Graph &g, int u, int p, int &t) {
+    auto tx = low[u] = t++;
+    for (auto &&v : g[u]) {
+      if (v != p) {
+        if (low[v] < 0) {
+          dfs(g, v, u, t);
+          if (low[v] > tx) {
+            emplace_back(u, v);
           }
-          low[u] = min(low[u], low[v]);
         }
+        low[u] = min(low[u], low[v]);
       }
-    };
-    f(f, s, -1);
+    }
   }
 };
 
 struct Match : vector<int> {
   int c = 0;
-  Match(Graph &g, int s) : vector<int>(g.size(), -1) { dfs(g, s); }
-  void dfs(Graph &g, int u, int p = -1) {
+  Match(Graph &g, int s) : vector<int>(g.size(), -1) { dfs(g, s, s); }
+  void dfs(Graph &g, int u, int p) {
     auto &m = *this;
     for (auto &v : g[u]) {
       if (v != p) {
         dfs(g, v, u); // post-order (visit leaves first)
         if (m[u] == m[v]) {
-          m[u] = v;
-          m[v] = u;
-          c++;
+          m[u] = v, m[v] = u, c++;
         }
       }
     }

@@ -48,7 +48,7 @@ void solve(int t) {
       }
     }
   };
-  f(f, 1, 0);
+  f(f, 1, 1);
   i64 ans = (i64(best) * (best - 1) + i64(n - best) * (n - best - 1)) / 2;
   cout << ans << endl;
 }
