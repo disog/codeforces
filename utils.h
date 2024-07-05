@@ -57,9 +57,32 @@ struct Graph : vector<vector<int>> {
   }
 };
 
+struct Bridge : vector<int> {
+  Bridge(Graph g, int s) : vector<int>(g.size()) {
+    vector<int> low(g.size());
+    int timer = 1;
+    auto f = [&](auto &f, int u, int p) -> void {
+      auto tx = low[u] = timer++;
+      for (auto &&v : g[u]) {
+        if (v != p) {
+          if (!low[v]) {
+            f(f, v, u);
+            if (low[v] > tx) { // bridge
+              (*this)[u] = v;
+              (*this)[v] = u;
+            }
+          }
+          low[u] = min(low[u], low[v]);
+        }
+      }
+    };
+    f(f, s, -1);
+  }
+};
+
 struct Match : vector<int> {
   int c = 0;
-  Match(Graph &g, int u) : vector<int>(g.size(), -1) { dfs(g, u); }
+  Match(Graph &g, int s) : vector<int>(g.size(), -1) { dfs(g, s); }
   void dfs(Graph &g, int u, int p = -1) {
     auto &m = *this;
     for (auto &v : g[u]) {

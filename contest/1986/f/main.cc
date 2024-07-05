@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1986/submission/268929551
+ * https://codeforces.com/contest/1986/submission/268935068
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -29,35 +29,26 @@ struct Graph : vector<vector<int>> {
 void solve(int t) {
   Num n, m;
   Graph g(n + 1, m);
-  vector<int> times(n + 1);
-  int total = 0, best = n;
+  vector<int> low(n + 1), size(n + 1);
+  int timer = 0, best = n;
   const auto mid = n / 2.0;
-  function<array<int, 2>(int, int, int)> f = [&](int u, int p, int tx) {
-    times[u] = tx;
-    array<int, 2> dp = {tx, tx};
+  auto f = [&](auto &f, int u, int p) -> void {
+    size[u] = 1;
+    auto tx = low[u] = timer++;
     for (auto &&v : g[u]) {
       if (v != p) {
-        if (!times[v]) {
-          auto before = total;
-          auto [tmin, tmax] = f(v, u, dp[1] + 1);
-          if (tmin > times[u]) { // bridge
-            total += tmax - tmin + 1;
-            auto c = total - before;
-            if (abs(c - mid) < abs(best - mid)) {
-              best = c;
-            }
-          } else { // component
-            dp[0] = min(dp[0], tmin);
-            dp[1] = max(dp[1], tmax);
+        if (!size[v]) {
+          f(f, v, u);
+          size[u] += size[v];
+          if (low[v] > tx && abs(size[v] - mid) < abs(best - mid)) {
+            best = size[v]; // bridge with best split
           }
-        } else if (times[u] > times[v]) {
-          dp[0] = min(dp[0], times[v]);
         }
+        low[u] = min(low[u], low[v]);
       }
     }
-    return dp;
   };
-  f(1, 0, 1);
+  f(f, 1, 0);
   i64 ans = (i64(best) * (best - 1) + i64(n - best) * (n - best - 1)) / 2;
   cout << ans << endl;
 }
