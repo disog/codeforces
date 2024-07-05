@@ -184,6 +184,14 @@ int binsearch(const auto &f, int s, int e) {
   return e;
 }
 
+void debug(auto &a, int n) {
+  cout << n << ';';
+  for (auto &ai : a) {
+    cout << ai << ',';
+  }
+  cout << endl;
+}
+
 void solve(int t) {}
 
 int main() {
