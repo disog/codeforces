@@ -18,10 +18,6 @@ template <typename T = int> struct Num {
   operator T &() { return x; }
 };
 
-template <typename T = int> struct Vec : vector<Num<T>> {
-  Vec(int n, int s = 0) : vector<Num<T>>(s, 0) { this->resize(n + s); }
-};
-
 struct Str : string {
   Str() { cin >> *this; }
 };
@@ -172,6 +168,17 @@ Mod modpow(Mod x, int y) {
   }
   return ans;
 }
+
+const less<int> lt1;
+const greater<int> gt1;
+const less<array<int, 2>> lt2;
+const greater<array<int, 2>> gt2;
+const auto lta2 = [](auto &lhs, auto &rhs) {
+  return lhs[0] < rhs[0] || (lhs[0] == rhs[0] && lhs[1] < rhs[1]);
+};
+const auto gta2 = [](auto &lhs, auto &rhs) {
+  return lhs[0] > rhs[0] || (lhs[0] == rhs[0] && lhs[1] > rhs[1]);
+};
 
 int binsearch(const auto &f, int s, int e) {
   while (s < e) {
