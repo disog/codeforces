@@ -10,7 +10,6 @@ template <typename T = int> struct Num {
 };
 
 const greater<int> gt1;
-const greater<array<int, 2>> gt2;
 const auto lta2 = [](auto &lhs, auto &rhs) {
   return lhs[0] < rhs[0] || (lhs[0] == rhs[0] && lhs[1] < rhs[1]);
 };
@@ -18,10 +17,10 @@ const auto lta2 = [](auto &lhs, auto &rhs) {
 void solve(int t) {
   Num n;
   vector<array<Num<>, 2>> b(n);
-  ranges::sort(b, lta2);
+  ranges::sort(b, lta2); // O(n*log n)
   vector<int> heights;
   vector<vector<int>> widths;
-  for (auto &[w, h] : b) {
+  for (auto &[w, h] : b) { // O(n*log n)
     auto i = ranges::lower_bound(heights, int(h), gt1) - heights.begin();
     if (i == heights.size()) {
       heights.push_back(h);
@@ -31,19 +30,29 @@ void solve(int t) {
       widths[i].push_back(w);
     }
   }
-  vector<array<int, 2>> lin;
+  vector<array<int, 2>> lin; // O(n*log n)
   int k = heights.size();
   for (int i = 0; i < k; i++) {
     for (int j = widths[i].size() - 1; j >= 0; j--) {
       lin.push_back({widths[i][j], k - i});
     }
   }
-  ranges::sort(lin, gt2);
-  int m = 1;
-  for (int i = 1, c = 1; i < lin.size(); i++) {
-    lin[i][1] > lin[i - 1][1] ? c = 1 : c++;
-    m = max<int>(m, c);
+  ranges::sort(lin);
+  vector<int> rows;
+  int row = 0, last = 0;
+  for (auto &[_, s] : lin) {
+    if (s < last) {
+      rows[row = 0]++;
+    } else if (row == rows.size()) {
+      rows.push_back(1);
+    } else if (rows[row] < rows[0]) {
+      rows[row]++;
+    } else {
+      row++;
+    }
+    last = s;
   }
+  int m = max<int>(row + 1, rows.size());
   cout << k << ' ' << m << endl;
 }
 
