@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1986/submission/268990501
+ * https://codeforces.com/contest/1986/submission/269091599
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -19,38 +19,51 @@ template <typename T = int> struct Vec : vector<Num<T>> {
   Vec(int n, int s = 0) : vector<Num<T>>(s, 0) { this->resize(n + s); }
 };
 
+struct Fac : vector<vector<int>> {
+  Fac(int n) : vector<vector<int>>(n + 1) {
+    for (int i = 1; i <= n; i++) {
+      for (int j = i; j <= n; j += i) {
+        (*this)[j].push_back(i);
+      }
+    }
+  }
+};
+
 void solve(int t) {
   Num n;
   Vec a(n, 1);
-  map<int, map<int, int>> num, den;
-  int mx = 0;
+  vector<vector<int>> num(n + 1), den(n + 1);
+  int amx = 0, bmx = 0;
   for (int i = 1; i <= n; i++) {
     auto g = gcd<int>(a[i], i);
     auto x = a[i] / g, y = i / g;
-    num[x][y]++, den[y][x]++;
-    mx = max(mx, x);
+    num[x].push_back(y);
+    den[y].push_back(x);
+    amx = max(amx, x);
+    bmx = max(bmx, y);
   }
-  i64 ans = 0;
-  for (auto &[y1, n1] : den) {
-    for (auto &[x1, c1] : n1) {
-      for (int x2 = y1, k = 1; x2 <= mx; x2 += y1, k++) {
-        if (x1 == x2) {
-          ans += i64(c1) * (c1 - 1) / 2;
-          continue;
-        }
-        auto it = num.find(x2);
-        if (it != num.end()) {
-          for (auto &[y2, c2] : it->second) {
-            if ((i64(x1) * k) % y2 == 0) {
-              ans += i64(c1) * c2;
-            }
-          }
+  vector<int> c(max(amx, bmx) + 1);
+  auto f = [&](int bi, int d) {
+    for (int aj = bi; aj <= amx; aj += bi) {
+      for (auto &bj : num[aj]) {
+        c[bj] += d;
+      }
+    }
+  };
+  Fac fac(amx);
+  i64 ans = -den[1].size();
+  for (int bi = 1; bi <= n; bi++) {
+    if (den[bi].size()) {
+      f(bi, 1);
+      for (auto &ai : den[bi]) {
+        for (auto &bj : fac[ai]) {
+          ans += c[bj];
         }
       }
-      num[x1].erase(y1);
+      f(bi, -1);
     }
   }
-  cout << ans << endl;
+  cout << ans / 2 << endl;
 }
 
 int main() {

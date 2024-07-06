@@ -135,14 +135,11 @@ struct Zfn : vector<int> {
   }
 };
 
-struct Fact : vector<int> {
-  Fact(i64 x) {
-    for (; x && x & 1 == 0; x >>= 1) {
-      push_back(2);
-    }
-    for (int i = 3; x > 1; i += 2) {
-      for (int r = x / i; r * i == x; x = r, r /= i) {
-        push_back(i);
+struct Fac : vector<vector<int>> {
+  Fac(int n) : vector<vector<int>>(n + 1) {
+    for (int i = 1; i <= n; i++) {
+      for (int j = i; j <= n; j += i) {
+        (*this)[j].push_back(i);
       }
     }
   }
