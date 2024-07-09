@@ -42,25 +42,28 @@ void solve(int t) {
     amx = max(amx, x);
     bmx = max(bmx, y);
   }
-  vector<int> c(max(amx, bmx) + 1);
-  auto f = [&](int bi, int d) {
-    for (int aj = bi; aj <= amx; aj += bi) {
-      for (auto &bj : num[aj]) {
-        c[bj] += d;
-      }
-    }
-  };
   Fac fac(amx);
+  vector<int> c(bmx + 1);
   i64 ans = -den[1].size();
   for (int bi = 1; bi <= n; bi++) {
     if (den[bi].size()) {
-      f(bi, 1);
-      for (auto &ai : den[bi]) {
-        for (auto &bj : fac[ai]) {
-          ans += c[bj];
+      for (int aj = bi; aj <= amx; aj += bi) {
+        for (auto &bj : num[aj]) {
+          c[bj]++;
         }
       }
-      f(bi, -1);
+      for (auto &ai : den[bi]) {
+        for (auto &bj : fac[ai]) {
+          if (bj <= bmx) {
+            ans += c[bj];
+          }
+        }
+      }
+      for (int aj = bi; aj <= amx; aj += bi) {
+        for (auto &bj : num[aj]) {
+          c[bj] = 0;
+        }
+      }
     }
   }
   cout << ans / 2 << endl;

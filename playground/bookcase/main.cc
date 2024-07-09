@@ -19,40 +19,58 @@ void solve(int t) {
   vector<array<Num<>, 2>> b(n);
   ranges::sort(b, lta2); // O(n*log n)
   vector<int> heights;
-  vector<vector<int>> widths;
-  for (auto &[w, h] : b) { // O(n*log n)
-    auto i = ranges::lower_bound(heights, int(h), gt1) - heights.begin();
-    if (i == heights.size()) {
+  vector<list<int>> shelves;
+  for (int i = 0; i < n; i++) { // O(n*log n)
+    int h = b[i][1];
+    int j = ranges::lower_bound(heights, h, gt1) - heights.begin();
+    if (j == heights.size()) {
       heights.push_back(h);
-      widths.push_back({w});
+      shelves.push_back({i});
     } else {
-      heights[i] = h;
-      widths[i].push_back(w);
+      heights[j] = h;
+      shelves[j].push_back(i);
     }
   }
-  vector<array<int, 2>> lin; // O(n*log n)
+  auto f = [&](list<int> &l, list<int> &r, int &c) {
+    auto it = l.begin();
+    auto [w, h] = b[r.front()];
+    for (; it != l.end() && c > 0; it++, c--) { // O(c)
+      auto [w1, h1] = b[*it];
+      if (w1 > w || h1 > h) {
+        break;
+      }
+    }
+    r.splice(r.begin(), l, l.begin(), it); // O(1)
+  };
+  auto g = [&](list<int> &l, list<int> &r, int &c) {
+    auto it = l.end();
+    auto [w, h] = b[r.back()];
+    for (; it != l.begin() && c > 0; it--, c--) { // O(c)
+      auto [w1, h1] = b[*prev(it)];
+      if (w1 < w || h1 < h) {
+        break;
+      }
+    }
+    r.splice(r.end(), l, it, l.end()); // O(1)
+  };
   int k = heights.size();
-  for (int i = 0; i < k; i++) {
-    for (int j = widths[i].size() - 1; j >= 0; j--) {
-      lin.push_back({widths[i][j], k - i});
+  for (bool done = false; !done;) { // O(n*k)
+    done = true;
+    for (int i = 1; i < k; i++) {
+      auto &l = shelves[i - 1], &r = shelves[i];
+      auto lc = l.size(), rc = r.size();
+      if (lc > rc) {
+        int c = (lc - rc + 1) / 2;
+        f(l, r, c);
+        g(l, r, c);
+        done = done && lc == l.size();
+      }
     }
   }
-  ranges::sort(lin);
-  vector<int> rows;
-  int row = 0, last = 0;
-  for (auto &[_, s] : lin) {
-    if (s < last) {
-      rows[row = 0]++;
-    } else if (row == rows.size()) {
-      rows.push_back(1);
-    } else if (rows[row] < rows[0]) {
-      rows[row]++;
-    } else {
-      row++;
-    }
-    last = s;
+  int m = 0;
+  for (auto &s : shelves) { // O(k)
+    m = max<int>(m, s.size());
   }
-  int m = max<int>(row + 1, rows.size());
   cout << k << ' ' << m << endl;
 }
 

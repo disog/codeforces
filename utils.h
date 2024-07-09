@@ -45,78 +45,88 @@ template <int N = 998244353> struct Mint : Mod {
 struct Graph : vector<vector<int>> {
   vector<array<Num<>, 2>> e;
   Graph(int n, int m) : vector<vector<int>>(n), e(m) {
-    auto &g = *this;
     for (auto &[u, v] : e) {
-      g[u].push_back(v);
-      g[v].push_back(u);
+      add(u, v);
     }
   }
-};
-
-struct Bridge : vector<pair<int, int>> {
-  vector<int> low;
-  Bridge(Graph g, int s) : low(g.size(), -1) { dfs(g, s, s, s); }
-  void dfs(Graph &g, int u, int p, int &t) {
-    auto tx = low[u] = t++;
-    for (auto &&v : g[u]) {
-      if (v != p) {
-        if (low[v] < 0) {
-          dfs(g, v, u, t);
-          if (low[v] > tx) {
-            emplace_back(u, v);
-          }
-        }
-        low[u] = min(low[u], low[v]);
-      }
-    }
-  }
-};
-
-struct Match : vector<int> {
-  int c = 0;
-  Match(Graph &g, int s) : vector<int>(g.size(), -1) { dfs(g, s, s); }
-  void dfs(Graph &g, int u, int p) {
-    auto &m = *this;
-    for (auto &v : g[u]) {
-      if (v != p) {
-        dfs(g, v, u); // post-order (visit leaves first)
-        if (m[u] == m[v]) {
-          m[u] = v, m[v] = u, c++;
-        }
-      }
-    }
+  void add(int u, int v) {
+    (*this)[u].push_back(v);
+    (*this)[v].push_back(u);
   }
 };
 
 struct DGraph : vector<vector<int>> {
   vector<array<Num<>, 2>> e;
   DGraph(int n, int m) : vector<vector<int>>(n), e(m) {
-    auto &g = *this;
     for (auto &[u, v] : e) {
-      g[u].push_back(v);
+      add(u, v);
     }
   }
+  void add(int u, int v) { (*this)[u].push_back(v); }
 };
 
-struct WGraph : vector<vector<array<int, 2>>> {
-  vector<array<Num<>, 3>> e;
-  WGraph(int n, int m) : vector<vector<array<int, 2>>>(n), e(m) {
-    auto &g = *this;
-    for (auto &[u, v, w] : e) {
-      g[u].emplace_back(v, w);
-      g[v].emplace_back(u, w);
+struct Match : vector<int> {
+  int count = 0;
+  vector<pair<int, int>> bridges;
+  Match(Graph g, int s = 0) : vector<int>(g.size(), -1), low(g.size()) {
+    int t = 1;
+    dfs(g, s, s, t);
+  }
+  void dfs(Graph &g, int u, int p, int &t) {
+    auto &match = *this;
+    auto tx = low[u] = t++;
+    for (auto v : g[u]) {
+      if (v != p) {
+        if (low[v] == 0) {
+          dfs(g, v, u, t);   // post-order (visit leaves first)
+          if (low[v] > tx) { // new bridge
+            bridges.emplace_back(u, v);
+          }
+          if (match[u] == match[v]) {
+            match[u] = v;
+            match[v] = u;
+            count++;
+          }
+        }
+        low[u] = min(low[u], low[v]);
+      }
     }
   }
+
+private:
+  vector<int> low;
 };
 
-struct WDGraph : vector<vector<array<int, 3>>> {
-  vector<array<Num<>, 3>> e;
-  WDGraph(int n, int m) : vector<vector<array<int, 3>>>(n), e(m) {
-    auto &g = *this;
-    for (auto &[u, v, w] : e) {
-      g[u].emplace_back(v, w);
+struct SCC : vector<int> {
+  int count = 0;
+  SCC(DGraph g) : vector<int>(g.size()), low(g.size()) {
+    for (int i = 0, t = 1; i < g.size(); i++) {
+      if (low[i] == 0) {
+        dfs(g, i, t);
+      }
     }
   }
+
+private:
+  void dfs(DGraph &g, int u, int &t) {
+    auto tx = low[u] = t++;
+    visited.push_back(u);
+    for (auto v : g[u]) {
+      if (low[v] == 0) {
+        dfs(g, v, t);
+      }
+      low[u] = min(low[u], low[v]);
+    }
+    if (low[u] == tx) { // component root
+      count++;
+      for (int v = -1; v != u; visited.pop_back()) {
+        v = visited.back();
+        low[v] = g.size();
+        (*this)[v] = count;
+      }
+    }
+  }
+  vector<int> low, visited;
 };
 
 struct Zfn : vector<int> {
@@ -188,12 +198,13 @@ int binsearch(const auto &f, int s, int e) {
   return e;
 }
 
-void debug(auto &a, int n) {
-  cout << n << ';';
+void debugn(int n) { cout << n << ';'; }
+
+void debuga(auto &a) {
   for (auto &ai : a) {
     cout << ai << ',';
   }
-  cout << endl;
+  cout << ';';
 }
 
 void solve(int t) {}
