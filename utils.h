@@ -55,6 +55,19 @@ struct Graph : vector<vector<int>> {
   }
 };
 
+struct WGraph : vector<vector<array<int, 2>>> {
+  vector<array<Num<>, 3>> e;
+  WGraph(int n, int m) : vector<vector<array<int, 2>>>(n), e(m) {
+    for (auto &[u, v, w] : e) {
+      add(u, v, w);
+    }
+  }
+  void add(int u, int v, int w) {
+    (*this)[u].push_back({v, w});
+    (*this)[v].push_back({u, w});
+  }
+};
+
 struct DGraph : vector<vector<int>> {
   vector<array<Num<>, 2>> e;
   DGraph(int n, int m) : vector<vector<int>>(n), e(m) {
@@ -128,6 +141,33 @@ private:
   }
   vector<int> low, visited;
 };
+
+template <typename T, int N> struct Trie : vector<pair<T, array<int, N>>> {
+  Trie(int cap = 1) : vector<pair<T, array<int, N>>>(1) { this->reserve(cap); }
+  void visit(const auto &f, const auto &x) {
+    for (int i = 0, j = 0;; j++) {
+      int k = f((*this)[i], j, x);
+      if (k < 0) {
+        break;
+      }
+      assert(k < N);
+      auto &child = (*this)[i].second[k];
+      if (!child) {
+        child = this->size();
+        this->emplace_back(); // might invalidate references
+      }
+      i = (*this)[i].second[k];
+    }
+  }
+};
+
+auto bit = [](int j, int x) { return x & (1 << j); };
+auto pget = [](int j, int x) { return j < 32 ? bit(31 - j, x) != 0 : -1; };
+auto padd = [](auto &node, int j, int x) { return node.first++, pget(j, x); };
+auto prem = [](auto &node, int j, int x) { return node.first--, pget(j, x); };
+auto sget = [](int j, int x) { return j >= 0 ? bit(j, x) != 0 : -1; };
+auto sadd = [](auto &node, int j, int x) { return node.first++, sget(j, x); };
+auto srem = [](auto &node, int j, int x) { return node.first--, sget(j, x); };
 
 struct Zfn : vector<int> {
   Zfn(auto &a, int s = 0) : Zfn(a, s, a.size()) {}
