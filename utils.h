@@ -169,6 +169,20 @@ auto sget = [](int j, int x) { return j >= 0 ? bit(j, x) != 0 : -1; };
 auto sadd = [](auto &node, int j, int x) { return node.first++, sget(j, x); };
 auto srem = [](auto &node, int j, int x) { return node.first--, sget(j, x); };
 
+struct Fen : vector<int> {
+  Fen(int n) : vector<int>(n) {}
+  void query(int x, const auto &f) {
+    for (; x >= 0; x -= x & -x) {
+      f(x);
+    }
+  }
+  void update(int x, const auto &f) {
+    for (; x < size(); x += x & -x) {
+      f(x);
+    }
+  }
+};
+
 struct Zfn : vector<int> {
   Zfn(auto &a, int s = 0) : Zfn(a, s, a.size()) {}
   Zfn(auto &a, int s, int e) : vector<int>(e - s) {
