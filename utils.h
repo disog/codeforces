@@ -161,13 +161,51 @@ template <typename T, int N> struct Trie : vector<pair<T, array<int, N>>> {
   }
 };
 
+// Trie manipulation
+using str = const string &;
 auto bit = [](int j, int x) { return x & (1 << j); };
-auto pget = [](int j, int x) { return j < 32 ? bit(31 - j, x) != 0 : -1; };
-auto padd = [](auto &node, int j, int x) { return node.first++, pget(j, x); };
-auto prem = [](auto &node, int j, int x) { return node.first--, pget(j, x); };
-auto sget = [](int j, int x) { return j >= 0 ? bit(j, x) != 0 : -1; };
-auto sadd = [](auto &node, int j, int x) { return node.first++, sget(j, x); };
-auto srem = [](auto &node, int j, int x) { return node.first--, sget(j, x); };
+auto chr = [](int j, str s) { return s[j] - 'a'; };
+
+// Bit prefixes
+auto bpget = [](int j, int x) { return j < 32 ? bit(31 - j, x) != 0 : -1; };
+auto bpadd = [](auto &node, int j, int x) { return node.first++, bpget(j, x); };
+auto bprem = [](auto &node, int j, int x) { return node.first--, bpget(j, x); };
+
+// Bit suffixes
+auto bsget = [](int j, int x) { return j < 32 ? bit(j, x) != 0 : -1; };
+auto bsadd = [](auto &node, int j, int x) { return node.first++, bsget(j, x); };
+auto bsrem = [](auto &node, int j, int x) { return node.first--, bsget(j, x); };
+
+// String prefixes
+auto spget = [](int j, str s) { return j < s.size() ? chr(j, s) : -1; };
+auto spadd = [](auto &node, int j, str s) { return node.first++, spget(j, s); };
+auto sprem = [](auto &node, int j, str s) { return node.first--, spget(j, s); };
+
+// String suffixes
+auto ssget = [](int j, str s) {
+  return j < s.size() ? chr(s.size() - j - 1, s) : -1;
+};
+auto ssadd = [](auto &node, int j, str s) { return node.first++, ssget(j, s); };
+auto ssrem = [](auto &node, int j, str s) { return node.first--, ssget(j, s); };
+
+struct DSU : vector<int> {
+  DSU &parent = *this;
+  vector<int> size;
+  DSU(int n) : vector<int>(n), size(n) {}
+  int add(int v) { return size[v] = 1, parent[v] = v; }
+  int find(int v) { return v == parent[v] ? v : parent[v] = find(parent[v]); }
+  int merge(int a, int b) {
+    a = find(a), b = find(b);
+    if (a != b) {
+      if (size[a] < size[b]) {
+        std::swap(a, b);
+      }
+      size[a] += size[b];
+      parent[b] = a;
+    }
+    return a;
+  }
+};
 
 struct Fen : vector<int> {
   Fen(int n) : vector<int>(n) {}

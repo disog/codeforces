@@ -6,6 +6,7 @@
 #include <bits/stdc++.h>
 
 using namespace std;
+using i64 = int64_t;
 
 template <typename T = int> struct Num {
   T x;
@@ -24,8 +25,10 @@ struct Mod {
   int operator-(int rhs) {
     return rhs < 0 ? operator+(-rhs) : (x - rhs < 0 ? x + m : x) - rhs;
   }
+  int operator*(int rhs) { return (x * i64(rhs)) % m; }
   int operator+=(int rhs) { return x = operator+(rhs); }
   int operator-=(int rhs) { return x = operator-(rhs); }
+  int operator*=(int rhs) { return x = operator*(rhs); }
 };
 
 template <int N = 998244353> struct Mint : Mod {
