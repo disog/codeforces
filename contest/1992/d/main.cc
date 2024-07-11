@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1992/submission/270067229
+ * https://codeforces.com/contest/1992/submission/270078666
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -22,8 +22,8 @@ void solve(int t) {
   Num n, m, k;
   Str a;
   for (int i = -1, e = m - 1; e < n;) {
-    int logi = a.find('L', i + 1);
-    if (logi != string::npos && logi <= e) {
+    int logi = a.rfind('L', e);
+    if (logi != string::npos && logi > i) {
       i = logi;
       e = i + m;
     } else if (a[e] == 'W' && k) {

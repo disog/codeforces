@@ -8,6 +8,7 @@
 using namespace std;
 using i64 = int64_t;
 using f64 = double;
+using str = const string &;
 using MaxHeap = priority_queue<int>;
 using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 
@@ -162,7 +163,6 @@ template <typename T, int N> struct Trie : vector<pair<T, array<int, N>>> {
 };
 
 // Trie manipulation
-using str = const string &;
 auto bit = [](int j, int x) { return x & (1 << j); };
 auto chr = [](int j, str s) { return s[j] - 'a'; };
 
