@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1985/submission/269799167
+ * https://codeforces.com/contest/1985/submission/269799718
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -58,26 +58,23 @@ void solve(int t) {
   int ans = 0;
   auto f = [&](int x, int y, auto &gg, auto &vv) {
     for (int i = 0; i < x; i++) {
-      map<int, int> size;
+      set<int> roots;
       int total = 0;
       for (int j = 0; j < y; j++) {
-        if (gg(i, j) == '.') {
-          total++;
+        if (gg(i, j) == '#') {
+          roots.insert(dsu.find(vv(i, j)));
         } else {
-          auto p = dsu.find(vv(i, j));
-          size[p] = dsu.size[p];
+          total++;
         }
         if (i > 0 && gg(i - 1, j) == '#') {
-          auto p = dsu.find(vv(i - 1, j));
-          size[p] = dsu.size[p];
+          roots.insert(dsu.find(vv(i - 1, j)));
         }
         if (i < x - 1 && gg(i + 1, j) == '#') {
-          auto p = dsu.find(vv(i + 1, j));
-          size[p] = dsu.size[p];
+          roots.insert(dsu.find(vv(i + 1, j)));
         }
       }
-      for (auto [_, c] : size) {
-        total += c;
+      for (auto r : roots) {
+        total += dsu.size[r];
       }
       ans = max(ans, total);
     }

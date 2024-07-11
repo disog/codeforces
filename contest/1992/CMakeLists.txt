@@ -1,0 +1,7 @@
+add_executable(1992_a a/main.cc)
+add_executable(1992_b b/main.cc)
+add_executable(1992_c c/main.cc)
+add_executable(1992_d d/main.cc)
+add_executable(1992_e e/main.cc)
+add_executable(1992_f f/main.cc)
+add_executable(1992_g g/main.cc)
