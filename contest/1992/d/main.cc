@@ -1,5 +1,5 @@
 /**
- * Submission
+ * https://codeforces.com/contest/1992/submission/270038657
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -14,7 +14,33 @@ template <typename T = int> struct Num {
   operator T &() { return x; }
 };
 
-void solve(int t) {}
+struct Str : string {
+  Str() { cin >> *this; }
+};
+
+void solve(int t) {
+  Num n, m, k;
+  Str a;
+  for (int i = -1, e = m - 1; e < n;) {
+    int lastlog = i;
+    for (int j = i + 1; j <= e; j++) {
+      if (a[j] == 'L') {
+        lastlog = j;
+      }
+    }
+    if (lastlog > i) {
+      i = lastlog;
+      e = i + m;
+    } else if (a[e] == 'W' && k) {
+      k--;
+      i = e++;
+    } else {
+      cout << "NO" << endl;
+      return;
+    }
+  }
+  cout << "YES" << endl;
+}
 
 int main() {
 #ifdef LOCAL
