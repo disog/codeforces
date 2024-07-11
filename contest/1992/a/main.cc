@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1992/submission/269969378
+ * https://codeforces.com/contest/1992/submission/270062675
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -14,25 +14,24 @@ template <typename T = int> struct Num {
   operator T &() { return x; }
 };
 
-const less<int> lt1;
-
 void solve(int t) {
-  vector<Num<>> a(3);
-  ranges::sort(a, lt1);
-  int c = 5;
-  auto d1 = min(c, a[1] - a[0]);
-  a[0] += d1;
-  c -= d1;
-  if (c > 0) {
-    auto d2 = min(c, a[2] - a[1]);
-    a[0] += d2 / 2;
-    a[1] += d2 - d2 / 2;
-    c -= d2;
-    for (int i = 0; c > 0; i++, c--) {
-      a[i % 3]++;
+  const int n = 3, m = 5;
+  vector<Num<>> a(n);
+  sort(a.begin(), a.end());
+  a.push_back(INT_MAX);
+  for (int i = 0, j = 0, k = 1; i < m; j++) {
+    if (a[j % k] < a[k]) {
+      a[j % k]++, i++;
+    } else {
+      k++;
     }
   }
-  cout << a[0] * a[1] * a[2] << endl;
+  a.pop_back();
+  int ans = 1;
+  for (auto &&ai : a) {
+    ans *= ai;
+  }
+  cout << ans << endl;
 }
 
 int main() {

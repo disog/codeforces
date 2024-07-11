@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1992/submission/269998604
+ * https://codeforces.com/contest/1992/submission/270066277
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -16,10 +16,7 @@ template <typename T = int> struct Num {
 
 void solve(int t) {
   Num n, m, k;
-  for (int i = n; i >= k; i--) {
-    cout << i << ' ';
-  }
-  for (int i = k - 1; i > m; i--) {
+  for (int i = n; i > m; i--) {
     cout << i << ' ';
   }
   for (int i = 1; i <= m; i++) {

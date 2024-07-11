@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1992/submission/269985581
+ * https://codeforces.com/contest/1992/submission/270063041
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -14,20 +14,15 @@ template <typename T = int> struct Num {
   operator T &() { return x; }
 };
 
-const less<int> lt1;
-
 void solve(int t) {
   Num n, k;
   vector<Num<>> a(k);
-  int ans = 0;
-  int mx = *ranges::max_element(a, lt1);
+  int ans = 0, mx = 0;
   for (auto &&ai : a) {
-    if (ai != mx) {
-      ans += ai - 1 + ai;
-    } else {
-      mx = 0;
-    }
+    ans += 2 * ai - 1;
+    mx = max<int>(mx, ai);
   }
+  ans -= 2 * mx - 1;
   cout << ans << endl;
 }
 
