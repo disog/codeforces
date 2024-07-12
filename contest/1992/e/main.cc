@@ -1,22 +1,17 @@
 /**
- * https://codeforces.com/contest/1992/submission/270090770
+ * https://codeforces.com/contest/1992/submission/270185739
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using str = const string &;
 
 template <typename T = int> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
-};
-
-struct Str : string {
-  Str() { cin >> *this; }
 };
 
 void solve(int t) {

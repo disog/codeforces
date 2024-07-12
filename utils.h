@@ -188,10 +188,9 @@ auto ssget = [](int j, str s) {
 auto ssadd = [](auto &node, int j, str s) { return node.first++, ssget(j, s); };
 auto ssrem = [](auto &node, int j, str s) { return node.first--, ssget(j, s); };
 
-struct DSU : vector<int> {
-  DSU &parent = *this;
-  vector<int> size;
-  DSU(int n) : vector<int>(n), size(n) {}
+struct DSU {
+  vector<int> parent, size;
+  DSU(int n) : parent(n), size(n) {}
   int add(int v) { return size[v] = 1, parent[v] = v; }
   int find(int v) { return v == parent[v] ? v : parent[v] = find(parent[v]); }
   int merge(int a, int b) {
@@ -207,16 +206,51 @@ struct DSU : vector<int> {
   }
 };
 
-struct Fen : vector<int> {
-  Fen(int n) : vector<int>(n) {}
-  void query(int x, const auto &f) {
-    for (; x >= 0; x -= x & -x) {
-      f(x);
+struct Fen {
+  vector<int> nodes;
+  Fen(int n) : nodes(n) {}
+  void query(int x, const auto &f) { range_query(0, x); }
+  void update(int x, const auto &f) { range_update(x, size() - 1); }
+  void range_query(int x, int y, const auto &f) {
+    for (; x <= y; y -= y & -y) {
+      f(y, nodes[y]);
     }
   }
-  void update(int x, const auto &f) {
-    for (; x < size(); x += x & -x) {
-      f(x);
+  void range_update(int x, int y, const auto &f) {
+    for (; x <= y; x += x & -x) {
+      f(x, nodes[x]);
+    }
+  }
+};
+
+struct Pref2D : vector<vector<int>> {
+  int n, m;
+  Pref2D(int n, int m) : vector<vector<int>>(n), n(n), m(m) {
+    for (auto &&row : *this) {
+      row.resize(m);
+    }
+  }
+  void add(int x, const array<int, 4> &range) {
+    auto &sum = *this;
+    auto [r1, c1, r2, c2] = range;
+    r2++, c2++;
+    if (r1 == 0 && c1 == 0) {
+      sum[0][0] += x;
+    } else {
+      sum[r1][0] += x;
+      sum[0][c1] += x;
+      sum[r1][c1] -= x;
+    }
+    if (r1 != 0 && c2 < m) {
+      sum[0][c2] -= x;
+      sum[r1][c2] += x;
+    }
+    if (c1 != 0 && r2 < n) {
+      sum[r2][0] -= x;
+      sum[r2][c1] += x;
+    }
+    if (r2 < n && c2 < m) {
+      sum[r2][c2] -= x;
     }
   }
 };

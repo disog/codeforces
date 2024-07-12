@@ -17,7 +17,7 @@ template <typename T = int> struct Num {
 void solve(int t) {
   Num n, k;
   vector<Num<>> a(k);
-  int mx = *max_element(a.begin(), a.end());
+  int mx = *max_element(a.begin(), a.end()); // O(n)
   int ans = 2 * (n - mx) - k + 1;
   cout << ans << endl;
 }
