@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1992/submission/270063041
+ * https://codeforces.com/contest/1992/submission/270094024
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -17,12 +17,8 @@ template <typename T = int> struct Num {
 void solve(int t) {
   Num n, k;
   vector<Num<>> a(k);
-  int ans = 0, mx = 0;
-  for (auto &&ai : a) {
-    ans += 2 * ai - 1;
-    mx = max<int>(mx, ai);
-  }
-  ans -= 2 * mx - 1;
+  int mx = *max_element(a.begin(), a.end());
+  int ans = 2 * (n - mx) - k + 1;
   cout << ans << endl;
 }
 

@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1992/submission/270090501
+ * https://codeforces.com/contest/1992/submission/270090770
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -33,7 +33,6 @@ void solve(int t) {
   while (s.size() < 6) {
     s += s;
   }
-  s.resize(6);
   vector<array<int, 2>> ans;
   for (int d = 1; d <= 6; d++) {
     auto x = stoi(s.substr(0, d));
