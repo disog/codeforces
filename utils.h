@@ -223,34 +223,46 @@ struct Fen {
   }
 };
 
-struct Pref2D : vector<vector<int>> {
+struct Pref2D {
   int n, m;
-  Pref2D(int n, int m) : vector<vector<int>>(n), n(n), m(m) {
-    for (auto &&row : *this) {
-      row.resize(m);
+  vector<vector<int>> sum;
+  Pref2D(int n, int m) : sum(n + 1), n(n), m(m) {
+    for (auto &&row : sum) {
+      row.resize(m + 1);
     }
   }
-  void add(int x, const array<int, 4> &range) {
-    auto &sum = *this;
+  void rect(int x, const array<int, 4> &range) {
     auto [r1, c1, r2, c2] = range;
-    r2++, c2++;
-    if (r1 == 0 && c1 == 0) {
-      sum[0][0] += x;
-    } else {
-      sum[r1][0] += x;
-      sum[0][c1] += x;
-      sum[r1][c1] -= x;
-    }
-    if (r1 != 0 && c2 < m) {
-      sum[0][c2] -= x;
-      sum[r1][c2] += x;
-    }
-    if (c1 != 0 && r2 < n) {
-      sum[r2][0] -= x;
-      sum[r2][c1] += x;
-    }
-    if (r2 < n && c2 < m) {
-      sum[r2][c2] -= x;
+    sum[r1][c1] += x;
+    sum[r2 + 1][c1] -= x;
+    sum[r1][c2 + 1] -= x;
+    sum[r2 + 1][c2 + 1] += x;
+  }
+  void rows(int x, const array<int, 2> &range) {
+    auto [r1, r2] = range;
+    sum[r1][0] += x;
+    sum[r2 + 1][0] -= x;
+  }
+  void cols(int x, const array<int, 2> &range) {
+    auto [c1, c2] = range;
+    sum[0][c1] += x;
+    sum[0][c2 + 1] -= x;
+  }
+  void cross(int x, const array<int, 4> &range) {
+    auto [r1, c1, r2, c2] = range;
+    rows(x, {r1, r2});
+    cols(x, {c1, c2});
+    rect(-x, range);
+  }
+  void visit(const auto &f) {
+    vector<int> cur(m + 1);
+    for (int i = 0; i < n; i++) {
+      for (int j = 0, prev = 0; j < m; j++) {
+        int saved = cur[j + 1];
+        cur[j + 1] += sum[i][j] + cur[j] - prev;
+        prev = saved;
+        f(i, j, cur[j + 1]);
+      }
     }
   }
 };
