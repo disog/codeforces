@@ -1,5 +1,5 @@
 /**
- * Submission
+ * https://codeforces.com/contest/1992/submission/270239536
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -14,7 +14,27 @@ template <typename T = int> struct Num {
   operator T &() { return x; }
 };
 
-void solve(int t) {}
+void solve(int t) {
+  Num n, x;
+  vector<Num<>> a(n);
+  set<int> divs = {x};
+  int ans = 1;
+  for (auto &&ai : a) {
+    if (divs.contains(ai)) {
+      ans++;
+      divs = {x, x / ai};
+    } else if (x % ai == 0) {
+      vector<int> add;
+      for (auto &&di : divs) {
+        if (di % ai == 0) {
+          add.push_back(di / ai);
+        }
+      }
+      divs.insert(add.begin(), add.end());
+    }
+  }
+  cout << ans << endl;
+}
 
 int main() {
 #ifdef LOCAL

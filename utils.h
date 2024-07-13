@@ -12,12 +12,15 @@ using str = const string &;
 using MaxHeap = priority_queue<int>;
 using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
 };
+using Int = Num<int>;
+using I64 = Num<i64>;
+using F64 = Num<f64>;
 
 struct Str : string {
   Str() { cin >> *this; }
@@ -25,26 +28,50 @@ struct Str : string {
 
 struct Mod {
   int x, m;
-  Mod(int a, int b) : x(a % b), m(b) {}
+  Mod(i64 a, int b) : x(a % b), m(b) {}
   operator int() { return x; }
-  int operator+(int rhs) {
-    return rhs < 0 ? operator-(-rhs) : (x + rhs >= m ? x - m : x) + rhs;
+  Mod &operator+=(int rhs) { return x = operator+(rhs), *this; }
+  Mod &operator-=(int rhs) { return x = operator-(rhs), *this; }
+  Mod &operator*=(int rhs) { return x = operator*(rhs), *this; }
+  Mod operator+(int rhs) {
+    return rhs < 0 ? operator-(-rhs) : Mod((x + rhs >= m ? x - m : x) + rhs, m);
   }
-  int operator-(int rhs) {
-    return rhs < 0 ? operator+(-rhs) : (x - rhs < 0 ? x + m : x) - rhs;
+  Mod operator-(int rhs) {
+    return rhs < 0 ? operator+(-rhs) : Mod((x - rhs < 0 ? x + m : x) - rhs, m);
   }
-  int operator*(int rhs) { return (x * i64(rhs)) % m; }
-  int operator+=(int rhs) { return x = operator+(rhs); }
-  int operator-=(int rhs) { return x = operator-(rhs); }
-  int operator*=(int rhs) { return x = operator*(rhs); }
+  Mod operator*(int rhs) { return Mod(i64(x) * rhs, m); }
+  Mod pow(int y) {
+    Mod b(x, m), ans(!!x, m);
+    for (; b && y; y >>= 1, b *= b) {
+      ans *= (y & 1) ? b : 1;
+    }
+    return ans;
+  }
+  Mod inv() { return pow(m - 2); }
 };
 
-template <int N = 998244353> struct Mint : Mod {
-  Mint(int a) : Mod(a, N) {}
+struct Mint : Mod {
+  Mint(int a) : Mod(a, 998244353) {}
+};
+
+struct Comb {
+  vector<Mod> num, den;
+  Comb(int n, int m) : num(n, {1, m}), den(n, {1, m}) {
+    for (int i = 1; i < n; i++) {
+      num[i] = num[i - 1] * i;
+    }
+    den[n - 1] = num[n - 1].inv();
+    for (int i = n - 1; i > 0; i--) {
+      den[i - 1] = den[i] * i;
+    }
+  }
+  Mod operator()(int n, int k) {
+    return n < 0 || n < k ? Mod(0, num[0].m) : num[n] * (den[k] * den[n - k]);
+  }
 };
 
 struct Graph : vector<vector<int>> {
-  vector<array<Num<>, 2>> e;
+  vector<array<Int, 2>> e;
   Graph(int n, int m) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
       add(u, v);
@@ -57,7 +84,7 @@ struct Graph : vector<vector<int>> {
 };
 
 struct WGraph : vector<vector<array<int, 2>>> {
-  vector<array<Num<>, 3>> e;
+  vector<array<Int, 3>> e;
   WGraph(int n, int m) : vector<vector<array<int, 2>>>(n), e(m) {
     for (auto &[u, v, w] : e) {
       add(u, v, w);
@@ -70,7 +97,7 @@ struct WGraph : vector<vector<array<int, 2>>> {
 };
 
 struct DGraph : vector<vector<int>> {
-  vector<array<Num<>, 2>> e;
+  vector<array<Int, 2>> e;
   DGraph(int n, int m) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
       add(u, v);
@@ -307,16 +334,6 @@ pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
   return {inv, shift};
 }
 
-Mod modpow(Mod x, int y) {
-  Mod ans(x != 0, x.m);
-  for (; x && y; y = y >> 1, x *= x) {
-    if (y & 1) {
-      ans *= x;
-    }
-  }
-  return ans;
-}
-
 const less<int> lt1;
 const greater<int> gt1;
 const less<array<int, 2>> lt2;
@@ -353,7 +370,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }
