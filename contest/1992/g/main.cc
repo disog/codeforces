@@ -53,7 +53,7 @@ struct Bin {
     }
   }
   Mod operator()(int n, int k) {
-    return k < 0 || k > n ? Mod(0, num[0].m) : num[n] * (den[k] * den[n - k]);
+    return k < 0 || k > n ? num[0] * 0 : num[n] * (den[k] * den[n - k]);
   }
 };
 

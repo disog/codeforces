@@ -5,6 +5,9 @@
  */
 #include <bits/stdc++.h>
 
+/**
+ * Common types
+ */
 using namespace std;
 using i64 = int64_t;
 using f64 = double;
@@ -12,8 +15,14 @@ using str = const string &;
 using MaxHeap = priority_queue<int>;
 using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 
+/**
+ * Common constants
+ */
 constexpr int _mod = 1000000007; // 998244353
 
+/**
+ * Input number
+ */
 template <typename T = int> struct Num {
   T x;
   Num() { cin >> x; }
@@ -25,6 +34,9 @@ struct Str : string {
   Str() { cin >> *this; }
 };
 
+/**
+ * Modular integer
+ */
 struct Mod {
   int x, m;
   Mod(i64 x, int m = _mod) : x(x % m), m(m) {}
@@ -49,6 +61,9 @@ struct Mod {
   Mod inv() { return pow(m - 2); }
 };
 
+/**
+ * (Modular) Binomial coefficient
+ */
 struct Bin {
   vector<Mod> num, den;
   Bin(int n, int m = _mod) : num(n, {1, m}), den(n, {1, m}) {
@@ -61,13 +76,16 @@ struct Bin {
     }
   }
   Mod operator()(int n, int k) {
-    return k < 0 || k > n ? Mod(0, num[0].m) : num[n] * (den[k] * den[n - k]);
+    return k < 0 || k > n ? num[0] * 0 : num[n] * (den[k] * den[n - k]);
   }
 };
 
+/**
+ * (Undirected) Graph
+ */
 struct Graph : vector<vector<int>> {
   vector<array<Num<>, 2>> e;
-  Graph(int n, int m) : vector<vector<int>>(n), e(m) {
+  Graph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
       add(u, v);
     }
@@ -78,9 +96,12 @@ struct Graph : vector<vector<int>> {
   }
 };
 
+/**
+ * (Undirected) Weighed Graph
+ */
 struct WGraph : vector<vector<array<int, 2>>> {
   vector<array<Num<>, 3>> e;
-  WGraph(int n, int m) : vector<vector<array<int, 2>>>(n), e(m) {
+  WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
     for (auto &[u, v, w] : e) {
       add(u, v, w);
     }
@@ -91,9 +112,12 @@ struct WGraph : vector<vector<array<int, 2>>> {
   }
 };
 
+/**
+ * Directed Graph
+ */
 struct DGraph : vector<vector<int>> {
   vector<array<Num<>, 2>> e;
-  DGraph(int n, int m) : vector<vector<int>>(n), e(m) {
+  DGraph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
       add(u, v);
     }
@@ -101,6 +125,22 @@ struct DGraph : vector<vector<int>> {
   void add(int u, int v) { (*this)[u].push_back(v); }
 };
 
+/**
+ * Weighed Directed Graph
+ */
+struct WDGraph : vector<vector<array<int, 2>>> {
+  vector<array<Num<>, 3>> e;
+  WDGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
+    for (auto &[u, v, w] : e) {
+      add(u, v, w);
+    }
+  }
+  void add(int u, int v, int w) { (*this)[u].push_back({v, w}); }
+};
+
+/**
+ * Matching & bridges (of undirected graph)
+ */
 struct Match : vector<int> {
   int count = 0;
   vector<pair<int, int>> bridges;
@@ -108,6 +148,8 @@ struct Match : vector<int> {
     int t = 1;
     dfs(g, s, s, t);
   }
+
+private:
   void dfs(Graph &g, int u, int p, int &t) {
     auto &match = *this;
     auto tx = low[u] = t++;
@@ -128,11 +170,12 @@ struct Match : vector<int> {
       }
     }
   }
-
-private:
   vector<int> low;
 };
 
+/**
+ * Strongly-connected components (of directed graph0
+ */
 struct SCC : vector<int> {
   int count = 0;
   SCC(DGraph g) : vector<int>(g.size()), low(g.size()) {
@@ -165,6 +208,9 @@ private:
   vector<int> low, visited;
 };
 
+/**
+ * Trie (N-ary prefix or suffix tree)
+ */
 template <typename T, int N> struct Trie : vector<pair<T, array<int, N>>> {
   Trie(int cap = 1) : vector<pair<T, array<int, N>>>(1) { this->reserve(cap); }
   void visit(const auto &f, const auto &x) {
@@ -210,6 +256,9 @@ auto ssget = [](int j, str s) {
 auto ssadd = [](auto &node, int j, str s) { return node.first++, ssget(j, s); };
 auto ssrem = [](auto &node, int j, str s) { return node.first--, ssget(j, s); };
 
+/**
+ * Disjoint set union (Union find)
+ */
 struct DSU {
   vector<int> parent, size;
   DSU(int n) : parent(n), size(n) {}
@@ -228,6 +277,9 @@ struct DSU {
   }
 };
 
+/**
+ * Fenwick tree (Binary indexed tree)
+ */
 struct Fen {
   vector<int> nodes;
   Fen(int n) : nodes(n) {}
@@ -245,6 +297,9 @@ struct Fen {
   }
 };
 
+/**
+ * 2-D prefix sums
+ */
 struct Pref2D {
   int n, m;
   vector<vector<int>> sum;
@@ -289,6 +344,9 @@ struct Pref2D {
   }
 };
 
+/**
+ * Z-function
+ */
 struct Zfn : vector<int> {
   Zfn(auto &a, int s = 0) : Zfn(a, s, a.size()) {}
   Zfn(auto &a, int s, int e) : vector<int>(e - s) {
@@ -301,6 +359,9 @@ struct Zfn : vector<int> {
   }
 };
 
+/**
+ * Precomputed integer factors (divisors)
+ */
 struct Fac : vector<vector<int>> {
   Fac(int n) : vector<vector<int>>(n + 1) {
     for (int i = 1; i <= n; i++) {
@@ -311,6 +372,9 @@ struct Fac : vector<vector<int>> {
   }
 };
 
+/**
+ * Inversion count and cyclic shift (of sorted array)
+ */
 pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
   int inv = 0, shift = a[sa] - sp, n = a.size();
   for (int i = sa, sum = 0; i < n; i++) {
@@ -329,6 +393,9 @@ pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
   return {inv, shift};
 }
 
+/**
+ * Comparison operators
+ */
 const less<int> lt1;
 const greater<int> gt1;
 const less<array<int, 2>> lt2;
@@ -340,6 +407,9 @@ const auto gta2 = [](auto &lhs, auto &rhs) {
   return lhs[0] > rhs[0] || (lhs[0] == rhs[0] && lhs[1] > rhs[1]);
 };
 
+/**
+ * Binary search
+ */
 int binsearch(const auto &f, int s, int e) {
   while (s < e) {
     auto m = (s + e + 1) / 2;
@@ -348,8 +418,10 @@ int binsearch(const auto &f, int s, int e) {
   return e;
 }
 
+/**
+ * Debugging utilities
+ */
 void debugn(int n) { cout << n << ';'; }
-
 void debuga(auto &a) {
   for (auto &ai : a) {
     cout << ai << ',';
@@ -357,8 +429,14 @@ void debuga(auto &a) {
   cout << ';';
 }
 
-void solve(int t) {}
+/**
+ * Test case function
+ */
+void solve(int t) { Num n; }
 
+/**
+ * Main function
+ */
 int main() {
 #ifdef LOCAL
   using filesystem::path;
