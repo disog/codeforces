@@ -28,6 +28,7 @@ template <typename T = int> struct Num {
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
 
 struct Str : string {
@@ -39,26 +40,26 @@ struct Str : string {
  */
 struct Mod {
   int x, m;
-  Mod(i64 x, int m = _mod) : x(x % m), m(m) {}
-  operator int() { return x; }
+  Mod(i64 x = 0, int m = _mod) : x(x % m), m(m) {}
+  operator int() const { return x; }
   Mod &operator+=(int rhs) { return x = operator+(rhs), *this; }
   Mod &operator-=(int rhs) { return x = operator-(rhs), *this; }
   Mod &operator*=(int rhs) { return x = operator*(rhs), *this; }
-  Mod operator+(int rhs) {
+  Mod operator+(int rhs) const {
     return rhs < 0 ? operator-(-rhs) : Mod((x + rhs >= m ? x - m : x) + rhs, m);
   }
-  Mod operator-(int rhs) {
+  Mod operator-(int rhs) const {
     return rhs < 0 ? operator+(-rhs) : Mod((x - rhs < 0 ? x + m : x) - rhs, m);
   }
-  Mod operator*(int rhs) { return Mod(i64(x) * rhs, m); }
-  Mod pow(int y) {
+  Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
+  Mod pow(int y) const {
     Mod b(x, m), ans(!!x, m);
     for (; b && y; y >>= 1, b *= b) {
       ans *= (y & 1) ? b.x : 1;
     }
     return ans;
   }
-  Mod inv() { return pow(m - 2); }
+  Mod inv() const { return pow(m - 2); }
 };
 
 /**
@@ -75,7 +76,7 @@ struct Bin {
       den[i - 1] = den[i] * i;
     }
   }
-  Mod operator()(int n, int k) {
+  Mod operator()(int n, int k) const {
     return k < 0 || k > n ? num[0] * 0 : num[n] * (den[k] * den[n - k]);
   }
 };
@@ -348,8 +349,8 @@ struct Pref2D {
  * Z-function
  */
 struct Zfn : vector<int> {
-  Zfn(auto &a, int s = 0) : Zfn(a, s, a.size()) {}
-  Zfn(auto &a, int s, int e) : vector<int>(e - s) {
+  Zfn(const auto &a, int s = 0) : Zfn(a, s, a.size()) {}
+  Zfn(const auto &a, int s, int e) : vector<int>(e - s) {
     auto &z = *this;
     for (int i = 1, j = 1; i + s < e; i++) {
       auto &c = z[i] = max(0, min(j + z[j] - i, z[i - j]));
@@ -375,7 +376,7 @@ struct Fac : vector<vector<int>> {
 /**
  * Inversion count and cyclic shift (of sorted array)
  */
-pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
+pair<int, int> invshift(const auto &a, int sa = 0, int sp = 1) {
   int inv = 0, shift = a[sa] - sp, n = a.size();
   for (int i = sa, sum = 0; i < n; i++) {
     for (int j = i + 1; j < n; j++) {
@@ -400,10 +401,10 @@ const less<int> lt1;
 const greater<int> gt1;
 const less<array<int, 2>> lt2;
 const greater<array<int, 2>> gt2;
-const auto lta2 = [](auto &lhs, auto &rhs) {
+const auto lta2 = [](const auto &lhs, const auto &rhs) {
   return lhs[0] < rhs[0] || (lhs[0] == rhs[0] && lhs[1] < rhs[1]);
 };
-const auto gta2 = [](auto &lhs, auto &rhs) {
+const auto gta2 = [](const auto &lhs, const auto &rhs) {
   return lhs[0] > rhs[0] || (lhs[0] == rhs[0] && lhs[1] > rhs[1]);
 };
 
@@ -419,10 +420,70 @@ int binsearch(const auto &f, int s, int e) {
 }
 
 /**
+ * Geometry utilities
+ */
+auto sign(auto x) { return (x > 0) - (x < 0); }
+
+template <typename T = int> struct Point {
+  T x, y;
+  Point &operator+=(const Point<T> &p) { return x += p.x, y += p.y, *this; }
+  Point &operator-=(const Point<T> &p) { return x -= p.x, y -= p.y, *this; }
+  Point &operator*=(T scale) { return x *= scale, y *= scale, *this; }
+  Point &operator/=(T scale) { return x /= scale, y /= scale, *this; }
+  Point operator+(const Point<T> &p) const { return {x + p.x, y + p.y}; }
+  Point operator-(const Point<T> &p) const { return {x - p.x, y - p.y}; }
+  Point operator*(T scale) const { return {x * scale, y * scale}; }
+  Point operator/(T scale) const { return {x / scale, y / scale}; }
+  bool operator<(const Point<T> &p) const {
+    return x < p.x || (x == p.x && y < p.y);
+  }
+  auto cross(const Point<T> &p) const { return x * p.y - y * p.x; }
+  auto dot(const Point<T> &p) const { return x * p.x + y * p.y; }
+  auto side(const Point<T> &p) const { return sign(cross(p)); }
+  auto norm2() const { return dot(*this); }
+  auto norm() const { return sqrt(norm2()); }
+};
+
+template <typename T = int> struct Circle {
+  T r;
+  Point<T> c;
+  auto area() const { return M_PI * r * r; }
+  auto perim() const { return M_PI * r * 2; }
+  auto side(const Point<T> &p) const { return sign(r * r - (p - c).norm2()); }
+};
+
+template <typename T = int> struct Triangle {
+  Point<T> a, b, c;
+  auto area() const {
+    return abs(a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2.0;
+  }
+  auto perim() const {
+    return (a - b).norm() + (b - c).norm() + (c - a).norm();
+  }
+  auto side(const Point<T> &p) const {
+    auto s1 = (a - b).side(p - b);
+    auto s2 = (b - c).side(p - c);
+    auto s3 = (c - a).side(p - a);
+    auto sum = abs(s1 + s2 + s3);
+    return sum >= 2 ? sum - 2 : -!!(s1 * s2 * s3);
+  }
+  auto circum() const {
+    auto v1 = b - a, v2 = c - a;
+    auto n1 = v1.norm2(), n2 = v2.norm2();
+    auto ux = v2.y * n1 - v1.y * n2;
+    auto uy = v1.x * n2 - v2.x * n1;
+    auto u = Point<T>(ux, uy) / (2 * v1.cross(v2));
+    return Circle<T>(u.norm(), u + a);
+  }
+};
+
+template <typename T = int> struct Polygon : vector<Point<T>> {};
+
+/**
  * Debugging utilities
  */
 void debugn(int n) { cout << n << ';'; }
-void debuga(auto &a) {
+void debuga(const auto &a) {
   for (auto &ai : a) {
     cout << ai << ',';
   }

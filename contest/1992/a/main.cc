@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1992/submission/270062675
+ * https://codeforces.com/contest/1992/submission/270349844
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -15,13 +15,13 @@ template <typename T = int> struct Num {
 };
 
 void solve(int t) {
-  const int n = 3, m = 5;
+  int n = 3, m = 5;
   vector<Num<>> a(n);
   sort(a.begin(), a.end());
   a.push_back(INT_MAX);
-  for (int i = 0, j = 0, k = 1; i < m; j++) {
-    if (a[j % k] < a[k]) {
-      a[j % k]++, i++;
+  for (int i = 0, k = 1; m > 0; i++) {
+    if (a[i % k] < a[k]) {
+      a[i % k]++, m--;
     } else {
       k++;
     }
