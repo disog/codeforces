@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/269630411
+ * https://codeforces.com/contest/1971/submission/270394353
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,16 +7,18 @@
 
 using namespace std;
 
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct DGraph : vector<vector<int>> {
-  vector<array<Num<>, 2>> e;
-  DGraph(int n, int m) : vector<vector<int>>(n), e(m) {
+  vector<array<Int, 2>> e;
+  DGraph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
       add(u, v);
     }
@@ -44,7 +46,7 @@ private:
       }
       low[u] = min(low[u], low[v]);
     }
-    if (low[u] == tx) { // root
+    if (low[u] == tx) { // component root
       count++;
       for (int v = -1; v != u; visited.pop_back()) {
         v = visited.back();
@@ -57,9 +59,9 @@ private:
 };
 
 void solve(int t) {
-  Num n;
-  vector<Num<>> a(n), b(n), c(n);
-  DGraph g(n * 2 + 1, 0);
+  Int n;
+  vector<Int> a(n), b(n), c(n);
+  DGraph g(n * 2 + 1);
   auto f = [&](int x, int y) {
     g.add(n - x, n + y); // !x -> y
     g.add(n - y, n + x); // !y -> x
@@ -85,7 +87,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

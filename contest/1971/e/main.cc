@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/267971688
+ * https://codeforces.com/contest/1971/submission/270394156
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -8,27 +8,29 @@
 using namespace std;
 using i64 = int64_t;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
   Int n, k, q;
-  vector<Int> a(k), b(k);
-  less<int> cmp;
+  vector<Int> a(k), b(k), d(q);
   auto f = [&](int d) -> int {
-    int j = ranges::upper_bound(a, d, cmp) - a.begin();
+    int j = upper_bound(a.begin(), a.end(), d) - a.begin();
     if (j == a.size()) {
       return b.back();
     }
-    auto a0 = j ? a[j - 1] : 0, b0 = j ? b[j - 1] : 0;
-    return b0 + i64(d - a0) * (b[j] - b0) / (a[j] - a0);
+    int a0 = j ? (int)a[j - 1] : 0;
+    int b0 = j ? (int)b[j - 1] : 0;
+    return b0 + (i64(d - a0) * (b[j] - b0)) / (a[j] - a0);
   };
-  for (int i = 0; i < q; ++i) {
-    Int d;
-    cout << f(d) << ' ';
+  for (auto &di : d) {
+    cout << f(di) << ' ';
   }
   cout << endl;
 }

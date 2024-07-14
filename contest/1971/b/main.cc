@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/267966200
+ * https://codeforces.com/contest/1971/submission/270393531
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,11 +7,14 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct Str : string {
   Str() { cin >> *this; }

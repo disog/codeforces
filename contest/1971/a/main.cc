@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/267965846
+ * https://codeforces.com/contest/1971/submission/270393472
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,15 +7,18 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
   Int x, y;
-  cout << min<int>(x, y) << ' ' << max<int>(x, y) << endl;
+  cout << min(x, y) << ' ' << max(x, y) << endl;
 }
 
 int main() {

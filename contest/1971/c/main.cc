@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/267966555
+ * https://codeforces.com/contest/1971/submission/270393758
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,17 +7,21 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
+  vector<array<Int, 2>> a(2);
   map<int, int> lines;
-  for (int i = 1; i <= 2; i++) {
-    Int a, b;
-    lines[a] = lines[b] = i;
+  for (int i = 0; i < 2; i++) {
+    auto [x, y] = a[i];
+    lines[x] = lines[y] = i;
   }
   int prev = lines.rbegin()->second;
   for (auto &&[_, line] : lines) {
