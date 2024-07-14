@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1968/submission/267963400
+ * https://codeforces.com/contest/1968/submission/270392174
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,17 +7,22 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
   Int n;
+  vector<Int> a(n - 1);
   int ans = 501;
-  for (int i = 0, x; i < n - 1; i++, cin >> x, ans += x) {
+  for (auto &ai : a) {
     cout << ans << ' ';
+    ans += ai;
   }
   cout << ans << endl;
 }

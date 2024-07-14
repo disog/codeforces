@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1968/submission/267964997
+ * https://codeforces.com/contest/1968/submission/270393052
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,30 +7,38 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct Str : string {
   Str() { cin >> *this; }
 };
 
 struct Zfn : vector<int> {
-  Zfn(const string &s) : vector<int>(s.size()) {
-    auto n = s.size();
-    for (int i = 1, j = 1; i < n; i++) {
-      auto &c = (*this)[i], r = j + (*this)[j];
-      if (i < r) {
-        c = min(r - i, (*this)[i - j]);
-      }
-      while (i + c < n && s[i + c] == s[c]) {
-        c++, j = i;
-      }
+  Zfn(const auto &a, int s = 0) : Zfn(a, s, a.size()) {}
+  Zfn(const auto &a, int s, int e) : vector<int>(e - s) {
+    auto &z = *this;
+    for (int i = 1, j = 1; i + s < e; i++) {
+      auto &c = z[i] = max(0, min(j + z[j] - i, z[i - j]));
+      for (; i + c < e && a[i + c + s] == a[c + s]; c++, j = i)
+        ;
     }
   }
 };
+
+int binsearch(const auto &f, int s, int e) {
+  while (s < e) {
+    auto m = (s + e + 1) / 2;
+    f(m) ? s = m : e = m - 1;
+  }
+  return e;
+}
 
 void solve(int t) {
   Int n, k, _;
@@ -46,19 +54,8 @@ void solve(int t) {
     }
     return ans;
   };
-  auto g = [&](int k) {
-    int ans = 1;
-    for (int end = n; ans <= end;) {
-      auto mid = (ans + end) / 2;
-      if (f(mid) >= k) {
-        ans = mid + 1;
-      } else {
-        end = mid - 1;
-      }
-    }
-    return ans - 1;
-  };
-  cout << g(k) << endl;
+  auto g = [&](int m) { return f(m) >= k; };
+  cout << binsearch(g, 0, n) << endl;
 }
 
 int main() {

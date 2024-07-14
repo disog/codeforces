@@ -6,9 +6,14 @@
 #include <bits/stdc++.h>
 
 /**
- * Common types
+ * Common namespaces
  */
 using namespace std;
+using namespace placeholders;
+
+/**
+ * Common types
+ */
 using i64 = int64_t;
 using f64 = double;
 using str = const string &;
@@ -23,7 +28,7 @@ constexpr int _mod = 1000000007; // 998244353
 /**
  * Input number
  */
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
@@ -31,6 +36,17 @@ template <typename T = int> struct Num {
   operator T() const { return x; }
 };
 
+/**
+ * Common input types
+ */
+using Int = Num<int>;
+using Chr = Num<char>;
+using I64 = Num<i64>;
+using F64 = Num<f64>;
+
+/**
+ * Input string
+ */
 struct Str : string {
   Str() { cin >> *this; }
 };
@@ -85,7 +101,7 @@ struct Bin {
  * (Undirected) Graph
  */
 struct Graph : vector<vector<int>> {
-  vector<array<Num<>, 2>> e;
+  vector<array<Int, 2>> e;
   Graph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
       add(u, v);
@@ -101,7 +117,7 @@ struct Graph : vector<vector<int>> {
  * (Undirected) Weighed Graph
  */
 struct WGraph : vector<vector<array<int, 2>>> {
-  vector<array<Num<>, 3>> e;
+  vector<array<Int, 3>> e;
   WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
     for (auto &[u, v, w] : e) {
       add(u, v, w);
@@ -117,7 +133,7 @@ struct WGraph : vector<vector<array<int, 2>>> {
  * Directed Graph
  */
 struct DGraph : vector<vector<int>> {
-  vector<array<Num<>, 2>> e;
+  vector<array<Int, 2>> e;
   DGraph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
       add(u, v);
@@ -130,7 +146,7 @@ struct DGraph : vector<vector<int>> {
  * Weighed Directed Graph
  */
 struct WDGraph : vector<vector<array<int, 2>>> {
-  vector<array<Num<>, 3>> e;
+  vector<array<Int, 3>> e;
   WDGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
     for (auto &[u, v, w] : e) {
       add(u, v, w);
@@ -414,7 +430,7 @@ const auto gta2 = [](const auto &lhs, const auto &rhs) {
 int binsearch(const auto &f, int s, int e) {
   while (s < e) {
     auto m = (s + e + 1) / 2;
-    f(m) ? s = m + 1 : e = m - 1;
+    f(m) ? s = m : e = m - 1;
   }
   return e;
 }
@@ -493,7 +509,7 @@ void debuga(const auto &a) {
 /**
  * Test case function
  */
-void solve(int t) { Num n; }
+void solve(int t) { Int n; }
 
 /**
  * Main function
@@ -504,7 +520,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

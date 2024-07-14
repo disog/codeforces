@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1968/submission/267963842
+ * https://codeforces.com/contest/1968/submission/270392198
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -8,11 +8,14 @@
 using namespace std;
 using i64 = int64_t;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
   Int n, k, pb, ps;
@@ -24,7 +27,8 @@ void solve(int t) {
     }
     return mx;
   };
-  auto fb = f(k, n, pb - 1), fs = f(k, n, ps - 1);
+  auto fb = f(k, n, pb - 1);
+  auto fs = f(k, n, ps - 1);
   auto ans = fb > fs ? "Bodya" : (fb < fs ? "Sasha" : "Draw");
   cout << ans << endl;
 }

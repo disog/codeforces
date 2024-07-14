@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1968/submission/267964756
+ * https://codeforces.com/contest/1968/submission/270392290
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,19 +7,23 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
-  Int n, q;
-  vector<int> b(n + 1);
+  Int n, m;
+  vector<Int> b(1, 0);
+  b.resize(n + 1);
+  vector<array<Int, 2>> q(m);
   map<int, vector<int>> p;
   p[0].push_back(0);
   for (int i = 1; i <= n; ++i) {
-    cin >> b[i];
     b[i] ^= b[i - 1];
     p[b[i]].push_back(i);
   }
@@ -32,8 +36,7 @@ void solve(int t) {
     auto t = ranges::lower_bound(p[bl], r);
     return *s < *prev(t);
   };
-  for (int i = 0; i < q; ++i) {
-    Int l, r;
+  for (auto &&[l, r] : q) {
     cout << (f(l, r) ? "YES" : "NO") << endl;
   }
   cout << endl;
