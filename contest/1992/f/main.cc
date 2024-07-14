@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1992/submission/270239536
+ * https://codeforces.com/contest/1992/submission/270399755
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,16 +7,18 @@
 
 using namespace std;
 
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
-  Num n, x;
-  vector<Num<>> a(n);
+  Int n, x;
+  vector<Int> a(n);
   set<int> divs = {x};
   int ans = 1;
   for (auto &&ai : a) {
@@ -42,7 +44,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }
