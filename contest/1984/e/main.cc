@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/268319555
+ * https://codeforces.com/contest/1984/submission/270397160
  *
  * Inspired by jiangly's solution:
  * https://codeforces.com/contest/1984/submission/264894399
@@ -10,39 +10,58 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct Graph : vector<vector<int>> {
   vector<array<Int, 2>> e;
-  Graph(int n, int m) : vector<vector<int>>(n), e(m) {
-    auto &g = *this;
+  Graph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
-      g[u].push_back(v);
-      g[v].push_back(u);
+      add(u, v);
     }
+  }
+  void add(int u, int v) {
+    (*this)[u].push_back(v);
+    (*this)[v].push_back(u);
   }
 };
 
 struct Match : vector<int> {
-  int c = 0;
-  Match(Graph &g, int u) : vector<int>(g.size(), -1) { dfs(g, u); }
-  void dfs(Graph &g, int u, int p = -1) {
-    auto &m = *this;
-    for (auto &v : g[u]) {
+  int count = 0;
+  vector<pair<int, int>> bridges;
+  Match(Graph g, int s = 0) : vector<int>(g.size(), -1), low(g.size()) {
+    int t = 1;
+    dfs(g, s, s, t);
+  }
+
+private:
+  void dfs(Graph &g, int u, int p, int &t) {
+    auto &match = *this;
+    auto tx = low[u] = t++;
+    for (auto v : g[u]) {
       if (v != p) {
-        dfs(g, v, u); // post-order (visit leaves first)
-        if (m[u] == m[v]) {
-          m[u] = v;
-          m[v] = u;
-          c++;
+        if (low[v] == 0) {
+          dfs(g, v, u, t);   // post-order (visit leaves first)
+          if (low[v] > tx) { // new bridge
+            bridges.emplace_back(u, v);
+          }
+          if (match[u] == match[v]) {
+            match[u] = v;
+            match[v] = u;
+            count++;
+          }
         }
+        low[u] = min(low[u], low[v]);
       }
     }
   }
+  vector<int> low;
 };
 
 void solve(int t) {
@@ -67,7 +86,7 @@ void solve(int t) {
       }
     }
   }
-  int ans = n - match.c;
+  int ans = n - match.count;
   for (int i = 1; i <= n; i++) {
     if (!vis[i] && g[i].size() == 1) {
       ans++;

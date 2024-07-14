@@ -23,7 +23,8 @@ using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 /**
  * Common constants
  */
-constexpr int _mod = 1000000007; // 998244353
+constexpr int _mod = 1000000007;
+// constexpr int _mod = 998244353;
 
 /**
  * Input number
@@ -444,6 +445,17 @@ int binsearch(const auto &f, int s, int e) {
     f(m) ? s = m : e = m - 1;
   }
   return e;
+}
+
+/**
+ * Choices satisfying inequality x + y <= c, for x <= a and y <= b
+ */
+i64 choices(int a, int b, int c) {
+  i64 ans = 0;
+  for (int i = 0; i <= a; i++) {
+    ans += max(0, 1 + min(b, c - i));
+  }
+  return ans;
 }
 
 /**

@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/267983773
+ * https://codeforces.com/contest/1984/submission/270396056
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -8,28 +8,47 @@
 using namespace std;
 using i64 = int64_t;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
-};
+constexpr int _mod = 998244353;
 
-template <int N> struct Mint {
-  int x;
-  Mint(int a = 0) : x(a) {}
-  operator int() { return x; }
-  int operator+=(int rhs) { return (x += rhs) >= N ? x -= N : x; }
-  int operator-=(int rhs) { return (x -= rhs) < 0 ? x += N : x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
-using Mint1 = Mint<998244353>;
+struct Mod {
+  int x, m;
+  Mod(i64 x = 0, int m = _mod) : x(x % m), m(m) {}
+  operator int() const { return x; }
+  Mod &operator+=(int rhs) { return x = operator+(rhs), *this; }
+  Mod &operator-=(int rhs) { return x = operator-(rhs), *this; }
+  Mod &operator*=(int rhs) { return x = operator*(rhs), *this; }
+  Mod operator+(int rhs) const {
+    return rhs < 0 ? operator-(-rhs) : Mod((x + rhs >= m ? x - m : x) + rhs, m);
+  }
+  Mod operator-(int rhs) const {
+    return rhs < 0 ? operator+(-rhs) : Mod((x - rhs < 0 ? x + m : x) - rhs, m);
+  }
+  Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
+  Mod pow(int y) const {
+    Mod b(x, m), ans(!!x, m);
+    for (; b && y; y >>= 1, b *= b) {
+      ans *= (y & 1) ? b.x : 1;
+    }
+    return ans;
+  }
+  Mod inv() const { return pow(m - 2); }
+};
 
 void solve(int t) {
   Int n;
   vector<Int> a(n);
-  map<i64, Mint1> dp = {{0, 1}};
+  map<i64, Mod> dp = {{0, 1}};
   for (auto &&ai : a) {
-    map<i64, Mint1> dp1;
+    map<i64, Mod> dp1;
     for (auto &&[c, u] : dp) {
       dp1[c + ai] += u;
       dp1[abs(c + ai)] += u;

@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/267982436
+ * https://codeforces.com/contest/1984/submission/270395949
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,11 +7,14 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct Str : string {
   Str() { cin >> *this; }
@@ -19,15 +22,10 @@ struct Str : string {
 
 void solve(int t) {
   Str x;
-  if (x.front() != '1' || x.back() == '9') {
+  if (x.front() != '1' || x.back() == '9' ||
+      x.rfind('0', x.size() - 2) != string::npos) {
     cout << "NO" << endl;
     return;
-  }
-  for (int i = 1; i < x.size() - 1; i++) {
-    if (x[i] == '0') {
-      cout << "NO" << endl;
-      return;
-    }
   }
   cout << "YES" << endl;
 }

@@ -1,35 +1,46 @@
 /**
- * https://codeforces.com/contest/1984/submission/268776322
+ * https://codeforces.com/contest/1984/submission/270397573
  *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+using i64 = int64_t;
 
-template <typename T = int> struct Num {
+constexpr int _mod = 1000000007;
+
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
-
-template <typename T = int> struct Vec : vector<Num<T>> {
-  Vec(int n, int s = 0) : vector<Num<T>>(s, 0) { this->resize(n + s); }
-};
+using Int = Num<int>;
 
 struct Mod {
   int x, m;
-  Mod(int a, int b) : x(a % b), m(b) {}
-  operator int() { return x; }
-  int operator+(int rhs) {
-    return rhs < 0 ? operator-(-rhs) : (x + rhs >= m ? x - m : x) + rhs;
+  Mod(i64 x = 0, int m = _mod) : x(x % m), m(m) {}
+  operator int() const { return x; }
+  Mod &operator+=(int rhs) { return x = operator+(rhs), *this; }
+  Mod &operator-=(int rhs) { return x = operator-(rhs), *this; }
+  Mod &operator*=(int rhs) { return x = operator*(rhs), *this; }
+  Mod operator+(int rhs) const {
+    return rhs < 0 ? operator-(-rhs) : Mod((x + rhs >= m ? x - m : x) + rhs, m);
   }
-  int operator-(int rhs) {
-    return rhs < 0 ? operator+(-rhs) : (x - rhs < 0 ? x + m : x) - rhs;
+  Mod operator-(int rhs) const {
+    return rhs < 0 ? operator+(-rhs) : Mod((x - rhs < 0 ? x + m : x) - rhs, m);
   }
-  int operator+=(int rhs) { return x = operator+(rhs); }
-  int operator-=(int rhs) { return x = operator-(rhs); }
+  Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
+  Mod pow(int y) const {
+    Mod b(x, m), ans(!!x, m);
+    for (; b && y; y >>= 1, b *= b) {
+      ans *= (y & 1) ? b.x : 1;
+    }
+    return ans;
+  }
+  Mod inv() const { return pow(m - 2); }
 };
 
 pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
@@ -51,8 +62,8 @@ pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
 }
 
 void solve(int t) {
-  Num n;
-  Vec a(n);
+  Int n;
+  vector<Int> a(n);
   vector<array<int, 2>> ops;
   auto [inv, shift] = invshift(a);
   int ans = n;
@@ -84,9 +95,9 @@ void solve(int t) {
     Mod c(n - 1, n);
     auto findpos = [&](int i, int d) {
       int k = 0;
-      for (; a.at(c - (k - d)) != i && a.at(c + (k + d)) != i && k < n; k += 2)
+      for (; a[c - (k - d)] != i && a[c + (k + d)] != i && k < n; k += 2)
         ;
-      return a.at(c - (k - d)) == i ? make_pair(-k, bwd2) : make_pair(k, fwd2);
+      return a[c - (k - d)] == i ? make_pair(-k, bwd2) : make_pair(k, fwd2);
     };
     auto f = [&](int i, bool move) {
       auto [dist, op] = findpos(i, 0);
@@ -100,14 +111,14 @@ void solve(int t) {
       }
       if (move) {
         if (fix) {
-          for (; a.at(c) != i + 1; c += 1) {
-            swap(a.at(c), a.at(c - 1));
+          for (; a[c] != i + 1; c += 1) {
+            swap(a[c], a[c - 1]);
             ops.push_back(bwd1);
             ops.push_back(fwd2);
           }
         } else {
-          for (; a.at(c + 1) != i + 1; c += 1) {
-            swap(a.at(c + 1), a.at(c));
+          for (; a[c + 1] != i + 1; c += 1) {
+            swap(a[c + 1], a[c]);
             ops.push_back(fwd1);
           }
         }
@@ -115,7 +126,7 @@ void solve(int t) {
     };
     f(n, false);
     for (int i = n - 1; i > 1; i--) {
-      for (int j = 1; a.at(c - j) == i && i > 1; j++, i--)
+      for (int j = 1; a[c - j] == i && i > 1; j++, i--)
         ;
       if (i > 1) {
         f(i, true);
@@ -136,7 +147,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }
