@@ -203,7 +203,7 @@ private:
 };
 
 /**
- * Strongly-connected components (of directed graph0
+ * Strongly-connected components (of directed graph)
  */
 struct SCC : vector<int> {
   int count = 0;
@@ -389,10 +389,10 @@ struct Zfn : vector<int> {
 };
 
 /**
- * Precomputed integer factors (divisors)
+ * Precomputed integer factors (Divisors)
  */
-struct Fac : vector<vector<int>> {
-  Fac(int n) : vector<vector<int>>(n + 1) {
+struct Div : vector<vector<int>> {
+  Div(int n) : vector<vector<int>>(n + 1) {
     for (int i = 1; i <= n; i++) {
       for (int j = i; j <= n; j += i) {
         (*this)[j].push_back(i);

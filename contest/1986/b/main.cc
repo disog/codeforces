@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1986/submission/267989121
+ * https://codeforces.com/contest/1986/submission/270399005
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,11 +7,14 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
   Int n, m;
@@ -21,10 +24,10 @@ void solve(int t) {
   }
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
-      auto u = i > 0 ? a[i - 1][j] : 0;
-      auto l = j > 0 ? a[i][j - 1] : 0;
-      auto d = i < n - 1 ? a[i + 1][j] : 0;
-      auto r = j < m - 1 ? a[i][j + 1] : 0;
+      auto u = i > 0 ? (int)a[i - 1][j] : 0;
+      auto l = j > 0 ? (int)a[i][j - 1] : 0;
+      auto d = i < n - 1 ? (int)a[i + 1][j] : 0;
+      auto r = j < m - 1 ? (int)a[i][j + 1] : 0;
       auto mx = max(u, max(l, max(d, r)));
       auto &cell = a[i][j];
       if (cell > mx) {

@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1985/submission/268785149
+ * https://codeforces.com/contest/1985/submission/270398534
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -8,20 +8,18 @@
 using namespace std;
 using i64 = int64_t;
 
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
-
-template <typename T = int> struct Vec : vector<Num<T>> {
-  Vec(int n, int s = 0) : vector<Num<T>>(s, 0) { this->resize(n + s); }
-};
+using Int = Num<int>;
 
 void solve(int t) {
-  Num h, n;
-  Vec a(n), c(n);
+  Int h, n;
+  vector<Int> a(n), c(n);
   i64 ans = 0;
   if (h > 0) {
     map<i64, vector<int>> turns;
@@ -50,7 +48,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

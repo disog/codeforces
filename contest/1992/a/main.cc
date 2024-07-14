@@ -7,16 +7,18 @@
 
 using namespace std;
 
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
   int n = 3, m = 5;
-  vector<Num<>> a(n);
+  vector<Int> a(n);
   sort(a.begin(), a.end());
   a.push_back(INT_MAX);
   for (int i = 0, k = 1; m > 0; i++) {
@@ -40,7 +42,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

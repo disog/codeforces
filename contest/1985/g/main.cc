@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1985/submission/268808554
+ * https://codeforces.com/contest/1985/submission/270398472
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -8,47 +8,45 @@
 using namespace std;
 using i64 = int64_t;
 
-template <typename T = int> struct Num {
+constexpr int _mod = 1000000007;
+
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct Mod {
   int x, m;
-  Mod(int a, int b) : x(a % b), m(b) {}
-  operator int() { return x; }
-  int operator+(int rhs) {
-    return rhs < 0 ? operator-(-rhs) : (x + rhs >= m ? x - m : x) + rhs;
+  Mod(i64 x = 0, int m = _mod) : x(x % m), m(m) {}
+  operator int() const { return x; }
+  Mod &operator+=(int rhs) { return x = operator+(rhs), *this; }
+  Mod &operator-=(int rhs) { return x = operator-(rhs), *this; }
+  Mod &operator*=(int rhs) { return x = operator*(rhs), *this; }
+  Mod operator+(int rhs) const {
+    return rhs < 0 ? operator-(-rhs) : Mod((x + rhs >= m ? x - m : x) + rhs, m);
   }
-  int operator-(int rhs) {
-    return rhs < 0 ? operator+(-rhs) : (x - rhs < 0 ? x + m : x) - rhs;
+  Mod operator-(int rhs) const {
+    return rhs < 0 ? operator+(-rhs) : Mod((x - rhs < 0 ? x + m : x) - rhs, m);
   }
-  int operator*(int rhs) { return (i64(x) * rhs) % m; }
-  int operator+=(int rhs) { return x = operator+(rhs); }
-  int operator-=(int rhs) { return x = operator-(rhs); }
-  int operator*=(int rhs) { return x = operator*(rhs); }
-};
-
-template <int N = 1000000007> struct Mint : Mod {
-  Mint(int a) : Mod(a, N) {}
-};
-
-Mod modpow(Mod x, int y) {
-  Mod ans(x != 0, x.m);
-  for (; x && y; y = y >> 1, x *= x) {
-    if (y & 1) {
-      ans *= x;
+  Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
+  Mod pow(int y) const {
+    Mod b(x, m), ans(!!x, m);
+    for (; b && y; y >>= 1, b *= b) {
+      ans *= (y & 1) ? b.x : 1;
     }
+    return ans;
   }
-  return ans;
-}
+  Mod inv() const { return pow(m - 2); }
+};
 
 void solve(int t) {
-  Num l, r, k;
-  Mint ans = 9 / k + 1;
-  ans = modpow(ans, r) - modpow(ans, l);
+  Int l, r, k;
+  Mod ans = 9 / k + 1;
+  ans = ans.pow(r) - ans.pow(l);
   cout << ans << endl;
 }
 
@@ -58,7 +56,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

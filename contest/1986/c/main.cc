@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1986/submission/267989431
+ * https://codeforces.com/contest/1986/submission/270399063
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,11 +7,14 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct Str : string {
   Str() { cin >> *this; }
@@ -22,9 +25,8 @@ void solve(int t) {
   Str s;
   vector<Int> ind(m);
   Str c;
-  less<int> cmp;
-  ranges::sort(ind, cmp);
-  ranges::sort(c, cmp);
+  ranges::sort(ind);
+  ranges::sort(c);
   for (int i = 0, j = 0, prev = -1; i < m; i++) {
     if (ind[i] != prev) {
       prev = ind[i];

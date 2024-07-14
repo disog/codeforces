@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1986/submission/267987452
+ * https://codeforces.com/contest/1986/submission/270398828
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,16 +7,18 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
   vector<Int> x(3);
-  less<int> cmp;
-  ranges::sort(x, cmp);
+  ranges::sort(x);
   cout << x.back() - x.front() << endl;
 }
 

@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1985/submission/270233567
+ * https://codeforces.com/contest/1985/submission/270398747
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,12 +7,14 @@
 
 using namespace std;
 
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct Str : string {
   Str() { cin >> *this; }
@@ -63,10 +65,10 @@ struct Pref2D {
 };
 
 void solve(int t) {
-  Num n, m;
+  Int n, m;
   vector<Str> g(n);
   int r1, r2, c1, c2, sz;
-  function<void(int, int)> f = [&](int i, int j) {
+  auto f = [&](auto &self, int i, int j) -> void {
     if (i < 0 || i >= n || j < 0 || j >= m || g[i][j] != '#') {
       return;
     }
@@ -76,10 +78,10 @@ void solve(int t) {
     c1 = min(c1, max(0, j - 1));
     r2 = max(r2, min(n - 1, i + 1));
     c2 = max(c2, min(m - 1, j + 1));
-    f(i - 1, j); // top
-    f(i + 1, j); // bottom
-    f(i, j - 1); // left
-    f(i, j + 1); // right
+    self(self, i - 1, j); // top
+    self(self, i + 1, j); // bottom
+    self(self, i, j - 1); // left
+    self(self, i, j + 1); // right
   };
   vector<int> rows(n), cols(m);
   Pref2D prefsum(n, m);
@@ -87,7 +89,7 @@ void solve(int t) {
     for (int j = 0; j < m; j++) {
       if (g[i][j] == '#') {
         r1 = i, r2 = i, c1 = j, c2 = j, sz = 0;
-        f(i, j);
+        f(f, i, j);
         prefsum.cross(sz, {r1, c1, r2, c2});
       } else if (g[i][j] == '.') {
         rows[i]++;
@@ -110,7 +112,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

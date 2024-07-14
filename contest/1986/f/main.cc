@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1986/submission/268935068
+ * https://codeforces.com/contest/1986/submission/270399326
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -8,26 +8,30 @@
 using namespace std;
 using i64 = int64_t;
 
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct Graph : vector<vector<int>> {
-  vector<array<Num<>, 2>> e;
-  Graph(int n, int m) : vector<vector<int>>(n), e(m) {
-    auto &g = *this;
+  vector<array<Int, 2>> e;
+  Graph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
-      g[u].push_back(v);
-      g[v].push_back(u);
+      add(u, v);
     }
+  }
+  void add(int u, int v) {
+    (*this)[u].push_back(v);
+    (*this)[v].push_back(u);
   }
 };
 
 void solve(int t) {
-  Num n, m;
+  Int n, m;
   Graph g(n + 1, m);
   vector<int> low(n + 1), size(n + 1);
   int timer = 0, best = n;
@@ -59,7 +63,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

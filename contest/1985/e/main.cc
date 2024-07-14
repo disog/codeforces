@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1985/submission/267987237
+ * https://codeforces.com/contest/1985/submission/270398364
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -8,27 +8,28 @@
 using namespace std;
 using i64 = int64_t;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
+using I64 = Num<i64>;
 
 void solve(int t) {
   Int x, y, z;
-  i64 k;
-  cin >> k;
+  I64 k;
   i64 ans = 0;
   for (int a = 1; a <= x; a++) {
     for (int b = 1; b <= y; b++) {
-      if (k % (a * b)) {
-        continue;
+      if (k % (a * b) == 0) {
+        auto c = k / (a * b);
+        if (c <= z) {
+          ans = max(ans, i64(x - a + 1) * (y - b + 1) * (z - c + 1));
+        }
       }
-      auto c = k / (a * b);
-      if (c > z) {
-        continue;
-      }
-      ans = max(ans, i64(x - a + 1) * (y - b + 1) * (z - c + 1));
     }
   }
   cout << ans << endl;

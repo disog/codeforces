@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1985/submission/267986572
+ * https://codeforces.com/contest/1985/submission/270398238
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,11 +7,14 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct Str : string {
   Str() { cin >> *this; }
@@ -19,10 +22,10 @@ struct Str : string {
 
 void solve(int t) {
   Int n, m;
-  vector<Str> rows(n);
+  vector<Str> g(n);
   int h1 = 0, h2 = 0, k = 0;
   for (int i = 0; i < n; ++i) {
-    auto pos = rows[i].find('#');
+    auto pos = g[i].find('#');
     if (pos != string::npos) {
       if (!k) {
         k = pos + 1;

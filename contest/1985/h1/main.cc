@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1985/submission/269799718
+ * https://codeforces.com/contest/1985/submission/270398604
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,17 +7,18 @@
 
 using namespace std;
 
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
-struct DSU : vector<int> {
-  DSU &parent = *this;
-  vector<int> size;
-  DSU(int n) : vector<int>(n), size(n) {}
+struct DSU {
+  vector<int> parent, size;
+  DSU(int n) : parent(n), size(n) {}
   int add(int v) { return size[v] = 1, parent[v] = v; }
   int find(int v) { return v == parent[v] ? v : parent[v] = find(parent[v]); }
   int merge(int a, int b) {
@@ -38,7 +39,7 @@ struct Str : string {
 };
 
 void solve(int t) {
-  Num n, m;
+  Int n, m;
   vector<Str> g(n);
   DSU dsu(n * m + 1);
   for (int i = 0; i < n; i++) {
@@ -94,7 +95,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }
