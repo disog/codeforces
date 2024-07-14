@@ -459,10 +459,8 @@ i64 choices(int a, int b, int c) {
 }
 
 /**
- * Geometry utilities
+ * Cartesian point
  */
-auto sign(auto x) { return (x > 0) - (x < 0); }
-
 template <typename T = int> struct Point {
   T x, y;
   Point &operator+=(const Point<T> &p) { return x += p.x, y += p.y, *this; }
@@ -473,24 +471,32 @@ template <typename T = int> struct Point {
   Point operator-(const Point<T> &p) const { return {x - p.x, y - p.y}; }
   Point operator*(T scale) const { return {x * scale, y * scale}; }
   Point operator/(T scale) const { return {x / scale, y / scale}; }
+  Point reflect() const { return {y, x}; }
+  auto cross(const Point<T> &p) const { return x * p.y - y * p.x; }
+  auto dot(const Point<T> &p) const { return x * p.x + y * p.y; }
+  auto norm2() const { return dot(*this); }
+  auto norm() const { return sqrt(norm2()); }
+  auto slope() const { return y / f64(x); }
+  auto angle() const { return atan2(y, x); }
   bool operator<(const Point<T> &p) const {
     return x < p.x || (x == p.x && y < p.y);
   }
-  auto cross(const Point<T> &p) const { return x * p.y - y * p.x; }
-  auto dot(const Point<T> &p) const { return x * p.x + y * p.y; }
-  auto side(const Point<T> &p) const { return sign(cross(p)); }
-  auto norm2() const { return dot(*this); }
-  auto norm() const { return sqrt(norm2()); }
 };
 
+/**
+ * Circle
+ */
 template <typename T = int> struct Circle {
   T r;
   Point<T> c;
   auto area() const { return M_PI * r * r; }
   auto perim() const { return M_PI * r * 2; }
-  auto side(const Point<T> &p) const { return sign(r * r - (p - c).norm2()); }
+  auto dist(const Point<T> &p) const { return r - (p - c).norm(); }
 };
 
+/**
+ * Triangle
+ */
 template <typename T = int> struct Triangle {
   Point<T> a, b, c;
   auto area() const {
@@ -499,10 +505,11 @@ template <typename T = int> struct Triangle {
   auto perim() const {
     return (a - b).norm() + (b - c).norm() + (c - a).norm();
   }
-  auto side(const Point<T> &p) const {
-    auto s1 = (a - b).side(p - b);
-    auto s2 = (b - c).side(p - c);
-    auto s3 = (c - a).side(p - a);
+  auto dist(const Point<T> &p) const {
+    auto sign = [](T x) { return (x > 0) - (x < 0); };
+    auto s1 = sign((a - b).cross(p - b));
+    auto s2 = sign((b - c).cross(p - c));
+    auto s3 = sign((c - a).cross(p - a));
     auto sum = abs(s1 + s2 + s3);
     return sum >= 2 ? sum - 2 : -!!(s1 * s2 * s3);
   }
@@ -516,7 +523,35 @@ template <typename T = int> struct Triangle {
   }
 };
 
-template <typename T = int> struct Polygon : vector<Point<T>> {};
+/**
+ * Convex Hull
+ */
+struct Hull : list<int> {
+  Hull(const vector<Point<Int>> &set) {
+    auto cmp = [&](const auto &a, const auto &b) {
+      return a.reflect() < b.reflect();
+    };
+    auto j = min_element(set.begin(), set.end(), cmp) - set.begin();
+    vector<pair<f64, int>> angles(set.size());
+    for (int i = 0; i < set.size(); i++) {
+      auto r = i == j ? INFINITY : (set[i] - set[j]).reflect().slope();
+      angles[i] = {-r, i};
+    }
+    ::sort(angles.begin(), angles.end());
+    for (auto &[_, i] : angles) {
+      if (size() > 2) {
+        for (auto it = --end(); true;) {
+          auto &p1 = set[*it--], &p0 = set[*it];
+          if ((p1 - p0).cross(set[i] - p0) >= 0) {
+            break; // colinear or left turn
+          }
+          pop_back(); // right turn
+        }
+      }
+      push_back(i);
+    }
+  }
+};
 
 /**
  * Debugging utilities
