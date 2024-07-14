@@ -52,6 +52,17 @@ struct Str : string {
 };
 
 /**
+ * Matrix (2-D Vector)
+ */
+template <typename T> struct Mat : vector<vector<T>> {
+  Mat(int n, int m) : vector<vector<T>>(n) {
+    for (auto &&row : *this) {
+      row.resize(m);
+    }
+  }
+};
+
+/**
  * Modular integer
  */
 struct Mod {

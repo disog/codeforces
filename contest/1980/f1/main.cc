@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/267981721
+ * https://codeforces.com/contest/1980/submission/270395092
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -8,15 +8,18 @@
 using namespace std;
 using i64 = int64_t;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 using Cell = pair<array<Int, 2>, int>;
 
-auto cmp = [](Cell &a, Cell &b) {
+const auto cmp = [](const Cell &a, const Cell &b) {
   auto [ra, ca] = a.first;
   auto [rb, cb] = b.first;
   return ra > rb || (ra == rb && ca < cb);

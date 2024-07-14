@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/267972719
+ * https://codeforces.com/contest/1980/submission/270394558
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,11 +7,16 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
+
+const greater<int> gt1;
 
 void solve(int t) {
   Int n, f, k;
@@ -19,8 +24,7 @@ void solve(int t) {
   auto ans = "YES";
   if (k < n) {
     auto x = a[f - 1];
-    greater<int> cmp;
-    ranges::sort(a, cmp);
+    ranges::sort(a, gt1);
     ans = a[k - 1] > x ? "NO" : (a[k] < x ? "YES" : "MAYBE");
   }
   cout << ans << endl;

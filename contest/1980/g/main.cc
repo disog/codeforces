@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/269773132
+ * https://codeforces.com/contest/1980/submission/270395619
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,16 +7,19 @@
 
 using namespace std;
 
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
+using Chr = Num<char>;
 
 struct WGraph : vector<vector<array<int, 2>>> {
-  vector<array<Num<>, 3>> e;
-  WGraph(int n, int m) : vector<vector<array<int, 2>>>(n), e(m) {
+  vector<array<Int, 3>> e;
+  WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
     for (auto &[u, v, w] : e) {
       add(u, v, w);
     }
@@ -28,8 +31,8 @@ struct WGraph : vector<vector<array<int, 2>>> {
 };
 
 struct Query {
-  Num<char> type;
-  Num<> y, x = 0;
+  Chr type;
+  Int y, x = 0;
   Query() {
     if (type == '?') {
       x = {};
@@ -57,9 +60,9 @@ template <typename T, int N> struct Trie : vector<pair<T, array<int, N>>> {
 };
 
 auto bit = [](int j, int x) { return x & (1 << j); };
-auto pget = [](int j, int x) { return j < 32 ? bit(31 - j, x) != 0 : -1; };
-auto padd = [](auto &node, int j, int x) { return node.first++, pget(j, x); };
-auto prem = [](auto &node, int j, int x) { return node.first--, pget(j, x); };
+auto bpget = [](int j, int x) { return j < 32 ? bit(31 - j, x) != 0 : -1; };
+auto bpadd = [](auto &node, int j, int x) { return node.first++, bpget(j, x); };
+auto bprem = [](auto &node, int j, int x) { return node.first--, bpget(j, x); };
 
 auto findmax = [](auto &trie, int x) {
   if (!trie[0].first) {
@@ -87,29 +90,28 @@ auto findmax = [](auto &trie, int x) {
 };
 
 void solve(int t) {
-  Num n, m;
+  Int n, m;
   WGraph g(n + 1, n - 1);
   vector<Query> q(m);
   vector<int> a(n + 1), b(n + 1);
   array<Trie<int, 2>, 2> tries;
-  function<void(int, int, int, int)> f = [&](int u, int p, int x, int h) {
+  auto f = [&](auto &self, int u, int p, int x, int h) -> void {
     a[u] = x;
     b[u] = h & 1;
-    tries[b[u]].visit(padd, x);
+    tries[b[u]].visit(bpadd, x);
     for (auto [v, w] : g[u]) {
       if (v != p) {
-        f(v, u, x ^ w, h + 1);
+        self(self, v, u, x ^ w, h + 1);
       }
     }
   };
-  f(1, 1, 0, 0);
+  f(f, 1, 1, 0, 0);
   int y = 0;
   auto ans = [&](int v, int x) {
-    tries[b[v]].visit(prem, a[v]);
-    auto z1 = a[v] ^ x, z2 = z1 ^ y;
-    auto w1 = findmax(tries[b[v]], z1);
-    auto w2 = findmax(tries[1 - b[v]], z2);
-    tries[b[v]].visit(padd, a[v]);
+    tries[b[v]].visit(bprem, a[v]);
+    auto w1 = findmax(tries[b[v]], a[v] ^ x);
+    auto w2 = findmax(tries[1 - b[v]], a[v] ^ x ^ y);
+    tries[b[v]].visit(bpadd, a[v]);
     return max(w1, w2);
   };
   for (auto &qi : q) {
@@ -128,7 +130,7 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }

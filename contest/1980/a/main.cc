@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/267971260
+ * https://codeforces.com/contest/1980/submission/270394482
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,11 +7,14 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 struct Str : string {
   Str() { cin >> *this; }
@@ -22,8 +25,9 @@ void solve(int t) {
   Str a;
   vector<int> hist('G' - 'A' + 1);
   int ans = m * hist.size();
-  for (auto &&c : a) {
-    if (hist[c - 'A']++ < m) {
+  for (int i = 0; i < n; i++) {
+    auto cnt = hist[a[i] - 'A']++;
+    if (cnt < m) {
       ans--;
     }
   }

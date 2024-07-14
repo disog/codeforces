@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/267978668
+ * https://codeforces.com/contest/1980/submission/270394776
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,19 +7,22 @@
 
 using namespace std;
 
-struct Int {
-  int x;
-  Int() { cin >> x; }
-  operator int() { return x; }
+template <typename T> struct Num {
+  T x;
+  Num() { cin >> x; }
+  Num(T a) : x(a) {}
+  operator T &() { return x; }
+  operator T() const { return x; }
 };
+using Int = Num<int>;
 
 void solve(int t) {
   Int n;
   vector<Int> a(n);
   auto f = [&](int k) {
     for (int i = !k, prev = 1; i < n - 1; i++) {
-      auto &a0 = a[i], &a1 = a[(i + 1 == k ? ++i : i) + 1];
-      auto cur = gcd<int, int>(a0, a1);
+      int a0 = a[i], a1 = a[(i + 1 == k ? ++i : i) + 1];
+      auto cur = gcd(a0, a1);
       if (cur < prev) {
         return i;
       }
