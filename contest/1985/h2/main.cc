@@ -52,32 +52,29 @@ template <typename T> struct Mat : vector<vector<T>> {
     }
     return ans;
   }
-  vector<T> operator*(const vector<T> &rhs) const {
-    assert(rhs.size() <= n && n <= m);
-    vector<T> ans(n);
+  template <typename U> vector<U> operator*(const vector<U> &rhs) const {
+    assert(m == rhs.size());
+    vector<U> ans(n);
     for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
+      for (int j = 0; j < m; j++) {
         ans[i] += (*this)[i][j] * rhs[i];
       }
     }
     return ans;
   }
-  Mat operator*(const Mat &rhs) const {
+  template <typename U> Mat<U> operator*(const Mat<U> &rhs) const {
     assert(m == rhs.n);
-    Mat ans(n, rhs.m);
-    vector<T> col(rhs.n);
-    for (int j = 0; j < rhs.m; j++) {
-      for (int k = 0; k < rhs.n; k++) {
-        col[k] = rhs[k][j];
-      }
-      for (int i = 0; i < n; i++) {
-        for (int k = 0; k < rhs.n; k++) {
-          ans[i][j] += (*this)[i][k] * col[k];
+    Mat<U> ans(n, rhs.m);
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < rhs.m; j++) {
+        for (int k = 0; k < m; k++) {
+          ans[i][j] += (*this)[i][k] * rhs[k][j];
         }
       }
     }
     return ans;
   }
+  Mat &operator*=(const Mat &rhs) { return *this = operator*(rhs); }
 };
 
 template <typename T> struct Pref2D {

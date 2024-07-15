@@ -23,18 +23,19 @@ struct Mod {
   int x, m;
   Mod(i64 x = 0, int m = _mod) : x(x % m), m(m) {}
   operator int() const { return x; }
-  Mod &operator+=(int rhs) { return x = operator+(rhs), *this; }
-  Mod &operator-=(int rhs) { return x = operator-(rhs), *this; }
-  Mod &operator*=(int rhs) { return x = operator*(rhs), *this; }
-  Mod &operator/=(int rhs) { return x = operator/(rhs), *this; }
-  Mod operator+(int rhs) const {
-    return rhs < 0 ? operator-(-rhs) : Mod((x + rhs >= m ? x - m : x) + rhs, m);
+  Mod operator+(int rhs) const { return Mod(x, m) += rhs; }
+  Mod operator-(int rhs) const { return Mod(x, m) -= rhs; }
+  Mod operator*(int rhs) const { return Mod(x, m) *= rhs; }
+  Mod operator/(int rhs) const { return Mod(x, m) /= rhs; }
+  Mod &operator+=(int rhs) {
+    return rhs < 0 ? operator-=(-rhs) : ((x += rhs) >= m ? x -= m : x, *this);
   }
-  Mod operator-(int rhs) const {
-    return rhs < 0 ? operator+(-rhs) : Mod((x - rhs < 0 ? x + m : x) - rhs, m);
+  Mod &operator-=(int rhs) {
+    return rhs < 0 ? operator+=(-rhs) : ((x -= rhs) < 0 ? x += m : x, *this);
   }
-  Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
-  Mod operator/(int rhs) const { return operator*(Mod(rhs, m).inv()); }
+  Mod &operator*=(int rhs) { return x = (i64(x) * rhs) % m, *this; }
+  Mod &operator/=(int rhs) { return operator*=(Mod(rhs, m).inv()); }
+  Mod inv() const { return pow(m - 2); } // inv of zero gives zero
   Mod pow(int rhs) const {
     Mod base(x, m), ans(!!x, m);
     for (; base && rhs; rhs >>= 1, base *= base) {
@@ -44,7 +45,6 @@ struct Mod {
     }
     return ans;
   }
-  Mod inv() const { return pow(m - 2); } // inv of zero gives zero
 };
 
 pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {

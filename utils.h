@@ -59,18 +59,19 @@ struct Mod {
   int x, m;
   Mod(i64 x = 0, int m = _mod) : x(x % m), m(m) {}
   operator int() const { return x; }
-  Mod &operator+=(int rhs) { return x = operator+(rhs), *this; }
-  Mod &operator-=(int rhs) { return x = operator-(rhs), *this; }
-  Mod &operator*=(int rhs) { return x = operator*(rhs), *this; }
-  Mod &operator/=(int rhs) { return x = operator/(rhs), *this; }
-  Mod operator+(int rhs) const {
-    return rhs < 0 ? operator-(-rhs) : Mod((x + rhs >= m ? x - m : x) + rhs, m);
+  Mod operator+(int rhs) const { return Mod(x, m) += rhs; }
+  Mod operator-(int rhs) const { return Mod(x, m) -= rhs; }
+  Mod operator*(int rhs) const { return Mod(x, m) *= rhs; }
+  Mod operator/(int rhs) const { return Mod(x, m) /= rhs; }
+  Mod &operator+=(int rhs) {
+    return rhs < 0 ? operator-=(-rhs) : ((x += rhs) >= m ? x -= m : x, *this);
   }
-  Mod operator-(int rhs) const {
-    return rhs < 0 ? operator+(-rhs) : Mod((x - rhs < 0 ? x + m : x) - rhs, m);
+  Mod &operator-=(int rhs) {
+    return rhs < 0 ? operator+=(-rhs) : ((x -= rhs) < 0 ? x += m : x, *this);
   }
-  Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
-  Mod operator/(int rhs) const { return operator*(Mod(rhs, m).inv()); }
+  Mod &operator*=(int rhs) { return x = (i64(x) * rhs) % m, *this; }
+  Mod &operator/=(int rhs) { return operator*=(Mod(rhs, m).inv()); }
+  Mod inv() const { return pow(m - 2); } // inv of zero gives zero
   Mod pow(int rhs) const {
     Mod base(x, m), ans(!!x, m);
     for (; base && rhs; rhs >>= 1, base *= base) {
@@ -80,7 +81,6 @@ struct Mod {
     }
     return ans;
   }
-  Mod inv() const { return pow(m - 2); } // inv of zero gives zero
 };
 
 /**
@@ -370,32 +370,29 @@ template <typename T> struct Mat : vector<vector<T>> {
     }
     return ans;
   }
-  vector<T> operator*(const vector<T> &rhs) const {
-    assert(rhs.size() <= n && n <= m);
-    vector<T> ans(n);
+  template <typename U> vector<U> operator*(const vector<U> &rhs) const {
+    assert(m == rhs.size());
+    vector<U> ans(n);
     for (int i = 0; i < n; i++) {
-      for (int j = 0; j < n; j++) {
+      for (int j = 0; j < m; j++) {
         ans[i] += (*this)[i][j] * rhs[i];
       }
     }
     return ans;
   }
-  Mat operator*(const Mat &rhs) const {
+  template <typename U> Mat<U> operator*(const Mat<U> &rhs) const {
     assert(m == rhs.n);
-    Mat ans(n, rhs.m);
-    vector<T> col(rhs.n);
-    for (int j = 0; j < rhs.m; j++) {
-      for (int k = 0; k < rhs.n; k++) {
-        col[k] = rhs[k][j];
-      }
-      for (int i = 0; i < n; i++) {
-        for (int k = 0; k < rhs.n; k++) {
-          ans[i][j] += (*this)[i][k] * col[k];
+    Mat<U> ans(n, rhs.m);
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < rhs.m; j++) {
+        for (int k = 0; k < m; k++) {
+          ans[i][j] += (*this)[i][k] * rhs[k][j];
         }
       }
     }
     return ans;
   }
+  Mat &operator*=(const Mat &rhs) { return *this = operator*(rhs); }
 };
 
 /**
@@ -530,14 +527,14 @@ i64 choices(int a, int b, int c) {
  */
 template <typename T = int> struct Point {
   T x, y;
-  Point &operator+=(const Point<T> &p) { return x += p.x, y += p.y, *this; }
-  Point &operator-=(const Point<T> &p) { return x -= p.x, y -= p.y, *this; }
+  Point &operator+=(const Point &p) { return x += p.x, y += p.y, *this; }
+  Point &operator-=(const Point &p) { return x -= p.x, y -= p.y, *this; }
   Point &operator*=(T scale) { return x *= scale, y *= scale, *this; }
   Point &operator/=(T scale) { return x /= scale, y /= scale, *this; }
-  Point operator+(const Point<T> &p) const { return {x + p.x, y + p.y}; }
-  Point operator-(const Point<T> &p) const { return {x - p.x, y - p.y}; }
-  Point operator*(T scale) const { return {x * scale, y * scale}; }
-  Point operator/(T scale) const { return {x / scale, y / scale}; }
+  Point operator+(const Point &p) const { return Point(x, y) += p; }
+  Point operator-(const Point &p) const { return Point(x, y) -= p; }
+  Point operator*(T scale) const { return Point(x, y) *= scale; }
+  Point operator/(T scale) const { return Point(x, y) /= scale; }
   Point operator-() const { return {-x, -y}; } // reflect about y=-x
   Point reflect() const { return {y, x}; }     // reflect about y=x
   Point rotate() const { return {-y, x}; }     // rotate 90 degrees
@@ -553,9 +550,7 @@ template <typename T = int> struct Point {
   auto norm() const { return sqrt(norm2()); }
   auto slope() const { return y / f64(x); }
   auto angle() const { return atan2(y, x); }
-  auto operator<=>(const Point<T> &p) const {
-    return tie(x, y) <=> tie(p.x, p.y);
-  }
+  auto operator<=>(const Point &p) const { return tie(x, y) <=> tie(p.x, p.y); }
 };
 
 /**
