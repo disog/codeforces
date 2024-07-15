@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1992/submission/270576031
+ * https://codeforces.com/contest/1992/submission/270620983
  *
  * Copyright (c) 2024 Diego Sogari
  */

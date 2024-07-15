@@ -553,6 +553,8 @@ template <typename T = int> struct Point {
   auto operator<=>(const Point &p) const { return tie(x, y) <=> tie(p.x, p.y); }
 };
 
+int sign(auto x) { return (x > 0) - (x < 0); };
+
 /**
  * Circle
  */
@@ -562,7 +564,7 @@ template <typename T = int> struct Circle {
   auto area() const { return numbers::pi * r * r; }
   auto perim() const { return numbers::pi * r * 2; }
   auto dist(const Point<T> &p) const { return r - (p - c).norm(); }
-  auto dist2(const Point<T> &p) const { return r * r - (p - c).norm2(); }
+  auto side(const Point<T> &p) const { return sign(r * r - (p - c).norm2()); }
 };
 
 /**
@@ -578,20 +580,26 @@ template <typename T = int> struct Triangle {
   }
   auto orient() const { return (b - a).cross(c - a); }
   auto side(const Point<T> &p) const {
-    auto sign = [](T x) { return (x > 0) - (x < 0); };
     auto s1 = sign((a - b).cross(p - b));
     auto s2 = sign((b - c).cross(p - c));
     auto s3 = sign((c - a).cross(p - a));
     auto sum = abs(s1 + s2 + s3);
     return sum >= 2 ? sum - 2 : -!!(s1 * s2 * s3);
   }
-  auto circum() const {
+  auto circle() const {
     auto v1 = b - a, v2 = c - a;
-    f64 n1 = v1.norm2(), n2 = v2.norm2();
-    f64 ux = v2.y * n1 - v1.y * n2; // use float, as it may be huge
-    f64 uy = v1.x * n2 - v2.x * n1;
+    i64 n1 = v1.norm2(), n2 = v2.norm2();
+    auto ux = v2.y * n1 - v1.y * n2;
+    auto uy = v1.x * n2 - v2.x * n1;
     auto u = Point<f64>(ux, uy) / (2.0 * v1.cross(v2));
     return Circle<f64>(u.norm(), u + Point<f64>(a.x, a.y));
+  }
+  bool circum(const Point<T> &p) const {
+    auto a1 = a - p, b1 = b - p, c1 = c - p;
+    auto x = (i64)a1.norm2() * b1.cross(c1);
+    auto y = (i64)b1.norm2() * c1.cross(a1);
+    auto z = (i64)c1.norm2() * a1.cross(b1);
+    return (x + y + z) * sign(orient()) >= 0;
   }
 };
 
