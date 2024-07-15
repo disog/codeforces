@@ -73,6 +73,7 @@ struct Mod {
   Mod &operator+=(int rhs) { return x = operator+(rhs), *this; }
   Mod &operator-=(int rhs) { return x = operator-(rhs), *this; }
   Mod &operator*=(int rhs) { return x = operator*(rhs), *this; }
+  Mod &operator/=(int rhs) { return x = operator/(rhs), *this; }
   Mod operator+(int rhs) const {
     return rhs < 0 ? operator-(-rhs) : Mod((x + rhs >= m ? x - m : x) + rhs, m);
   }
@@ -80,6 +81,7 @@ struct Mod {
     return rhs < 0 ? operator+(-rhs) : Mod((x - rhs < 0 ? x + m : x) - rhs, m);
   }
   Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
+  Mod operator/(int rhs) const { return operator*(Mod(rhs, m).inv()); }
   Mod pow(int y) const {
     Mod b(x, m), ans(!!x, m);
     for (; b && y; y >>= 1, b *= b) {
@@ -87,25 +89,33 @@ struct Mod {
     }
     return ans;
   }
-  Mod inv() const { return pow(m - 2); }
+  Mod inv() const { return pow(m - 2); } // inv of zero gives zero
+};
+
+/**
+ * (Modular) Factorial
+ */
+struct Fac : vector<Mod> {
+  Fac(int n, int m = _mod) : vector<Mod>(n, {1, m}) {
+    for (int i = 1; i < n; i++) {
+      (*this)[i] = (*this)[i - 1] * i;
+    }
+  }
 };
 
 /**
  * (Modular) Binomial coefficient
  */
-struct Bin {
-  vector<Mod> num, den;
-  Bin(int n, int m = _mod) : num(n, {1, m}), den(n, {1, m}) {
-    for (int i = 1; i < n; i++) {
-      num[i] = num[i - 1] * i;
-    }
-    den[n - 1] = num[n - 1].inv();
+struct Bin : Fac {
+  vector<Mod> den;
+  Bin(int n, int m = _mod) : Fac(n, m), den(n, {1, m}) {
+    den[n - 1] = back().inv();
     for (int i = n - 1; i > 0; i--) {
       den[i - 1] = den[i] * i;
     }
   }
   Mod operator()(int n, int k) const {
-    return k < 0 || k > n ? num[0] * 0 : num[n] * (den[k] * den[n - k]);
+    return k < 0 || k > n ? front() * 0 : (*this)[n] * (den[k] * den[n - k]);
   }
 };
 
@@ -471,15 +481,22 @@ template <typename T = int> struct Point {
   Point operator-(const Point<T> &p) const { return {x - p.x, y - p.y}; }
   Point operator*(T scale) const { return {x * scale, y * scale}; }
   Point operator/(T scale) const { return {x / scale, y / scale}; }
-  Point reflect() const { return {y, x}; }
+  Point reflect() const { return {y, x}; }  // reflect about y=x
+  Point perpend() const { return {-y, x}; } // rotate 90 degrees
+  Point rotate(T rad) const {
+    auto s = sin(rad), c = cos(rad);
+    return {x * c - y * s, x * s + y * c};
+  }
+  Point unit() const { return *this / norm(); }
+  Point normal() const { return perpend().unit(); }
   auto cross(const Point<T> &p) const { return x * p.y - y * p.x; }
   auto dot(const Point<T> &p) const { return x * p.x + y * p.y; }
   auto norm2() const { return dot(*this); }
   auto norm() const { return sqrt(norm2()); }
   auto slope() const { return y / f64(x); }
   auto angle() const { return atan2(y, x); }
-  bool operator<(const Point<T> &p) const {
-    return x < p.x || (x == p.x && y < p.y);
+  auto operator<=>(const Point<T> &p) const {
+    return tie(x, y) <=> tie(p.x, p.y);
   }
 };
 
@@ -489,9 +506,10 @@ template <typename T = int> struct Point {
 template <typename T = int> struct Circle {
   T r;
   Point<T> c;
-  auto area() const { return M_PI * r * r; }
-  auto perim() const { return M_PI * r * 2; }
+  auto area() const { return numbers::pi * r * r; }
+  auto perim() const { return numbers::pi * r * 2; }
   auto dist(const Point<T> &p) const { return r - (p - c).norm(); }
+  auto dist2(const Point<T> &p) const { return r * r - (p - c).norm2(); }
 };
 
 /**
@@ -505,7 +523,7 @@ template <typename T = int> struct Triangle {
   auto perim() const {
     return (a - b).norm() + (b - c).norm() + (c - a).norm();
   }
-  auto dist(const Point<T> &p) const {
+  auto side(const Point<T> &p) const {
     auto sign = [](T x) { return (x > 0) - (x < 0); };
     auto s1 = sign((a - b).cross(p - b));
     auto s2 = sign((b - c).cross(p - c));
@@ -515,38 +533,38 @@ template <typename T = int> struct Triangle {
   }
   auto circum() const {
     auto v1 = b - a, v2 = c - a;
-    auto n1 = v1.norm2(), n2 = v2.norm2();
-    auto ux = v2.y * n1 - v1.y * n2;
-    auto uy = v1.x * n2 - v2.x * n1;
-    auto u = Point<T>(ux, uy) / (2 * v1.cross(v2));
-    return Circle<T>(u.norm(), u + a);
+    f64 n1 = v1.norm2(), n2 = v2.norm2();
+    f64 ux = v2.y * n1 - v1.y * n2; // use float, as it may be huge
+    f64 uy = v1.x * n2 - v2.x * n1;
+    auto u = Point<f64>(ux, uy) / (2.0 * v1.cross(v2));
+    return Circle<f64>(u.norm(), u + Point<f64>(a.x, a.y));
   }
 };
 
 /**
  * Convex Hull
  */
-struct Hull : list<int> {
-  Hull(const vector<Point<Int>> &set) {
+struct Hull : vector<int> {
+  template <typename T> Hull(const vector<Point<T>> &set) {
+    assert(set.size());
     auto cmp = [&](const auto &a, const auto &b) {
       return a.reflect() < b.reflect();
     };
-    auto j = min_element(set.begin(), set.end(), cmp) - set.begin();
-    vector<pair<f64, int>> angles(set.size());
+    auto j = ranges::min_element(set, cmp) - set.begin();
+    vector<tuple<f64, T, int>> slopes;
     for (int i = 0; i < set.size(); i++) {
       auto r = i == j ? INFINITY : (set[i] - set[j]).reflect().slope();
-      angles[i] = {-r, i};
+      slopes.emplace_back(-r, set[i].x, i);
     }
-    ::sort(angles.begin(), angles.end());
-    for (auto &[_, i] : angles) {
-      if (size() > 2) {
-        for (auto it = --end(); true;) {
-          auto &p1 = set[*it--], &p0 = set[*it];
-          if ((p1 - p0).cross(set[i] - p0) >= 0) {
-            break; // colinear or left turn
-          }
-          pop_back(); // right turn
+    ranges::sort(slopes);
+    for (auto &[_, _x, i] : slopes) {
+      for (int k = size() - 1; k > 1; k--) {
+        auto &p1 = set[(*this)[k]];
+        auto &p0 = set[(*this)[k - 1]];
+        if ((p1 - p0).cross(set[i] - p0) >= 0) {
+          break; // colinear or left turn
         }
+        pop_back(); // right turn
       }
       push_back(i);
     }
@@ -560,6 +578,12 @@ void debugn(int n) { cout << n << ';'; }
 void debuga(const auto &a) {
   for (auto &ai : a) {
     cout << ai << ',';
+  }
+  cout << ';';
+}
+void debuga2(const auto &a) {
+  for (auto &[x, y] : a) {
+    cout << x << ',' << y << ',';
   }
   cout << ';';
 }
