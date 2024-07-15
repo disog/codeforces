@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/270595837
+ * https://codeforces.com/contest/1984/submission/270610051
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -36,10 +36,12 @@ struct Mod {
   }
   Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
   Mod operator/(int rhs) const { return operator*(Mod(rhs, m).inv()); }
-  Mod pow(int y) const {
-    Mod b(x, m), ans(!!x, m);
-    for (; b && y; y >>= 1, b *= b) {
-      ans *= (y & 1) ? b.x : 1;
+  Mod pow(int rhs) const {
+    Mod base(x, m), ans(!!x, m);
+    for (; base && rhs; rhs >>= 1, base *= base) {
+      if (rhs & 1) {
+        ans *= base;
+      }
     }
     return ans;
   }
@@ -87,10 +89,25 @@ template <typename T = int> struct Circle {
 
 template <typename T = int> struct Triangle {
   Point<T> a, b, c;
+  auto area() const {
+    return abs(a.x * (b.y - c.y) + b.x * (c.y - a.y) + c.x * (a.y - b.y)) / 2.0;
+  }
+  auto perim() const {
+    return (a - b).norm() + (b - c).norm() + (c - a).norm();
+  }
+  auto orient() const { return (b - a).cross(c - a); }
+  auto side(const Point<T> &p) const {
+    auto sign = [](T x) { return (x > 0) - (x < 0); };
+    auto s1 = sign((a - b).cross(p - b));
+    auto s2 = sign((b - c).cross(p - c));
+    auto s3 = sign((c - a).cross(p - a));
+    auto sum = abs(s1 + s2 + s3);
+    return sum >= 2 ? sum - 2 : -!!(s1 * s2 * s3);
+  }
   auto circum() const {
     auto v1 = b - a, v2 = c - a;
     f64 n1 = v1.norm2(), n2 = v2.norm2();
-    f64 ux = v2.y * n1 - v1.y * n2;
+    f64 ux = v2.y * n1 - v1.y * n2; // use float, as it may be huge
     f64 uy = v1.x * n2 - v2.x * n1;
     auto u = Point<f64>(ux, uy) / (2.0 * v1.cross(v2));
     return Circle<f64>(u.norm(), u + Point<f64>(a.x, a.y));
@@ -98,26 +115,23 @@ template <typename T = int> struct Triangle {
 };
 
 struct Hull : vector<int> {
-  template <typename T> Hull(const vector<Point<T>> &p) {
-    auto cmp1 = [&](const auto &a, const auto &b) {
-      return a.reflect() < b.reflect();
-    };
-    auto it = min_element(p.begin(), p.end(), cmp1);
+  template <typename T>
+  Hull(const vector<Point<T>> &p) : vector<int>(p.size()) {
+    assert(size() > 2);
+    auto cmp1 = [&](int i, int j) { return p[i].reflect() < p[j].reflect(); };
     auto cmp2 = [&](int i, int j) {
-      auto r = (p[i] - *it).cross(p[j] - *it);
+      auto r = (p[i] - p[front()]).cross(p[j] - p[front()]);
       return r > 0 || (r == 0 && p[i].x < p[j].x);
     };
-    auto &h = *this;
-    resize(p.size());
     iota(begin(), end(), 0);
-    ::swap(front(), h[it - p.begin()]);
+    ::swap(front(), *min_element(begin(), end(), cmp1));
     sort(begin() + 1, end(), cmp2);
-    int i = 3;
-    for (int j = i; j < size(); h[i++] = h[j++]) {
-      for (; (p[h[i - 1]] - p[h[i - 2]]).cross(p[h[j]] - p[h[i - 2]]) < 0; i--)
+    auto i = begin() + 3;
+    for (auto j = i; j != end(); *i++ = *j++) {
+      for (; (p[*(i - 1)] - p[*(i - 2)]).cross(p[*j] - p[*(i - 2)]) < 0; i--)
         ;
     }
-    resize(i);
+    resize(i - begin());
   }
 };
 

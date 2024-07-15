@@ -53,17 +53,6 @@ struct Str : string {
 };
 
 /**
- * Matrix (2-D Vector)
- */
-template <typename T> struct Mat : vector<vector<T>> {
-  Mat(int n, int m) : vector<vector<T>>(n) {
-    for (auto &&row : *this) {
-      row.resize(m);
-    }
-  }
-};
-
-/**
  * Modular integer
  */
 struct Mod {
@@ -82,10 +71,12 @@ struct Mod {
   }
   Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
   Mod operator/(int rhs) const { return operator*(Mod(rhs, m).inv()); }
-  Mod pow(int y) const {
-    Mod b(x, m), ans(!!x, m);
-    for (; b && y; y >>= 1, b *= b) {
-      ans *= (y & 1) ? b.x : 1;
+  Mod pow(int rhs) const {
+    Mod base(x, m), ans(!!x, m);
+    for (; base && rhs; rhs >>= 1, base *= base) {
+      if (rhs & 1) {
+        ans *= base;
+      }
     }
     return ans;
   }
@@ -345,43 +336,101 @@ struct Fen {
 };
 
 /**
- * 2-D prefix sums
+ * Matrix (2-D Vector)
  */
-struct Pref2D {
+template <typename T> struct Mat : vector<vector<T>> {
   int n, m;
-  vector<vector<int>> sum;
-  Pref2D(int n, int m) : sum(n + 1), n(n), m(m) {
-    for (auto &&row : sum) {
-      row.resize(m + 1);
+  Mat(int n, int m) : vector<vector<T>>(n), n(n), m(m) {
+    for (auto &&row : *this) {
+      row.resize(m);
     }
   }
-  void rect(int x, const array<int, 4> &range) {
+  static Mat ident(int n) {
+    Mat ans(n, n);
+    for (int i = 0; i < n; i++) {
+      ans[i][i] = 1;
+    }
+    return ans;
+  }
+  Mat trans() const {
+    Mat ans(m, n);
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < m; j++) {
+        ans[j][i] = (*this)[i][j];
+      }
+    }
+    return ans;
+  }
+  Mat pow(int rhs) const {
+    auto base = *this, ans = ident(n);
+    for (; rhs; rhs >>= 1, base *= base) {
+      if (rhs & 1) {
+        ans *= base;
+      }
+    }
+    return ans;
+  }
+  vector<T> operator*(const vector<T> &rhs) const {
+    assert(rhs.size() <= n && n <= m);
+    vector<T> ans(n);
+    for (int i = 0; i < n; i++) {
+      for (int j = 0; j < n; j++) {
+        ans[i] += (*this)[i][j] * rhs[i];
+      }
+    }
+    return ans;
+  }
+  Mat operator*(const Mat &rhs) const {
+    assert(m == rhs.n);
+    Mat ans(n, rhs.m);
+    vector<T> col(rhs.n);
+    for (int j = 0; j < rhs.m; j++) {
+      for (int k = 0; k < rhs.n; k++) {
+        col[k] = rhs[k][j];
+      }
+      for (int i = 0; i < n; i++) {
+        for (int k = 0; k < rhs.n; k++) {
+          ans[i][j] += (*this)[i][k] * col[k];
+        }
+      }
+    }
+    return ans;
+  }
+};
+
+/**
+ * 2-D prefix sums
+ */
+template <typename T> struct Pref2D {
+  Mat<T> sum;
+  Pref2D(int n, int m) : sum(n + 1, m + 1) {}
+  void rect(T x, const array<int, 4> &range) {
     auto [r1, c1, r2, c2] = range;
     sum[r1][c1] += x;
     sum[r2 + 1][c1] -= x;
     sum[r1][c2 + 1] -= x;
     sum[r2 + 1][c2 + 1] += x;
   }
-  void rows(int x, const array<int, 2> &range) {
+  void rows(T x, const array<int, 2> &range) {
     auto [r1, r2] = range;
     sum[r1][0] += x;
     sum[r2 + 1][0] -= x;
   }
-  void cols(int x, const array<int, 2> &range) {
+  void cols(T x, const array<int, 2> &range) {
     auto [c1, c2] = range;
     sum[0][c1] += x;
     sum[0][c2 + 1] -= x;
   }
-  void cross(int x, const array<int, 4> &range) {
+  void cross(T x, const array<int, 4> &range) {
     auto [r1, c1, r2, c2] = range;
     rows(x, {r1, r2});
     cols(x, {c1, c2});
     rect(-x, range);
   }
   void visit(const auto &f) {
-    vector<int> cur(m + 1);
-    for (int i = 0; i < n; i++) {
-      for (int j = 0, prev = 0; j < m; j++) {
+    vector<T> cur(sum.m);
+    for (int i = 0; i < sum.n - 1; i++) {
+      for (int j = 0, prev = 0; j < sum.m - 1; j++) {
         int saved = cur[j + 1];
         cur[j + 1] += sum[i][j] + cur[j] - prev;
         prev = saved;
@@ -532,6 +581,7 @@ template <typename T = int> struct Triangle {
   auto perim() const {
     return (a - b).norm() + (b - c).norm() + (c - a).norm();
   }
+  auto orient() const { return (b - a).cross(c - a); }
   auto side(const Point<T> &p) const {
     auto sign = [](T x) { return (x > 0) - (x < 0); };
     auto s1 = sign((a - b).cross(p - b));
@@ -554,26 +604,23 @@ template <typename T = int> struct Triangle {
  * Convex Hull
  */
 struct Hull : vector<int> {
-  template <typename T> Hull(const vector<Point<T>> &p) {
-    auto cmp1 = [&](const auto &a, const auto &b) {
-      return a.reflect() < b.reflect();
-    };
-    auto it = min_element(p.begin(), p.end(), cmp1);
+  template <typename T>
+  Hull(const vector<Point<T>> &p) : vector<int>(p.size()) {
+    assert(size() > 2);
+    auto cmp1 = [&](int i, int j) { return p[i].reflect() < p[j].reflect(); };
     auto cmp2 = [&](int i, int j) {
-      auto r = (p[i] - *it).cross(p[j] - *it);
+      auto r = (p[i] - p[front()]).cross(p[j] - p[front()]);
       return r > 0 || (r == 0 && p[i].x < p[j].x);
     };
-    auto &h = *this;
-    resize(p.size());
     iota(begin(), end(), 0);
-    ::swap(front(), h[it - p.begin()]);
+    ::swap(front(), *min_element(begin(), end(), cmp1));
     sort(begin() + 1, end(), cmp2);
-    int i = 3;
-    for (int j = i; j < size(); h[i++] = h[j++]) {
-      for (; (p[h[i - 1]] - p[h[i - 2]]).cross(p[h[j]] - p[h[i - 2]]) < 0; i--)
+    auto i = begin() + 3;
+    for (auto j = i; j != end(); *i++ = *j++) {
+      for (; (p[*(i - 1)] - p[*(i - 2)]).cross(p[*j] - p[*(i - 2)]) < 0; i--)
         ;
     }
-    resize(i);
+    resize(i - begin());
   }
 };
 

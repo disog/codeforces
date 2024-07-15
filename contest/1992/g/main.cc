@@ -35,10 +35,12 @@ struct Mod {
   }
   Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
   Mod operator/(int rhs) const { return operator*(Mod(rhs, m).inv()); }
-  Mod pow(int y) const {
-    Mod b(x, m), ans(!!x, m);
-    for (; b && y; y >>= 1, b *= b) {
-      ans *= (y & 1) ? b.x : 1;
+  Mod pow(int rhs) const {
+    Mod base(x, m), ans(!!x, m);
+    for (; base && rhs; rhs >>= 1, base *= base) {
+      if (rhs & 1) {
+        ans *= base;
+      }
     }
     return ans;
   }
