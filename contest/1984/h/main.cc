@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/270568292
+ * https://codeforces.com/contest/1984/submission/270595837
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -56,14 +56,15 @@ template <typename T = int> struct Point {
   Point operator-(const Point<T> &p) const { return {x - p.x, y - p.y}; }
   Point operator*(T scale) const { return {x * scale, y * scale}; }
   Point operator/(T scale) const { return {x / scale, y / scale}; }
-  Point reflect() const { return {y, x}; }  // reflect about y=x
-  Point perpend() const { return {-y, x}; } // rotate 90 degrees
+  Point operator-() const { return {-x, -y}; } // reflect about y=-x
+  Point reflect() const { return {y, x}; }     // reflect about y=x
+  Point rotate() const { return {-y, x}; }     // rotate 90 degrees
   Point rotate(T rad) const {
     auto s = sin(rad), c = cos(rad);
     return {x * c - y * s, x * s + y * c};
   }
   Point unit() const { return *this / norm(); }
-  Point normal() const { return perpend().unit(); }
+  Point normal() const { return rotate().unit(); }
   auto cross(const Point<T> &p) const { return x * p.y - y * p.x; }
   auto dot(const Point<T> &p) const { return x * p.x + y * p.y; }
   auto norm2() const { return dot(*this); }
@@ -97,44 +98,42 @@ template <typename T = int> struct Triangle {
 };
 
 struct Hull : vector<int> {
-  template <typename T> Hull(const vector<Point<T>> &set) {
-    assert(set.size());
-    auto cmp = [&](const auto &a, const auto &b) {
+  template <typename T> Hull(const vector<Point<T>> &p) {
+    auto cmp1 = [&](const auto &a, const auto &b) {
       return a.reflect() < b.reflect();
     };
-    auto j = ranges::min_element(set, cmp) - set.begin();
-    vector<tuple<f64, T, int>> slopes;
-    for (int i = 0; i < set.size(); i++) {
-      auto r = i == j ? INFINITY : (set[i] - set[j]).reflect().slope();
-      slopes.emplace_back(-r, set[i].x, i);
+    auto it = min_element(p.begin(), p.end(), cmp1);
+    auto cmp2 = [&](int i, int j) {
+      auto r = (p[i] - *it).cross(p[j] - *it);
+      return r > 0 || (r == 0 && p[i].x < p[j].x);
+    };
+    auto &h = *this;
+    resize(p.size());
+    iota(begin(), end(), 0);
+    ::swap(front(), h[it - p.begin()]);
+    sort(begin() + 1, end(), cmp2);
+    int i = 3;
+    for (int j = i; j < size(); h[i++] = h[j++]) {
+      for (; (p[h[i - 1]] - p[h[i - 2]]).cross(p[h[j]] - p[h[i - 2]]) < 0; i--)
+        ;
     }
-    ranges::sort(slopes);
-    for (auto &[_, _x, i] : slopes) {
-      for (int k = size() - 1; k > 1; k--) {
-        auto &p1 = set[(*this)[k]];
-        auto &p0 = set[(*this)[k - 1]];
-        if ((p1 - p0).cross(set[i] - p0) >= 0) {
-          break; // colinear or left turn
-        }
-        pop_back(); // right turn
-      }
-      push_back(i);
-    }
+    resize(i);
   }
 };
 
 struct Fac : vector<Mod> {
-  Fac(int n, int m = _mod) : vector<Mod>(n, {1, m}) {
-    for (int i = 1; i < n; i++) {
-      (*this)[i] = (*this)[i - 1] * i;
+  Fac(int m = _mod) : vector<Mod>(1, {1, m}) {}
+  Mod operator[](int n) {
+    while (size() <= n) {
+      push_back(back() * (int)size());
     }
+    return vector<Mod>::operator[](n);
   }
-};
+} fac;
 
 void solve(int t) {
   Int n;
   vector<Point<Int>> p(n);
-  Point<int> a;
   Hull hull(p);       // O(n*log n)
   ranges::sort(hull); // O(n*log n)
   if (hull[1] != 1) {
@@ -142,27 +141,27 @@ void solve(int t) {
     return;
   }
   int m = hull.size();
-  vector<int> sizes(m);
-  sizes[0] = sizes[1] = -1;
-  auto f = [&](auto &self, int i, int j, int k) {
-    if (sizes[k]) {
-      return;
-    }
+  auto check = [&](int i, int j, int k) {
     auto &a = p[hull[i]];
     auto &b = p[hull[j]];
     auto &c = p[hull[k]];
     Triangle tri(a, b, c);
     auto circle = tri.circum();
-    bool bad = false;
-    for (int l = 0; l < m && !bad; l++) {
+    for (int l = 0; l < m; l++) {
       if (l != i && l != j && l != k) {
         auto &d = p[hull[l]];
-        bad = circle.dist2(Point<f64>(d.x, d.y)) < 0;
+        if (circle.dist2(Point<f64>(d.x, d.y)) < 0) {
+          return false;
+        }
       }
     }
-    if (!bad) {
+    return true;
+  };
+  vector<int> sizes(m);
+  auto f = [&](auto &self, int i, int j, int k) -> void {
+    if (!sizes[k] && check(i, j, k)) {
       sizes[k] = 1; // visited
-      for (int l = 0; l < m; l++) {
+      for (int l = 2; l < m; l++) {
         if (!sizes[l]) {
           self(self, i, k, l);
           self(self, j, k, l);
@@ -174,7 +173,6 @@ void solve(int t) {
   for (int k = 2; k < m; k++) {
     f(f, 0, 1, k);
   }
-  Fac fac(m);
   Mod ans = fac[m - 2];
   for (int i = 2; i < m; i++) {
     ans /= sizes[i];

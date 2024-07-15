@@ -96,10 +96,12 @@ struct Mod {
  * (Modular) Factorial
  */
 struct Fac : vector<Mod> {
-  Fac(int n, int m = _mod) : vector<Mod>(n, {1, m}) {
-    for (int i = 1; i < n; i++) {
-      (*this)[i] = (*this)[i - 1] * i;
+  Fac(int m = _mod) : vector<Mod>(1, {1, m}) {}
+  Mod operator[](int n) {
+    while (size() <= n) {
+      push_back(back() * (int)size());
     }
+    return vector<Mod>::operator[](n);
   }
 };
 
@@ -107,17 +109,23 @@ struct Fac : vector<Mod> {
  * (Modular) Binomial coefficient
  */
 struct Bin : Fac {
-  vector<Mod> den;
-  Bin(int n, int m = _mod) : Fac(n, m), den(n, {1, m}) {
-    den[n - 1] = back().inv();
-    for (int i = n - 1; i > 0; i--) {
-      den[i - 1] = den[i] * i;
+  vector<Mod> inv;
+  Mod operator()(int n, int k) {
+    if (k < 0 || k > n) {
+      return front() * 0;
     }
+    auto ans = (*this)[n];
+    if (inv.size() <= n) {
+      int s = inv.size();
+      inv.resize(n + 1);
+      inv[n] = ans.inv();
+      for (int i = n; i > s; i--) {
+        inv[i - 1] = inv[i] * i;
+      }
+    }
+    return ans * inv[k] * inv[n - k];
   }
-  Mod operator()(int n, int k) const {
-    return k < 0 || k > n ? front() * 0 : (*this)[n] * (den[k] * den[n - k]);
-  }
-};
+} bin;
 
 /**
  * (Undirected) Graph
@@ -481,14 +489,15 @@ template <typename T = int> struct Point {
   Point operator-(const Point<T> &p) const { return {x - p.x, y - p.y}; }
   Point operator*(T scale) const { return {x * scale, y * scale}; }
   Point operator/(T scale) const { return {x / scale, y / scale}; }
-  Point reflect() const { return {y, x}; }  // reflect about y=x
-  Point perpend() const { return {-y, x}; } // rotate 90 degrees
+  Point operator-() const { return {-x, -y}; } // reflect about y=-x
+  Point reflect() const { return {y, x}; }     // reflect about y=x
+  Point rotate() const { return {-y, x}; }     // rotate 90 degrees
   Point rotate(T rad) const {
     auto s = sin(rad), c = cos(rad);
     return {x * c - y * s, x * s + y * c};
   }
   Point unit() const { return *this / norm(); }
-  Point normal() const { return perpend().unit(); }
+  Point normal() const { return rotate().unit(); }
   auto cross(const Point<T> &p) const { return x * p.y - y * p.x; }
   auto dot(const Point<T> &p) const { return x * p.x + y * p.y; }
   auto norm2() const { return dot(*this); }
@@ -545,29 +554,26 @@ template <typename T = int> struct Triangle {
  * Convex Hull
  */
 struct Hull : vector<int> {
-  template <typename T> Hull(const vector<Point<T>> &set) {
-    assert(set.size());
-    auto cmp = [&](const auto &a, const auto &b) {
+  template <typename T> Hull(const vector<Point<T>> &p) {
+    auto cmp1 = [&](const auto &a, const auto &b) {
       return a.reflect() < b.reflect();
     };
-    auto j = ranges::min_element(set, cmp) - set.begin();
-    vector<tuple<f64, T, int>> slopes;
-    for (int i = 0; i < set.size(); i++) {
-      auto r = i == j ? INFINITY : (set[i] - set[j]).reflect().slope();
-      slopes.emplace_back(-r, set[i].x, i);
+    auto it = min_element(p.begin(), p.end(), cmp1);
+    auto cmp2 = [&](int i, int j) {
+      auto r = (p[i] - *it).cross(p[j] - *it);
+      return r > 0 || (r == 0 && p[i].x < p[j].x);
+    };
+    auto &h = *this;
+    resize(p.size());
+    iota(begin(), end(), 0);
+    ::swap(front(), h[it - p.begin()]);
+    sort(begin() + 1, end(), cmp2);
+    int i = 3;
+    for (int j = i; j < size(); h[i++] = h[j++]) {
+      for (; (p[h[i - 1]] - p[h[i - 2]]).cross(p[h[j]] - p[h[i - 2]]) < 0; i--)
+        ;
     }
-    ranges::sort(slopes);
-    for (auto &[_, _x, i] : slopes) {
-      for (int k = size() - 1; k > 1; k--) {
-        auto &p1 = set[(*this)[k]];
-        auto &p0 = set[(*this)[k - 1]];
-        if ((p1 - p0).cross(set[i] - p0) >= 0) {
-          break; // colinear or left turn
-        }
-        pop_back(); // right turn
-      }
-      push_back(i);
-    }
+    resize(i);
   }
 };
 

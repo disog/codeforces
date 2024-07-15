@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1992/submission/270399846
+ * https://codeforces.com/contest/1992/submission/270576031
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -26,6 +26,7 @@ struct Mod {
   Mod &operator+=(int rhs) { return x = operator+(rhs), *this; }
   Mod &operator-=(int rhs) { return x = operator-(rhs), *this; }
   Mod &operator*=(int rhs) { return x = operator*(rhs), *this; }
+  Mod &operator/=(int rhs) { return x = operator/(rhs), *this; }
   Mod operator+(int rhs) const {
     return rhs < 0 ? operator-(-rhs) : Mod((x + rhs >= m ? x - m : x) + rhs, m);
   }
@@ -33,6 +34,7 @@ struct Mod {
     return rhs < 0 ? operator+(-rhs) : Mod((x - rhs < 0 ? x + m : x) - rhs, m);
   }
   Mod operator*(int rhs) const { return Mod(i64(x) * rhs, m); }
+  Mod operator/(int rhs) const { return operator*(Mod(rhs, m).inv()); }
   Mod pow(int y) const {
     Mod b(x, m), ans(!!x, m);
     for (; b && y; y >>= 1, b *= b) {
@@ -40,28 +42,40 @@ struct Mod {
     }
     return ans;
   }
-  Mod inv() const { return pow(m - 2); }
+  Mod inv() const { return pow(m - 2); } // inv of zero gives zero
 };
 
-struct Bin {
-  vector<Mod> num, den;
-  Bin(int n, int m = _mod) : num(n, {1, m}), den(n, {1, m}) {
-    for (int i = 1; i < n; i++) {
-      num[i] = num[i - 1] * i;
+struct Fac : vector<Mod> {
+  Fac(int m = _mod) : vector<Mod>(1, {1, m}) {}
+  Mod operator[](int n) {
+    while (size() <= n) {
+      push_back(back() * (int)size());
     }
-    den[n - 1] = num[n - 1].inv();
-    for (int i = n - 1; i > 0; i--) {
-      den[i - 1] = den[i] * i;
-    }
-  }
-  Mod operator()(int n, int k) const {
-    return k < 0 || k > n ? num[0] * 0 : num[n] * (den[k] * den[n - k]);
+    return vector<Mod>::operator[](n);
   }
 };
+
+struct Bin : Fac {
+  vector<Mod> inv;
+  Mod operator()(int n, int k) {
+    if (k < 0 || k > n) {
+      return front() * 0;
+    }
+    auto ans = (*this)[n];
+    if (inv.size() <= n) {
+      int s = inv.size();
+      inv.resize(n + 1);
+      inv[n] = ans.inv();
+      for (int i = n; i > s; i--) {
+        inv[i - 1] = inv[i] * i;
+      }
+    }
+    return ans * inv[k] * inv[n - k];
+  }
+} bin;
 
 void solve(int t) {
   Int n;
-  Bin bin(n + 1);
   Mod ans = 2 * (n + 1); // empty and n-ary sets
   for (int i = 1; 2 * i < n; i++) {
     for (int j = 0; j <= i; j++) {
