@@ -16,9 +16,9 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-struct DGraph : vector<vector<int>> {
+struct Digraph : vector<vector<int>> {
   vector<array<Int, 2>> e;
-  DGraph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
+  Digraph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
       add(u, v);
     }
@@ -28,7 +28,7 @@ struct DGraph : vector<vector<int>> {
 
 struct SCC : vector<int> {
   int count = 0;
-  SCC(DGraph g) : vector<int>(g.size()), low(g.size()) {
+  SCC(Digraph g) : vector<int>(g.size()), low(g.size()) {
     for (int i = 0, t = 1; i < g.size(); i++) {
       if (low[i] == 0) {
         dfs(g, i, t);
@@ -37,7 +37,7 @@ struct SCC : vector<int> {
   }
 
 private:
-  void dfs(DGraph &g, int u, int &t) {
+  void dfs(Digraph &g, int u, int &t) {
     auto tx = low[u] = t++;
     visited.push_back(u);
     for (auto v : g[u]) {
@@ -61,7 +61,7 @@ private:
 void solve(int t) {
   Int n;
   vector<Int> a(n), b(n), c(n);
-  DGraph g(n * 2 + 1);
+  Digraph g(n * 2 + 1);
   auto f = [&](int x, int y) {
     g.add(n - x, n + y); // !x -> y
     g.add(n - y, n + x); // !y -> x

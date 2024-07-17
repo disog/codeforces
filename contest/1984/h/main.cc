@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/270628549
+ * https://codeforces.com/contest/1984/submission/271011898
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -154,13 +154,14 @@ struct Fac : vector<Mod> {
 void solve(int t) {
   Int n;
   vector<Point<Int>> p(n);
-  Hull hull(p);       // O(n*log n)
-  ranges::sort(hull); // O(n*log n)
-  if (hull[1] != 1) {
+  Hull hull(p); // O(n*log n)
+  int m = hull.size();
+  int p0 = ranges::find(hull, 0) - hull.begin();
+  int p1 = ranges::find(hull, 1) - hull.begin();
+  if (p0 == m || p1 == m) {
     cout << 0 << endl;
     return;
   }
-  int m = hull.size();
   auto check = [&](int i, int j, int k) {
     auto &a = p[hull[i]];
     auto &b = p[hull[j]];
@@ -175,27 +176,21 @@ void solve(int t) {
     }
     return true;
   };
-  vector<int> sizes(m);
-  auto f = [&](auto &self, int i, int j, int k) -> void {
-    if (!sizes[k] && check(i, j, k)) {
-      sizes[k] = 1; // visited
-      for (int l = 2; l < m; l++) {
-        if (!sizes[l]) {
-          self(self, i, k, l);
-          self(self, j, k, l);
-          sizes[k] += sizes[l];
-        }
+  Mod ans = 1;
+  auto f = [&](auto &self, int i, int j) -> int { // O(n*log n)/O(n^2)
+    for (Mod k = {i + 1, m}; k != j; k += 1) {
+      if (check(i, j, k)) {
+        auto l = self(self, i, k);
+        auto r = self(self, k, j);
+        auto s = 1 + l + r;
+        return ans *= s, s;
       }
     }
+    return 0;
   };
-  for (int k = 2; k < m; k++) {
-    f(f, 0, 1, k);
-  }
-  Mod ans = fac[m - 2];
-  for (int i = 2; i < m; i++) {
-    ans /= sizes[i];
-  }
-  cout << ans << endl;
+  auto s0 = f(f, p0, p1);
+  auto s1 = f(f, p1, p0);
+  cout << (s0 || s1 ? fac[m - 2] / ans : Mod{0, m}) << endl;
 }
 
 int main() {

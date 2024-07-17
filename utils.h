@@ -153,9 +153,9 @@ struct WGraph : vector<vector<array<int, 2>>> {
 /**
  * Directed Graph
  */
-struct DGraph : vector<vector<int>> {
+struct Digraph : vector<vector<int>> {
   vector<array<Int, 2>> e;
-  DGraph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
+  Digraph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
       add(u, v);
     }
@@ -166,9 +166,9 @@ struct DGraph : vector<vector<int>> {
 /**
  * Weighed Directed Graph
  */
-struct WDGraph : vector<vector<array<int, 2>>> {
+struct WDigraph : vector<vector<array<int, 2>>> {
   vector<array<Int, 3>> e;
-  WDGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
+  WDigraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
     for (auto &[u, v, w] : e) {
       add(u, v, w);
     }
@@ -216,7 +216,7 @@ private:
  */
 struct SCC : vector<int> {
   int count = 0;
-  SCC(DGraph g) : vector<int>(g.size()), low(g.size()) {
+  SCC(Digraph g) : vector<int>(g.size()), low(g.size()) {
     for (int i = 0, t = 1; i < g.size(); i++) {
       if (low[i] == 0) {
         dfs(g, i, t);
@@ -225,7 +225,7 @@ struct SCC : vector<int> {
   }
 
 private:
-  void dfs(DGraph &g, int u, int &t) {
+  void dfs(Digraph &g, int u, int &t) {
     auto tx = low[u] = t++;
     visited.push_back(u);
     for (auto v : g[u]) {
