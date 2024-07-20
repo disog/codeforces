@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1990/submission/271645680
+ * https://codeforces.com/contest/1990/submission/271648727
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -22,12 +22,13 @@ void solve(int t) {
   vector<Int> a(n);
   i64 ans = 0;
   auto f = [&]() {
-    unordered_set<int> set;
+    vector<bool> b(n + 1);
     for (int i = 0, mx = 0; i < n; i++) { // O(n)
       ans += a[i];
-      if (!set.insert(a[i]).second && a[i] > mx) {
+      if (b[a[i]] && a[i] > mx) {
         mx = a[i];
       } else {
+        b[a[i]] = true;
         a[i] = mx;
       }
     }

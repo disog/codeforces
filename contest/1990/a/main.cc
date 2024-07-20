@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1990/submission/271569587
+ * https://codeforces.com/contest/1990/submission/271667794
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -19,7 +19,7 @@ using Int = Num<int>;
 void solve(int t) {
   Int n;
   vector<Int> a(n);
-  map<int, int, greater<int>> cnt;
+  map<int, int> cnt;
   for (auto &&ai : a) {
     cnt[ai]++;
   }
