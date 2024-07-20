@@ -14,7 +14,24 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-void solve(int t) {}
+void solve(int t) {
+  Int n, x, y;
+  vector<int> a(n);
+  x--, y--;
+  for (int i = y, v = 1; i >= 0; i--, v = -v) {
+    a[i] = v;
+  }
+  for (int i = y + 1; i < x; i++) {
+    a[i] = 1;
+  }
+  for (int i = x, v = 1; i < n; i++, v = -v) {
+    a[i] = v;
+  }
+  for (auto &&ai : a) {
+    cout << ai << ' ';
+  }
+  cout << endl;
+}
 
 int main() {
 #ifdef LOCAL
