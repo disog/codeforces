@@ -4,7 +4,7 @@
  * Inspired by jiangly's solution:
  * https://codeforces.com/contest/1984/submission/264894399
  *
- * Copyright (c) 2024 Diego Sogari
+ * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
