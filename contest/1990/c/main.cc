@@ -4,6 +4,7 @@
 #include <bits/stdc++.h>
 
 using namespace std;
+using i64 = int64_t;
 
 template <typename T> struct Num {
   T x;
@@ -14,7 +15,27 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-void solve(int t) {}
+void solve(int t) {
+  Int n;
+  vector<Int> a(n);
+  i64 ans = 0;
+  auto f = [&]() {
+    map<int, int> cnt;
+    for (int i = 0, mx = 0; i < n; i++) {
+      ans += a[i];
+      if (cnt[a[i]]++ && a[i] > mx) {
+        mx = a[i];
+      } else {
+        a[i] = mx;
+      }
+    }
+  };
+  f(), f();
+  for (int i = 0; i < n; i++) {
+    ans += i64(n - i) * a[i];
+  }
+  cout << ans << endl;
+}
 
 int main() {
 #ifdef LOCAL
