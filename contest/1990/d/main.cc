@@ -22,12 +22,12 @@ void solve(int t) {
   int ans = 0;
   for (int i = 0, j = 0, k = 2; i < n; i++) {
     if (a[i] > j) {
-      ans++;
+      ans++; // dye row or square
     }
     if (a[i] <= j || a[i] > k) {
-      j = 0, k = 2;
+      j = 0, k = 2; // reset
     } else {
-      j = 2 - j, k = 4;
+      j = 2 - j, k = 4; // alternate square
     }
   }
   cout << ans << endl;
