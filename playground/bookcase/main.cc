@@ -1,5 +1,5 @@
 /**
- * Clique cover number
+ * Bookcase
  *
  * Copyright (c) 2024 Diego Sogari
  */
@@ -7,76 +7,121 @@
 
 using namespace std;
 
-template <typename T = int> struct Num {
+template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
   Num(T a) : x(a) {}
   operator T &() { return x; }
+  operator T() const { return x; }
+};
+using Int = Num<int>;
+
+struct Graph : vector<set<int>> {
+  vector<array<Int, 2>> e;
+  Graph(int n, int m = 0) : vector<set<int>>(n), e(m) {
+    for (auto &[u, v] : e) {
+      add(u, v);
+    }
+  }
+  void add(int u, int v) {
+    (*this)[u].insert(v);
+    (*this)[v].insert(u);
+  }
 };
 
 const greater<int> gt1;
-const auto lta2 = [](auto &lhs, auto &rhs) {
-  return lhs[0] < rhs[0] || (lhs[0] == rhs[0] && lhs[1] < rhs[1]);
-};
+
+int len1(const auto &b, int n, int k) {
+  vector<int> s(k, -1), c(k);
+  auto lte = [&](int i, int j) {
+    return b[i][0] <= b[j][0] && b[i][1] <= b[j][1];
+  };
+  int ans = n;
+  auto f = [&](auto &self, int i) -> void {
+    if (i == n) {
+      ans = min(ans, *ranges::max_element(c));
+      return;
+    }
+    for (int j = 0; j < k; j++) {
+      if (s[j] < 0 || lte(s[j], i)) {
+        auto saved = s[j];
+        s[j] = i, c[j]++;
+        self(self, i + 1);
+        s[j] = saved, c[j]--; // backtrack
+      }
+    }
+  };
+  f(f, 0);
+  return ans;
+}
+
+int len2(const auto &b, int n, int k) {
+  Graph g(n);
+  for (int i = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      if (b[i][1] <= b[j][1]) {
+        g.add(i, j);
+      }
+    }
+  }
+  int m = (n + k - 1) / k;
+  vector<bool> vis(n);
+  for (int i = n - 1, c = k; i >= 0; i--) {
+    if (!vis[i]) {
+      vis[i] = true;
+      if (c) {
+        c--;
+        int u = i;
+        for (int s = m - 1; s > 0 && g[u].size(); s--) {
+          auto v = *g[u].rbegin();
+          while (g[v].size() && *g[v].rbegin() > v) {
+            g[*g[v].rbegin()].erase(v);
+            g[v].erase(prev(g[v].end()));
+          }
+          while (g[u].size()) {
+            g[*g[u].rbegin()].erase(u);
+            g[u].erase(prev(g[u].end()));
+          }
+          vis[v] = true;
+          u = v;
+        }
+        while (g[u].size()) {
+          g[*g[u].rbegin()].erase(u);
+          g[u].erase(prev(g[u].end()));
+        }
+      } else {
+        m++;
+      }
+    }
+  }
+  return m;
+}
 
 void solve(int t) {
-  Num n;
-  vector<array<Num<>, 2>> b(n);
-  ranges::sort(b, lta2); // O(n*log n)
+  Int n;
+  vector<array<Int, 2>> b(n);
+  // int n = 10;
+  // vector<array<int, 2>> b(n);
+  // for (auto &&bi : b) {
+  //   bi[0] = rand() % n + 1;
+  //   bi[1] = rand() % n + 1;
+  // }
+  ranges::sort(b); // O(n*log n)
   vector<int> heights;
-  vector<list<int>> shelves;
   for (int i = 0; i < n; i++) { // O(n*log n)
     int h = b[i][1];
     int j = ranges::lower_bound(heights, h, gt1) - heights.begin();
     if (j == heights.size()) {
       heights.push_back(h);
-      shelves.push_back({i});
     } else {
       heights[j] = h;
-      shelves[j].push_back(i);
     }
   }
-  auto f = [&](list<int> &l, list<int> &r, int &c) {
-    auto it = l.begin();
-    auto [w, h] = b[r.front()];
-    for (; it != l.end() && c > 0; it++, c--) { // O(c)
-      auto [w1, h1] = b[*it];
-      if (w1 > w || h1 > h) {
-        break;
-      }
-    }
-    r.splice(r.begin(), l, l.begin(), it); // O(1)
-  };
-  auto g = [&](list<int> &l, list<int> &r, int &c) {
-    auto it = l.end();
-    auto [w, h] = b[r.back()];
-    for (; it != l.begin() && c > 0; it--, c--) { // O(c)
-      auto [w1, h1] = b[*prev(it)];
-      if (w1 < w || h1 < h) {
-        break;
-      }
-    }
-    r.splice(r.end(), l, it, l.end()); // O(1)
-  };
   int k = heights.size();
-  for (bool done = false; !done;) { // O(n*k)
-    done = true;
-    for (int i = 1; i < k; i++) {
-      auto &l = shelves[i - 1], &r = shelves[i];
-      auto lc = l.size(), rc = r.size();
-      if (lc > rc) {
-        int c = (lc - rc + 1) / 2;
-        f(l, r, c);
-        g(l, r, c);
-        done = done && lc == l.size();
-      }
-    }
-  }
-  int m = 0;
-  for (auto &s : shelves) { // O(k)
-    m = max<int>(m, s.size());
-  }
-  cout << k << ' ' << m << endl;
+  int l1 = len1(b, n, k);
+  int l2 = len2(b, n, k);
+  // assert(l1 == l2);
+  cout << k << ' ' << l1 << ' ' << l2 << endl;
 }
 
 int main() {
@@ -85,7 +130,8 @@ int main() {
   freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
 #endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
-  Num t;
+  Int t;
+  // int t = 10;
   for (int i = 1; i <= t; ++i) {
     solve(i);
   }
