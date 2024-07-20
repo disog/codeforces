@@ -1,4 +1,6 @@
 /**
+ * https://codeforces.com/contest/1990/submission/271645680
+ *
  * Copyright (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
@@ -20,19 +22,19 @@ void solve(int t) {
   vector<Int> a(n);
   i64 ans = 0;
   auto f = [&]() {
-    map<int, int> cnt;
-    for (int i = 0, mx = 0; i < n; i++) {
+    unordered_set<int> set;
+    for (int i = 0, mx = 0; i < n; i++) { // O(n)
       ans += a[i];
-      if (cnt[a[i]]++ && a[i] > mx) {
+      if (!set.insert(a[i]).second && a[i] > mx) {
         mx = a[i];
       } else {
         a[i] = mx;
       }
     }
   };
-  f(), f();
+  f(), f(); // O(n)
   for (int i = 0; i < n; i++) {
-    ans += i64(n - i) * a[i];
+    ans += i64(n - i) * a[i]; // sum of prefix sums
   }
   cout << ans << endl;
 }
