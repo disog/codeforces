@@ -14,7 +14,21 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-void solve(int t) {}
+void solve(int t) {
+  Int n;
+  vector<Int> a(n);
+  map<int, int, greater<int>> cnt;
+  for (auto &&ai : a) {
+    cnt[ai]++;
+  }
+  for (auto [ai, c] : cnt) {
+    if (c % 2) {
+      cout << "YES" << endl;
+      return;
+    }
+  }
+  cout << "NO" << endl;
+}
 
 int main() {
 #ifdef LOCAL
