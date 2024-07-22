@@ -119,38 +119,6 @@ struct Bin : Fac {
 } bin;
 
 /**
- * (Undirected) Graph
- */
-struct Graph : vector<vector<int>> {
-  vector<array<Int, 2>> e;
-  Graph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
-    for (auto &[u, v] : e) {
-      add(u, v);
-    }
-  }
-  void add(int u, int v) {
-    (*this)[u].push_back(v);
-    (*this)[v].push_back(u);
-  }
-};
-
-/**
- * (Undirected) Weighed Graph
- */
-struct WGraph : vector<vector<array<int, 2>>> {
-  vector<array<Int, 3>> e;
-  WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
-    for (auto &[u, v, w] : e) {
-      add(u, v, w);
-    }
-  }
-  void add(int u, int v, int w) {
-    (*this)[u].push_back({v, w});
-    (*this)[v].push_back({u, w});
-  }
-};
-
-/**
  * Directed Graph
  */
 struct Digraph : vector<vector<int>> {
@@ -158,6 +126,20 @@ struct Digraph : vector<vector<int>> {
   Digraph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
     for (auto &[u, v] : e) {
       add(u, v);
+    }
+  }
+  void add(int u, int v) { (*this)[u].push_back(v); }
+};
+
+/**
+ * Undirected Graph
+ */
+struct Graph : vector<vector<int>> {
+  vector<array<Int, 2>> e;
+  Graph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
+    for (auto &[u, v] : e) {
+      add(u, v);
+      add(v, u);
     }
   }
   void add(int u, int v) { (*this)[u].push_back(v); }
@@ -174,6 +156,37 @@ struct WDigraph : vector<vector<array<int, 2>>> {
     }
   }
   void add(int u, int v, int w) { (*this)[u].push_back({v, w}); }
+};
+
+/**
+ * Weighed Undirected Graph
+ */
+struct WGraph : vector<vector<array<int, 2>>> {
+  vector<array<Int, 3>> e;
+  WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
+    for (auto &[u, v, w] : e) {
+      add(u, v, w);
+      add(v, u, w);
+    }
+  }
+  void add(int u, int v, int w) { (*this)[u].push_back({v, w}); }
+};
+
+/**
+ * Parent & depth (in undirected graph)
+ */
+struct Parent : vector<array<int, 2>> {
+  Parent(Graph g, int s = 0) : vector<array<int, 2>>(g.size()) {
+    dfs(g, s, s, 1);
+  }
+  void dfs(Graph &g, int u, int p, int d) {
+    (*this)[u] = {p, d};
+    for (auto &v : g[u]) {
+      if (v != p) {
+        dfs(g, v, u, d + 1);
+      }
+    }
+  }
 };
 
 /**

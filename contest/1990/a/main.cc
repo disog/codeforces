@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1990/submission/271667794
+ * https://codeforces.com/contest/1990/submission/271672976
  *
  * (c) 2024 Diego Sogari
  */
@@ -19,11 +19,11 @@ using Int = Num<int>;
 void solve(int t) {
   Int n;
   vector<Int> a(n);
-  map<int, int> cnt;
-  for (auto &&ai : a) {
-    cnt[ai]++;
+  vector<int> b(n + 1);
+  for (auto &ai : a) {
+    b[ai]++;
   }
-  for (auto [ai, c] : cnt) {
+  for (auto &c : b) {
     if (c % 2) {
       cout << "YES" << endl;
       return;

@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1990/submission/271604282
+ * https://codeforces.com/contest/1990/submission/271672732
  *
  * (c) 2024 Diego Sogari
  */
@@ -18,16 +18,13 @@ using Int = Num<int>;
 
 void solve(int t) {
   Int n, x, y;
-  vector<int> a(n);
+  vector<int> a(n, 1);
   x--, y--;
-  for (int i = y, v = 1; i >= 0; i--, v = -v) {
-    a[i] = v;
+  for (int i = y - 1; i >= 0; i -= 2) {
+    a[i] = -1;
   }
-  for (int i = y + 1; i < x; i++) {
-    a[i] = 1;
-  }
-  for (int i = x, v = 1; i < n; i++, v = -v) {
-    a[i] = v;
+  for (int i = x + 1; i < n; i += 2) {
+    a[i] = -1;
   }
   for (auto &&ai : a) {
     cout << ai << ' ';
