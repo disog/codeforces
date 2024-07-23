@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1995/submission/272100703
+ * https://codeforces.com/contest/1995/submission/272220864
  *
  * (c) 2024 Diego Sogari
  */
@@ -18,17 +18,10 @@ using Int = Num<int>;
 
 void solve(int t) {
   Int n, k;
-  int mn = 0, ans = 0;
-  for (int i = n; i >= 1 && mn < k; i--) {
-    mn += i;
+  int ans = 0;
+  for (int i = n; i > 0 && k > 0; i -= ans % 2) {
+    k -= i;
     ans++;
-    if (mn >= k) {
-      break;
-    }
-    if (i < n) {
-      mn += i;
-      ans++;
-    }
   }
   cout << ans << endl;
 }

@@ -1,9 +1,12 @@
 /**
+ * https://codeforces.com/contest/1995/submission/272221434
+ *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+using i64 = int64_t;
 
 template <typename T> struct Num {
   T x;
@@ -13,8 +16,34 @@ template <typename T> struct Num {
   operator T() const { return x; }
 };
 using Int = Num<int>;
+using I64 = Num<i64>;
 
-void solve(int t) {}
+i64 maxsum(int a, int ca, int b, int cb, i64 m) {
+  assert(a > 0 && a < b);
+  auto ua = min<i64>(ca, m / a);
+  auto ub = min<i64>(cb, (m - ua * a) / b);
+  auto ra = min<i64>({ua, cb - ub, (m - ua * a - ub * b) / (b - a)});
+  return (ua - ra) * a + (ub + ra) * b;
+}
+
+void solve(int t) {
+  Int n;
+  I64 m;
+  vector<Int> a(n), c(n);
+  a.push_back(INT_MAX);
+  c.push_back(0);
+  vector<int> ids(n + 1);
+  iota(ids.begin(), ids.end(), 0);
+  auto cmp = [&](int i, int j) { return a[i] < a[j]; };
+  ranges::sort(ids, cmp);
+  i64 ans = 0;
+  for (int i = 0; i < n; i++) {
+    int j = ids[i], k = ids[i + 1];
+    int ck = a[k] - a[j] == 1 ? int(c[k]) : 0;
+    ans = max(ans, maxsum(a[j], c[j], a[k], ck, m));
+  }
+  cout << ans << endl;
+}
 
 int main() {
 #ifdef LOCAL

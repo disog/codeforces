@@ -558,6 +558,17 @@ i64 choices(int a, int b, int c) {
 }
 
 /**
+ * Maximum sum satisfying inequality a * x + b * y <= m, for x <= ca and y <= cb
+ */
+i64 maxsum(int a, int ca, int b, int cb, i64 m) {
+  assert(a > 0 && a < b);
+  auto ua = min<i64>(ca, m / a);
+  auto ub = min<i64>(cb, (m - ua * a) / b);
+  auto ra = min<i64>({ua, cb - ub, (m - ua * a - ub * b) / (b - a)});
+  return (ua - ra) * a + (ub + ra) * b;
+}
+
+/**
  * Cartesian point
  */
 template <typename T = int> struct Point {
@@ -665,7 +676,7 @@ struct Hull : vector<int> {
 /**
  * Debugging utilities
  */
-void debugn(int n) { cout << n << ';'; }
+void debugn(auto n) { cout << n << ';'; }
 void debuga(const auto &a) {
   for (auto &ai : a) {
     cout << ai << ',';

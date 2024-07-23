@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1995/submission/272133688
+ * https://codeforces.com/contest/1995/submission/272210377
  *
  * (c) 2024 Diego Sogari
  */
@@ -18,42 +18,39 @@ template <typename T> struct Num {
 using Int = Num<int>;
 using I64 = Num<i64>;
 
-const greater<int> gt1;
-
 void solve(int t) {
   Int n;
   I64 m;
   vector<Int> a(n);
   ranges::sort(a);
-  vector<i64> b(n + 1);
   i64 ans = 0;
-  auto f = [&](int last, int i) {
-    for (int j = i; j > last; j--) {
-      if (b[i] - b[j - 1] <= m) {
-        ans = max(ans, b[i] - b[j - 1]);
+  auto f1 = [&](int last, int i) {
+    i64 sum = 0;
+    for (int j = i - 1; j >= last; j--) {
+      sum += a[j];
+      if (sum <= m) {
+        ans = max(ans, sum);
       } else {
-        i--; // remove one flower from right
+        sum -= a[--i]; // remove one flower from right
       }
     }
   };
   int last1 = 0, last2 = 0;
+  auto f2 = [&](int i) {
+    if (a[last1] - a[last2] == 1) {
+      f1(last2, i); // take two flowers
+    } else {
+      f1(last1, i); // take one flower
+    }
+  };
   for (int i = 0; i < n; i++) {
-    b[i + 1] += a[i] + b[i];
     if (a[i] != a[last1]) {
-      if (a[last1] - a[last2] == 1) {
-        f(last2, i); // take two flowers
-      } else {
-        f(last1, i); // take one flower
-      }
+      f2(i);
       last2 = last1;
       last1 = i;
     }
   }
-  if (a[last1] - a[last2] == 1) {
-    f(last2, n); // take two flowers
-  } else {
-    f(last1, n); // take one flower
-  }
+  f2(n);
   cout << ans << endl;
 }
 
