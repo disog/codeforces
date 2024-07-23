@@ -1,4 +1,6 @@
 /**
+ * https://codeforces.com/contest/1995/submission/272100703
+ *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
@@ -14,7 +16,22 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-void solve(int t) {}
+void solve(int t) {
+  Int n, k;
+  int mn = 0, ans = 0;
+  for (int i = n; i >= 1 && mn < k; i--) {
+    mn += i;
+    ans++;
+    if (mn >= k) {
+      break;
+    }
+    if (i < n) {
+      mn += i;
+      ans++;
+    }
+  }
+  cout << ans << endl;
+}
 
 int main() {
 #ifdef LOCAL
