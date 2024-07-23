@@ -4,7 +4,6 @@
 #include <bits/stdc++.h>
 
 using namespace std;
-using i64 = int64_t;
 
 template <typename T> struct Num {
   T x;
@@ -14,21 +13,8 @@ template <typename T> struct Num {
   operator T() const { return x; }
 };
 using Int = Num<int>;
-using I64 = Num<i64>;
 
-struct Query {
-  Int type, a, b;
-};
-
-void solve(int t) {
-  Int n, q;
-  vector<I64> a(n);
-  vector<Query> qs(q);
-  vector<i64> sum(n), mx(n);
-  for (int i = 1; i < n; i++) {
-    sum[i] += sum[i - 1];
-  }
-}
+void solve(int t) {}
 
 int main() {
 #ifdef LOCAL
