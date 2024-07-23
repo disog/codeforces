@@ -122,9 +122,8 @@ struct Bin : Fac {
  * Directed Graph
  */
 struct Digraph : vector<vector<int>> {
-  vector<array<Int, 2>> e;
-  Digraph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
-    for (auto &[u, v] : e) {
+  Digraph(int n, int m = 0) : vector<vector<int>>(n + 1) {
+    for (auto &[u, v] : vector<array<Int, 2>>(m)) {
       add(u, v);
     }
   }
@@ -135,23 +134,21 @@ struct Digraph : vector<vector<int>> {
  * Undirected Graph
  */
 struct Graph : vector<vector<int>> {
-  vector<array<Int, 2>> e;
-  Graph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
-    for (auto &[u, v] : e) {
+  Graph(int n, int m = 0) : vector<vector<int>>(n + 1) {
+    for (auto &[u, v] : vector<array<Int, 2>>(m)) {
       add(u, v);
-      add(v, u);
     }
   }
-  void add(int u, int v) { (*this)[u].push_back(v); }
+  void add(int u, int v) { _add(u, v), _add(v, u); }
+  void _add(int u, int v) { (*this)[u].push_back(v); }
 };
 
 /**
  * Weighed Directed Graph
  */
 struct WDigraph : vector<vector<array<int, 2>>> {
-  vector<array<Int, 3>> e;
-  WDigraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
-    for (auto &[u, v, w] : e) {
+  WDigraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n + 1) {
+    for (auto &[u, v, w] : vector<array<Int, 3>>(m)) {
       add(u, v, w);
     }
   }
@@ -162,28 +159,32 @@ struct WDigraph : vector<vector<array<int, 2>>> {
  * Weighed Undirected Graph
  */
 struct WGraph : vector<vector<array<int, 2>>> {
-  vector<array<Int, 3>> e;
-  WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
-    for (auto &[u, v, w] : e) {
+  WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n + 1) {
+    for (auto &[u, v, w] : vector<array<Int, 3>>(m)) {
       add(u, v, w);
-      add(v, u, w);
     }
   }
-  void add(int u, int v, int w) { (*this)[u].push_back({v, w}); }
+  void add(int u, int v, int w) { _add(u, v, w), _add(v, u, w); }
+  void _add(int u, int v, int w) { (*this)[u].push_back({v, w}); }
 };
 
 /**
- * Parent & depth (in undirected graph)
+ * Tree
  */
-struct Parent : vector<array<int, 2>> {
-  Parent(Graph g, int s = 0) : vector<array<int, 2>>(g.size()) {
-    dfs(g, s, s, 1);
-  }
-  void dfs(Graph &g, int u, int p, int d) {
-    (*this)[u] = {p, d};
-    for (auto &v : g[u]) {
+struct Tree : Graph {
+  struct Info {
+    int par, dep, siz, hei;
+  };
+  vector<Info> info;
+  Tree(int n) : Graph(n), info(n + 1) {} // no edges
+  Tree(int n, int s) : Graph(n, n - 1), info(n + 1) { dfs(s, s); }
+  void dfs(int u, int p, int d = 1) {
+    auto &cur = info[u] = {p, d, 1, 1};
+    for (auto &v : (*this)[u]) {
       if (v != p) {
-        dfs(g, v, u, d + 1);
+        dfs(v, u, d + 1);
+        cur.siz += info[v].siz;
+        cur.hei = max(cur.hei, 1 + info[v].hei);
       }
     }
   }
@@ -195,7 +196,7 @@ struct Parent : vector<array<int, 2>> {
 struct Match : vector<int> {
   int count = 0;
   vector<pair<int, int>> bridges;
-  Match(Graph g, int s = 0) : vector<int>(g.size(), -1), low(g.size()) {
+  Match(Graph &g, int s) : vector<int>(g.size(), -1), low(g.size()) {
     int t = 1;
     dfs(g, s, s, t);
   }
@@ -229,7 +230,7 @@ private:
  */
 struct SCC : vector<int> {
   int count = 0;
-  SCC(Digraph g) : vector<int>(g.size()), low(g.size()) {
+  SCC(Digraph &g) : vector<int>(g.size()), low(g.size()) {
     for (int i = 0, t = 1; i < g.size(); i++) {
       if (low[i] == 0) {
         dfs(g, i, t);
@@ -354,59 +355,80 @@ struct Fen {
 template <typename T> struct Mat : vector<vector<T>> {
   int n, m;
   Mat(int n, int m) : vector<vector<T>>(n), n(n), m(m) {
-    for (auto &&row : *this) {
+    for (auto &row : *this) {
       row.resize(m);
     }
   }
-  static Mat ident(int n) {
-    Mat ans(n, n);
-    for (int i = 0; i < n; i++) {
-      ans[i][i] = 1;
-    }
-    return ans;
-  }
-  Mat trans() const {
-    Mat ans(m, n);
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < m; j++) {
-        ans[j][i] = (*this)[i][j];
-      }
-    }
-    return ans;
-  }
-  Mat pow(int rhs) const {
-    auto base = *this, ans = ident(n);
-    for (; rhs; rhs >>= 1, base *= base) {
-      if (rhs & 1) {
-        ans *= base;
-      }
-    }
-    return ans;
-  }
-  template <typename U> vector<U> operator*(const vector<U> &rhs) const {
-    assert(m == rhs.size());
-    vector<U> ans(n);
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < m; j++) {
-        ans[i] += (*this)[i][j] * rhs[i];
-      }
-    }
-    return ans;
-  }
-  template <typename U> Mat<U> operator*(const Mat<U> &rhs) const {
-    assert(m == rhs.n);
-    Mat<U> ans(n, rhs.m);
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < rhs.m; j++) {
-        for (int k = 0; k < m; k++) {
-          ans[i][j] += (*this)[i][k] * rhs[k][j];
-        }
-      }
-    }
-    return ans;
-  }
-  Mat &operator*=(const Mat &rhs) { return *this = operator*(rhs); }
 };
+
+/**
+ * Matrix-vector multiplication
+ */
+template <typename T, typename U>
+vector<U> operator*(const Mat<T> &mat, const vector<U> &rhs) {
+  assert(m == rhs.size());
+  vector<U> ans(n);
+  for (int i = 0; i < n; i++) {
+    for (int j = 0; j < m; j++) {
+      ans[i] += (*this)[i][j] * rhs[i];
+    }
+  }
+  return ans;
+}
+
+/**
+ * Matrix multiplication
+ */
+template <typename T, typename U>
+Mat<U> operator*(const Mat<T> &mat, const Mat<U> &rhs) {
+  assert(mat.m == rhs.n);
+  Mat<U> ans(mat.n, rhs.m);
+  for (int i = 0; i < mat.n; i++) {
+    for (int j = 0; j < rhs.m; j++) {
+      for (int k = 0; k < mat.m; k++) {
+        ans[i][j] += mat[i][k] * rhs[k][j];
+      }
+    }
+  }
+  return ans;
+}
+
+/**
+ * Matrix idendity
+ */
+template <typename T> Mat<T> ident(int n) {
+  Mat<T> ans(n, n);
+  for (int i = 0; i < n; i++) {
+    ans[i][i] = 1;
+  }
+  return ans;
+}
+
+/**
+ * Matrix exponentiation
+ */
+template <typename T> Mat<T> pow(const Mat<T> &mat, int rhs) {
+  auto base = mat, ans = ident<T>(n);
+  for (; rhs; rhs >>= 1, base *= base) {
+    if (rhs & 1) {
+      ans *= base;
+    }
+  }
+  return ans;
+}
+
+/**
+ * Matrix transpose
+ */
+template <typename T> Mat<T> trans(const Mat<T> &mat) {
+  Mat<T> ans(mat.m, mat.n);
+  for (int i = 0; i < mat.n; i++) {
+    for (int j = 0; j < mat.m; j++) {
+      ans[j][i] = mat[i][j];
+    }
+  }
+  return ans;
+}
 
 /**
  * 2-D prefix sums

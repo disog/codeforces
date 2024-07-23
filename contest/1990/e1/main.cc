@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1990/submission/271882332
+ * https://codeforces.com/contest/1990/submission/271990684
  *
  * (c) 2024 Diego Sogari
  */
@@ -17,14 +17,32 @@ template <typename T> struct Num {
 using Int = Num<int>;
 
 struct Graph : vector<vector<int>> {
-  vector<array<Int, 2>> e;
-  Graph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
-    for (auto &[u, v] : e) {
+  Graph(int n, int m = 0) : vector<vector<int>>(n + 1) {
+    for (auto &[u, v] : vector<array<Int, 2>>(m)) {
       add(u, v);
-      add(v, u);
     }
   }
-  void add(int u, int v) { (*this)[u].push_back(v); }
+  void add(int u, int v) { _add(u, v), _add(v, u); }
+  void _add(int u, int v) { (*this)[u].push_back(v); }
+};
+
+struct Tree : Graph {
+  struct Info {
+    int par, dep, siz, hei;
+  };
+  vector<Info> info;
+  Tree(int n) : Graph(n), info(n + 1) {} // no edges
+  Tree(int n, int s) : Graph(n, n - 1), info(n + 1) { dfs(s, s); }
+  void dfs(int u, int p, int d = 1) {
+    auto &cur = info[u] = {p, d, 1, 1};
+    for (auto &v : (*this)[u]) {
+      if (v != p) {
+        dfs(v, u, d + 1);
+        cur.siz += info[v].siz;
+        cur.hei = max(cur.hei, 1 + info[v].hei);
+      }
+    }
+  }
 };
 
 int binsearch(const auto &f, int s, int e) {
@@ -37,41 +55,31 @@ int binsearch(const auto &f, int s, int e) {
 
 void solve(int t) {
   Int n;
-  Graph g(n + 1, n - 1);
-  vector<int> path, mxdepth(n + 1);
+  Tree g(n, 1);
+  vector<int> path;
   int limit = n / 300;
   auto p = [](char c, int x) { (cout << c << ' ' << x << endl).flush(); };
   auto q = [&](int x) { return p('?', x), Int(); };
-  auto f2 = [&](auto &self, int u, int p) -> void {
-    mxdepth[u] = 1;
-    for (auto &v : g[u]) {
-      if (v != p) {
-        self(self, v, u);
-        mxdepth[u] = max(mxdepth[u], 1 + mxdepth[v]);
-      }
-    }
-  };
-  f2(f2, 1, 1);
   auto f = [&](auto &self, int u, int p) -> void {
     path.push_back(u);
     vector<int> test;
     for (auto &&v : g[u]) {
       if (v != p) {
-        if (mxdepth[v] + 1 == mxdepth[u]) {
+        if (g.info[v].hei + 1 == g.info[u].hei) {
           test.push_back(v);
-        } else if (mxdepth[v] > limit && q(v)) {
+        } else if (g.info[v].hei > limit && q(v)) {
           return self(self, v, u);
         }
       }
     }
     bool check = test.size() > 1;
     for (auto &v : test) {
-      if (!check || (mxdepth[v] > limit && q(v))) {
+      if (!check || (g.info[v].hei > limit && q(v))) {
         return self(self, v, u);
       }
     }
   };
-  if (mxdepth[1] > limit) {
+  if (g.info[1].hei > limit) {
     f(f, 1, 1);
   }
   while (limit && !q(n)) {
