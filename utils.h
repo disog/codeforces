@@ -676,18 +676,19 @@ struct Hull : vector<int> {
 /**
  * Debugging utilities
  */
-void debugn(auto n) { cout << n << ';'; }
-void debuga(const auto &a) {
+void debug(const auto &...args) { ((cout << args << ';'), ...) << endl; }
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
   for (auto &ai : a) {
-    cout << ai << ',';
+    os << ai << ',';
   }
-  cout << ';';
+  return os;
 }
-void debuga2(const auto &a) {
-  for (auto &[x, y] : a) {
-    cout << x << ',' << y << ',';
+template <typename T, size_t N>
+ostream &operator<<(ostream &os, const array<T, N> &a) {
+  for (auto &ai : a) {
+    os << ai << ',';
   }
-  cout << ';';
+  return os;
 }
 
 /**

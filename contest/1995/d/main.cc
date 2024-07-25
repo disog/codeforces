@@ -1,4 +1,6 @@
 /**
+ * https://codeforces.com/contest/1995/submission/272527017
+ *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
@@ -14,7 +16,41 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-void solve(int t) {}
+struct Str : string {
+  Str() { cin >> *this; }
+};
+
+void solve(int t) {
+  Int n, c, k;
+  Str s;
+  unsigned m = 1 << c;
+  vector<int> cnt(c);
+  vector<bool> bad(m);
+  for (int i = 0, mask = 0; i < n; i++) {
+    cnt[s[i] - 'A']++;
+    mask |= 1 << (s[i] - 'A');
+    if (i >= k - 1) {
+      if (i >= k && !--cnt[s[i - k] - 'A']) {
+        mask ^= 1 << (s[i - k] - 'A');
+      }
+      bad[(m - 1) ^ mask] = true;
+    }
+  }
+  bad[(m - 1) ^ (1 << (s.back() - 'A'))] = true;
+  int ans = c;
+  for (unsigned i = m - 1; i > 0; i--) {
+    if (!bad[i]) {
+      ans = min(ans, popcount(i));
+      continue;
+    }
+    for (int b = 1; b < m; b <<= 1) {
+      if (i & b) {
+        bad[i ^ b] = true;
+      }
+    }
+  }
+  cout << ans << endl;
+}
 
 int main() {
 #ifdef LOCAL
