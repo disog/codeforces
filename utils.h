@@ -6,6 +6,12 @@
 #include <bits/stdc++.h>
 
 /**
+ * Common compilation flags
+ */
+#pragma GCC optimize("O3,unroll-loops")
+#pragma GCC target("avx2,popcnt")
+
+/**
  * Common namespaces
  */
 using namespace std;
@@ -191,31 +197,49 @@ struct Tree : Graph {
 };
 
 /**
- * Matching & bridges (of undirected graph)
+ * Matching (of tree)
  */
 struct Match : vector<int> {
   int count = 0;
-  vector<pair<int, int>> bridges;
-  Match(Graph &g, int s) : vector<int>(g.size(), -1), low(g.size()) {
+  Match(const Tree &g, int s) : vector<int>(g.size(), -1), vis(g.size()) {
+    dfs(g, s, s);
+  }
+
+private:
+  void dfs(const Tree &g, int u, int p) {
+    vis[u] = true;
+    for (auto v : g[u]) {
+      if (v != p && !vis[v]) {
+        dfs(g, v, u); // post-order (visit leaves first)
+        if ((*this)[u] == (*this)[v]) {
+          (*this)[u] = v;
+          (*this)[v] = u;
+          count++;
+        }
+      }
+    }
+  }
+  vector<bool> vis;
+};
+
+/**
+ * Bridges (of undirected connected graph)
+ */
+struct Bridges : vector<pair<int, int>> {
+  Bridges(const Graph &g, int s) : low(g.size()) {
     int t = 1;
     dfs(g, s, s, t);
   }
 
 private:
-  void dfs(Graph &g, int u, int p, int &t) {
-    auto &match = *this;
+  void dfs(const Graph &g, int u, int p, int &t) {
     auto tx = low[u] = t++;
     for (auto v : g[u]) {
       if (v != p) {
         if (low[v] == 0) {
-          dfs(g, v, u, t);   // post-order (visit leaves first)
-          if (low[v] > tx) { // new bridge
-            bridges.emplace_back(u, v);
-          }
-          if (match[u] == match[v]) {
-            match[u] = v;
-            match[v] = u;
-            count++;
+          dfs(g, v, u, t); // post-order (visit leaves first)
+          if (low[v] > tx) {
+            emplace_back(u, v);
           }
         }
         low[u] = min(low[u], low[v]);
@@ -230,7 +254,7 @@ private:
  */
 struct SCC : vector<int> {
   int count = 0;
-  SCC(Digraph &g) : vector<int>(g.size()), low(g.size()) {
+  SCC(const Digraph &g) : vector<int>(g.size()), low(g.size()) {
     for (int i = 0, t = 1; i < g.size(); i++) {
       if (low[i] == 0) {
         dfs(g, i, t);
@@ -239,9 +263,9 @@ struct SCC : vector<int> {
   }
 
 private:
-  void dfs(Digraph &g, int u, int &t) {
+  void dfs(const Digraph &g, int u, int &t) {
     auto tx = low[u] = t++;
-    visited.push_back(u);
+    vis.push_back(u);
     for (auto v : g[u]) {
       if (low[v] == 0) {
         dfs(g, v, t);
@@ -250,14 +274,44 @@ private:
     }
     if (low[u] == tx) { // component root
       count++;
-      for (int v = -1; v != u; visited.pop_back()) {
-        v = visited.back();
+      for (int v = -1; v != u; vis.pop_back()) {
+        v = vis.back();
         low[v] = g.size();
         (*this)[v] = count;
       }
     }
   }
-  vector<int> low, visited;
+  vector<int> low, vis;
+};
+
+/**
+ * 2-Satisfiability solver
+ */
+struct TwoSat {
+  int n;
+  Digraph g;
+  TwoSat(int n) : g(2 * n), n(n) {}
+  void add(int a, int b) { g.add(n + a, n + b); }
+  void either(int a, int b) { implies(-a, b); }
+  void notequal(int a, int b) { equal(-a, b); }
+  void set(int a) { add(-a, a); }
+  void equal(int a, int b) {
+    implies(a, b);
+    implies(-a, -b);
+  }
+  void implies(int a, int b) {
+    add(a, b);   //  a ->  b
+    add(-b, -a); // !b -> !a
+  }
+  bool operator()() const {
+    SCC scc(g);
+    for (int i = 0; i < n; i++) {
+      if (scc[i] == scc[2 * n - i]) {
+        return false;
+      }
+    }
+    return true;
+  }
 };
 
 /**
@@ -671,6 +725,13 @@ struct Hull : vector<int> {
     }
     resize(i - begin());
   }
+};
+
+/**
+ * MV Matching (of undirected graph)
+ */
+struct MVMatch : vector<int> {
+  MVMatch(Graph &g) : vector<int>(g.size()) {}
 };
 
 /**
