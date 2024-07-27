@@ -272,11 +272,13 @@ private:
     }
     if (low[u] == tx) { // component root
       count++;
-      for (int v = -1; v != u; vis.pop_back()) {
-        v = vis.back();
+      int i = vis.size();
+      do {
+        auto v = vis[--i];
         low[v] = g.size();
         (*this)[v] = count;
-      }
+      } while (vis[i] != u);
+      vis.resize(i);
     }
   }
   vector<int> low, vis;
@@ -303,8 +305,8 @@ struct TwoSat {
   }
   bool operator()() const {
     SCC scc(g);
-    for (int i = 0; i < n; i++) {
-      if (scc[i] == scc[2 * n - i]) {
+    for (int i = 1; i <= n; i++) {
+      if (scc[n + i] == scc[n - i]) {
         return false;
       }
     }
@@ -727,12 +729,6 @@ struct Hull : vector<int> {
 /**
  * Printing utilities
  */
-#ifdef LOCAL
-#define debug println
-#else
-#define debug
-#endif
-
 void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T, size_t N>
@@ -749,16 +745,23 @@ template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
 void solve(int t) { Int n; }
 
 /**
+ * Input redirection
+ */
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+using filesystem::path;
+auto _ = freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
+#define debug println
+#endif
+
+/**
  * Main function
  */
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }
