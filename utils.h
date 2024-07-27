@@ -1,6 +1,4 @@
 /**
- * Utils
- *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
@@ -727,28 +725,22 @@ struct Hull : vector<int> {
 };
 
 /**
- * MV Matching (of undirected graph)
+ * Printing utilities
  */
-struct MVMatch : vector<int> {
-  MVMatch(Graph &g) : vector<int>(g.size()) {}
-};
+#ifdef LOCAL
+#define debug println
+#else
+#define debug
+#endif
 
-/**
- * Debugging utilities
- */
-void debug(const auto &...args) { ((cout << args << ';'), ...) << endl; }
-template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
-  for (auto &ai : a) {
-    os << ai << ',';
-  }
-  return os;
-}
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
+
 template <typename T, size_t N>
 ostream &operator<<(ostream &os, const array<T, N> &a) {
-  for (auto &ai : a) {
-    os << ai << ',';
-  }
-  return os;
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
 }
 
 /**

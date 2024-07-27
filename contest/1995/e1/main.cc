@@ -5,6 +5,22 @@
 
 using namespace std;
 
+#ifdef LOCAL
+#define debug println
+#else
+#define debug
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
+
+template <typename T, size_t N>
+ostream &operator<<(ostream &os, const array<T, N> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+
 template <typename T> struct Num {
   T x;
   Num() { cin >> x; }
@@ -85,58 +101,87 @@ struct TwoSat {
 void solve(int t) {
   Int n;
   vector<Int> a(2 * n);
+  if (n == 1) {
+    println(0);
+    return;
+  }
   if (n % 2 == 0) {
     int mn = INT_MAX, mx = 0;
     for (int i = 0; i < n; i += 2) {
-      multiset<int> sums = {
+      vector<int> sums = {
           a[i] + a[i + 1],
           a[i] + a[i + n + 1],
           a[i + n] + a[i + 1],
           a[i + n] + a[i + n + 1],
       };
-      mn = min(mn, *next(sums.begin()));
-      mx = max(mx, *next(sums.rbegin()));
+      ranges::sort(sums);
+      mn = min(mn, sums[1]);
+      mx = max(mx, sums[2]);
     }
-    cout << mx - mn << endl;
+    println(mx - mn);
     return;
   }
-  vector<int> sums;
-  vector<array<int, 2>> edges;
-  auto add = [&](int i, int j) {
-    sums.push_back(a[i] + a[j]);
-    edges.push_back({i, j});
+  vector<array<int, 3>> edges;
+  vector<array<array<bool, 2>, 2>> desks(n);
+  auto add = [&](int i, int j) { edges.push_back({a[i] + a[j], i, j}); };
+  auto cmp = [](auto &e1, auto &e2) { return e1[0] < e2[0]; };
+  auto use = [&](int k, bool val) {
+    auto [_, i, j] = edges[k];
+    desks[i % n][i < n][j < n] = val;
   };
-  for (int i = 0; i < 2 * n; i++) {
-    if (n % 2 || i % 2 == 0) {
-      add(i, (i + 1) % (2 * n));
-      add(i, (i + n + 1) % (2 * n));
-    }
-  }
-  int m = sums.size();
-  vector<int> idx(m);
-  iota(idx.begin(), idx.end(), 0);
-  auto cmp = [&](int i, int j) { return sums[i] < sums[j]; };
-  ranges::sort(idx, cmp);
-  auto check = [&](int l, int r) {
+  auto chk = [&](int l, int r) {
     TwoSat sat(n);
-    for (; l <= r; l++) {
-      auto [i, j] = edges[idx[l]];
-      i = i < n ? i + 1 : n - (i + 1);
-      j = j < n ? j + 1 : n - (j + 1);
-      sat.implies(i, j);
+    for (int i = 0; i < n; i++) {
+      auto [u, v] = desks[i];
+      auto a = i % n + 1, b = (i + 1) % n + 1; // a/b are the students
+      switch (u[0] + u[1] + v[0] + v[1]) { // v/1 is original, u/0 is swapped
+      case 0:
+        return false; // desk would be empty
+      case 1:
+        sat.set(v[0] || v[1] ? a : -a);
+        sat.set(v[1] || u[1] ? b : -b);
+        break;
+      case 2:
+        if (v[0] && v[1]) {
+          sat.set(a);
+        } else if (v[1] && u[1]) {
+          sat.set(b);
+        } else if (u[0] && u[1]) {
+          sat.set(-a);
+        } else if (v[0] && u[0]) {
+          sat.set(-b);
+        } else if (v[1] && u[0]) {
+          sat.equal(a, b);
+        } else /* v[0] && u[1] */ {
+          sat.notequal(a, b);
+        }
+        break;
+      case 3:
+        sat.either(v[0] && v[1] ? a : -a, v[1] && u[1] ? b : -b);
+        break;
+      }
     }
     return sat();
   };
-  int ans = INT_MAX;
-  for (int l = 0, r = 1; l < r && r < m; l++) {
-    while (r < m && !check(l, r)) {
-      r++;
-    }
-    if (r < m) {
-      ans = min(ans, sums[idx[r]] - sums[idx[l]]);
-    }
+  int ans = INT_MAX, total = 0;
+  for (int i = 0; i < 2 * n; i++) {
+    add(i, (i + 1) % (2 * n));
+    add(i, (i + n + 1) % (2 * n));
+    total += a[i];
   }
-  cout << ans << endl;
+  ranges::sort(edges, cmp);
+  debug(edges);
+  for (int l = 0, r = 0, e = edges.size(); r < e; l++) {
+    for (; r < e; r++) {
+      use(r, true);
+      if (r - l + 1 >= n && edges[r][0] * n >= total && chk(l, r)) {
+        ans = min(ans, edges[r][0] - edges[l][0]);
+        break;
+      }
+    }
+    use(l, false);
+  }
+  println(ans);
 }
 
 int main() {
