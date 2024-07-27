@@ -388,16 +388,15 @@ struct DSU {
  */
 struct Fen {
   vector<int> nodes;
-  Fen(int n) : nodes(n) {}
-  void query(int x, const auto &f) { range_query(0, x); }
-  void update(int x, const auto &f) { range_update(x, size() - 1); }
-  void range_query(int x, int y, const auto &f) {
-    for (; x <= y; y -= y & -y) {
+  Fen(int n) : nodes(n + 1) {}
+  void query(int y, const auto &f) {
+    for (; y > 0; y -= y & -y) {
       f(y, nodes[y]);
     }
   }
-  void range_update(int x, int y, const auto &f) {
-    for (; x <= y; x += x & -x) {
+  void update(int x, const auto &f) {
+    assert(x > 0);
+    for (; x < nodes.size(); x += x & -x) {
       f(x, nodes[x]);
     }
   }
@@ -601,12 +600,12 @@ int binsearch(const auto &f, int s, int e) {
 }
 
 /**
- * Choices satisfying inequality x + y <= c, for x <= a and y <= b
+ * Choices satisfying inequality x + y <= m, for x <= a and y <= b
  */
-i64 choices(int a, int b, int c) {
+i64 choices(int a, int b, i64 m) {
   i64 ans = 0;
   for (int i = 0; i <= a; i++) {
-    ans += max(0, 1 + min(b, c - i));
+    ans += max<i64>(0, 1 + min<i64>(b, m - i));
   }
   return ans;
 }

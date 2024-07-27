@@ -14,7 +14,20 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-void solve(int t) {}
+struct Str : string {
+  Str() { cin >> *this; }
+};
+
+void solve(int t) {
+  Int n, k;
+  vector<Str> g(n);
+  for (int i = 0; i < n; i += k) {
+    for (int j = 0; j < n; j += k) {
+      cout << g[i][j];
+    }
+    cout << endl;
+  }
+}
 
 int main() {
 #ifdef LOCAL

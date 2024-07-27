@@ -1,4 +1,6 @@
 /**
+ * https://codeforces.com/contest/1996/submission/272743069
+ *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
@@ -14,7 +16,12 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-void solve(int t) {}
+void solve(int t) {
+  Int n;
+  int a = n / 4;
+  int b = (n - a * 4) / 2;
+  cout << a + b << endl;
+}
 
 int main() {
 #ifdef LOCAL
