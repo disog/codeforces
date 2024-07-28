@@ -1,11 +1,20 @@
 /**
- * https://codeforces.com/contest/1971/submission/270393531
+ * https://codeforces.com/contest/1971/submission/273045877
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -25,21 +34,18 @@ void solve(int t) {
   for (int i = 1; i < s.size(); ++i) {
     if (s[i] != s[0]) {
       swap(s[i], s[0]);
-      cout << "YES" << endl << s << endl;
+      println("YES");
+      println(s);
       return;
     }
   }
-  cout << "NO" << endl;
+  println("NO");
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

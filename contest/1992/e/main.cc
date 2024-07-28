@@ -1,11 +1,27 @@
 /**
- * https://codeforces.com/contest/1992/submission/270399680
+ * https://codeforces.com/contest/1992/submission/273051391
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+template <typename T, size_t N>
+ostream &operator<<(ostream &os, const array<T, N> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << endl; }), os;
+}
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -19,9 +35,9 @@ using Int = Num<int>;
 void solve(int t) {
   Int n;
   if (n == 1) {
-    cout << 9999 << endl;
+    println(9999);
     for (int i = 1; i < 1e4; i++) {
-      cout << i + 1 << ' ' << i << endl;
+      println(i + 1, i);
     }
     return;
   }
@@ -44,20 +60,14 @@ void solve(int t) {
       }
     }
   }
-  cout << ans.size() << endl;
-  for (auto &&[a, b] : ans) {
-    cout << a << ' ' << b << endl;
-  }
+  println(ans.size());
+  println(ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

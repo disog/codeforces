@@ -1,11 +1,20 @@
 /**
- * https://codeforces.com/contest/1971/submission/272715933
+ * https://codeforces.com/contest/1971/submission/273046410
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -47,34 +56,38 @@ private:
     }
     if (low[u] == tx) { // component root
       count++;
-      for (int v = -1; v != u; vis.pop_back()) {
-        v = vis.back();
+      int i = vis.size();
+      do {
+        auto v = vis[--i];
         low[v] = g.size();
         (*this)[v] = count;
-      }
+      } while (vis[i] != u);
+      vis.resize(i);
     }
   }
   vector<int> low, vis;
 };
 
-struct TwoSat : Digraph {
+struct TwoSat {
   int n;
-  TwoSat(int n) : Digraph(2 * n), n(n) {}
-  void add(int a, int b) { Digraph::add(n + a, n + b); }
+  Digraph g;
+  TwoSat(int n) : g(2 * n), n(n) {}
+  void add(int a, int b) { g.add(n + a, n + b); }
   void either(int a, int b) { implies(-a, b); }
   void notequal(int a, int b) { equal(-a, b); }
+  void set(int a) { add(-a, a); }
   void equal(int a, int b) {
     implies(a, b);
     implies(-a, -b);
   }
   void implies(int a, int b) {
-    add(a, b);   // a -> b
+    add(a, b);   //  a ->  b
     add(-b, -a); // !b -> !a
   }
   bool operator()() const {
-    SCC scc(*this);
-    for (int i = 0; i < n; i++) {
-      if (scc[i] == scc[2 * n - i]) {
+    SCC scc(g);
+    for (int i = 1; i <= n; i++) {
+      if (scc[n + i] == scc[n - i]) {
         return false;
       }
     }
@@ -91,17 +104,13 @@ void solve(int t) {
     sat.either(a[i], c[i]);
     sat.either(b[i], c[i]);
   }
-  cout << (sat() ? "YES" : "NO") << endl;
+  println((sat() ? "YES" : "NO"));
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

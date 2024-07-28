@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/270394156
+ * https://codeforces.com/contest/1971/submission/273046188
  *
  * (c) 2024 Diego Sogari
  */
@@ -7,6 +7,18 @@
 
 using namespace std;
 using i64 = int64_t;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -29,20 +41,15 @@ void solve(int t) {
     int b0 = j ? (int)b[j - 1] : 0;
     return b0 + (i64(d - a0) * (b[j] - b0)) / (a[j] - a0);
   };
-  for (auto &di : d) {
-    cout << f(di) << ' ';
-  }
-  cout << endl;
+  vector<int> ans(q);
+  ranges::transform(d, ans.begin(), f);
+  println(ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

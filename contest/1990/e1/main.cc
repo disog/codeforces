@@ -1,11 +1,20 @@
 /**
- * https://codeforces.com/contest/1990/submission/271990684
+ * https://codeforces.com/contest/1990/submission/273050926
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -58,8 +67,7 @@ void solve(int t) {
   Tree g(n, 1);
   vector<int> path;
   int limit = n / 300;
-  auto p = [](char c, int x) { (cout << c << ' ' << x << endl).flush(); };
-  auto q = [&](int x) { return p('?', x), Int(); };
+  auto q = [&](int x) { return println('?', x), Int(); };
   auto f = [&](auto &self, int u, int p) -> void {
     path.push_back(u);
     vector<int> test;
@@ -97,17 +105,13 @@ void solve(int t) {
       ans = path[max(0, i)];
     }
   }
-  p('!', ans);
+  println('!', ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

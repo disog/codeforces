@@ -1,11 +1,20 @@
 /**
- * https://codeforces.com/contest/1980/submission/270394558
+ * https://codeforces.com/contest/1980/submission/273046649
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -27,17 +36,13 @@ void solve(int t) {
     ranges::sort(a, gt1);
     ans = a[k - 1] > x ? "NO" : (a[k] < x ? "YES" : "MAYBE");
   }
-  cout << ans << endl;
+  println(ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/271011898
+ * https://codeforces.com/contest/1984/submission/273048360
  *
  * (c) 2024 Diego Sogari
  */
@@ -8,6 +8,15 @@
 using namespace std;
 using i64 = int64_t;
 using f64 = double;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 constexpr int _mod = 998244353;
 
@@ -159,10 +168,10 @@ void solve(int t) {
   int p0 = ranges::find(hull, 0) - hull.begin();
   int p1 = ranges::find(hull, 1) - hull.begin();
   if (p0 == m || p1 == m) {
-    cout << 0 << endl;
+    println(0);
     return;
   }
-  auto check = [&](int i, int j, int k) {
+  auto chk = [&](int i, int j, int k) {
     auto &a = p[hull[i]];
     auto &b = p[hull[j]];
     auto &c = p[hull[k]];
@@ -177,9 +186,9 @@ void solve(int t) {
     return true;
   };
   Mod ans = 1;
-  auto f = [&](auto &self, int i, int j) -> int { // O(n*log n)/O(n^2)
+  auto f = [&](auto &self, int i, int j) -> int { // O(n*log n) / O(n^2)
     for (Mod k = {i + 1, m}; k != j; k += 1) {
-      if (check(i, j, k)) {
+      if (chk(i, j, k)) {
         auto l = self(self, i, k);
         auto r = self(self, k, j);
         auto s = 1 + l + r;
@@ -190,17 +199,13 @@ void solve(int t) {
   };
   auto s0 = f(f, p0, p1);
   auto s1 = f(f, p1, p0);
-  cout << (s0 || s1 ? fac[m - 2] / ans : Mod{0, m}) << endl;
+  println(s0 || s1 ? fac[m - 2] / ans : Mod{0, m});
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

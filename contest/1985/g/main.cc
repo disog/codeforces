@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1985/submission/270398472
+ * https://codeforces.com/contest/1985/submission/273048712
  *
  * (c) 2024 Diego Sogari
  */
@@ -7,6 +7,15 @@
 
 using namespace std;
 using i64 = int64_t;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 constexpr int _mod = 1000000007;
 
@@ -50,18 +59,13 @@ struct Mod {
 void solve(int t) {
   Int l, r, k;
   Mod ans = 9 / k + 1;
-  ans = ans.pow(r) - ans.pow(l);
-  cout << ans << endl;
+  println(ans.pow(r) - ans.pow(l));
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

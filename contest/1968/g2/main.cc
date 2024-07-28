@@ -1,12 +1,24 @@
 /**
- * https://codeforces.com/contest/1968/submission/270393290
+ * https://codeforces.com/contest/1968/submission/273045656
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using namespace placeholders;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+template <typename T, size_t N>
+ostream &operator<<(ostream &os, const span<T, N> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -62,25 +74,18 @@ void solve(int t) {
     lcp[f(x)] = x;
   }
   for (int k = 1; k <= m; k++) {
-    lcp[k] = binsearch(bind(g, k, _1), 0, n);
+    lcp[k] = binsearch(bind(g, k, placeholders::_1), 0, n);
   }
   for (int i = n - 1; i > 0; i--) {
     lcp[i] = max(lcp[i], lcp[i + 1]);
   }
-  for (int k = l; k <= r; k++) {
-    cout << lcp[k] << ' ';
-  }
-  cout << endl;
+  println(span(&lcp[l], r - l + 1));
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

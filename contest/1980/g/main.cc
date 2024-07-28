@@ -1,11 +1,23 @@
 /**
- * https://codeforces.com/contest/1980/submission/270395619
+ * https://codeforces.com/contest/1980/submission/273047300
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -18,16 +30,13 @@ using Int = Num<int>;
 using Chr = Num<char>;
 
 struct WGraph : vector<vector<array<int, 2>>> {
-  vector<array<Int, 3>> e;
-  WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n), e(m) {
-    for (auto &[u, v, w] : e) {
+  WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n + 1) {
+    for (auto &[u, v, w] : vector<array<Int, 3>>(m)) {
       add(u, v, w);
     }
   }
-  void add(int u, int v, int w) {
-    (*this)[u].push_back({v, w});
-    (*this)[v].push_back({u, w});
-  }
+  void add(int u, int v, int w) { _add(u, v, w), _add(v, u, w); }
+  void _add(int u, int v, int w) { (*this)[u].push_back({v, w}); }
 };
 
 struct Query {
@@ -40,7 +49,7 @@ struct Query {
   }
 };
 
-template <typename T, int N> struct Trie : vector<pair<T, array<int, N>>> {
+template <typename T, size_t N> struct Trie : vector<pair<T, array<int, N>>> {
   Trie(int cap = 1) : vector<pair<T, array<int, N>>>(1) { this->reserve(cap); }
   void visit(const auto &f, const auto &x) {
     for (int i = 0, j = 0;; j++) {
@@ -91,11 +100,11 @@ auto findmax = [](auto &trie, int x) {
 
 void solve(int t) {
   Int n, m;
-  WGraph g(n + 1, n - 1);
+  WGraph g(n, n - 1);
   vector<Query> q(m);
   vector<int> a(n + 1), b(n + 1);
   array<Trie<int, 2>, 2> tries;
-  auto f = [&](auto &self, int u, int p, int x, int h) -> void {
+  auto f1 = [&](auto &self, int u, int p, int x, int h) -> void {
     a[u] = x;
     b[u] = h & 1;
     tries[b[u]].visit(bpadd, x);
@@ -105,33 +114,30 @@ void solve(int t) {
       }
     }
   };
-  f(f, 1, 1, 0, 0);
+  f1(f1, 1, 1, 0, 0);
   int y = 0;
-  auto ans = [&](int v, int x) {
+  auto f2 = [&](int v, int x) {
     tries[b[v]].visit(bprem, a[v]);
     auto w1 = findmax(tries[b[v]], a[v] ^ x);
     auto w2 = findmax(tries[1 - b[v]], a[v] ^ x ^ y);
     tries[b[v]].visit(bpadd, a[v]);
     return max(w1, w2);
   };
+  vector<int> ans;
   for (auto &qi : q) {
     if (qi.type == '^') {
       y ^= qi.y;
     } else {
-      cout << ans(qi.y, qi.x) << ' ';
+      ans.push_back(f2(qi.y, qi.x));
     }
   }
-  cout << endl;
+  println(ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

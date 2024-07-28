@@ -1,11 +1,20 @@
 /**
- * https://codeforces.com/contest/1985/submission/270398238
+ * https://codeforces.com/contest/1985/submission/273048582
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -34,17 +43,13 @@ void solve(int t) {
       h2 = i + 1;
     }
   }
-  cout << (h1 + h2) / 2 << ' ' << k << endl;
+  println((h1 + h2) / 2, k);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

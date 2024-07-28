@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1971/submission/270394207
+ * https://codeforces.com/contest/1971/submission/273046233
  *
  * (c) 2024 Diego Sogari
  */
@@ -7,6 +7,15 @@
 
 using namespace std;
 using i64 = int64_t;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -23,17 +32,13 @@ void solve(int t) {
   for (i64 i = 1, a = i64(r) * r, b = i64(r + 1) * (r + 1); i <= r; i++) {
     ans += ceil(sqrt(b - i * i)) - ceil(sqrt(a - i * i));
   }
-  cout << ans * 4 << endl;
+  println(ans * 4);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

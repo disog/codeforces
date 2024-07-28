@@ -1,11 +1,20 @@
 /**
- * https://codeforces.com/contest/1985/submission/270398604
+ * https://codeforces.com/contest/1985/submission/273048921
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -25,7 +34,7 @@ struct DSU {
     a = find(a), b = find(b);
     if (a != b) {
       if (size[a] < size[b]) {
-        std::swap(a, b);
+        swap(a, b);
       }
       size[a] += size[b];
       parent[b] = a;
@@ -41,11 +50,11 @@ struct Str : string {
 void solve(int t) {
   Int n, m;
   vector<Str> g(n);
-  DSU dsu(n * m + 1);
+  DSU dsu(n * m);
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
       if (g[i][j] == '#') {
-        auto v = i * m + j + 1;
+        auto v = i * m + j;
         dsu.add(v);
         if (i > 0 && g[i - 1][j] == '#') {
           dsu.merge(v, v - m);
@@ -82,21 +91,17 @@ void solve(int t) {
   };
   auto g1 = [&](int i, int j) { return g[i][j]; };
   auto g2 = [&](int i, int j) { return g[j][i]; };
-  auto v1 = [&](int i, int j) { return i * m + j + 1; };
+  auto v1 = [&](int i, int j) { return i * m + j; };
   auto v2 = [&](int i, int j) { return v1(j, i); };
   f(n, m, g1, v1);
   f(m, n, g2, v2);
-  cout << ans << endl;
+  println(ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

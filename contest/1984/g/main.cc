@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/270397573
+ * https://codeforces.com/contest/1984/submission/273048222
  *
  * (c) 2024 Diego Sogari
  */
@@ -7,6 +7,22 @@
 
 using namespace std;
 using i64 = int64_t;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+template <typename T, size_t N>
+ostream &operator<<(ostream &os, const array<T, N> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 constexpr int _mod = 1000000007;
 
@@ -138,21 +154,15 @@ void solve(int t) {
     }
     f(n, false);
   }
-  cout << ans << endl;
-  cout << ops.size() << endl;
-  for (auto &[x, y] : ops) {
-    cout << x << ' ' << y << endl;
-  }
+  println(ans);
+  println(ops.size());
+  println(ops);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

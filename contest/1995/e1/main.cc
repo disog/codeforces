@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1995/submission/273041081
+ * https://codeforces.com/contest/1995/submission/273051789
  *
  * (c) 2024 Diego Sogari
  */
@@ -11,12 +11,9 @@ using i64 = int64_t;
 #ifdef ONLINE_JUDGE
 #define debug
 #else
-using filesystem::path;
-auto _ = freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#define debug println
+#include "debug.h"
+init(__FILE__);
 #endif
-
-void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T, size_t N>
 ostream &operator<<(ostream &os, const array<T, N> &a) {
@@ -25,6 +22,7 @@ ostream &operator<<(ostream &os, const array<T, N> &a) {
 template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
   return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
 }
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -36,7 +34,8 @@ template <typename T> struct Num {
 using Int = Num<int>;
 
 struct Digraph : vector<vector<int>> {
-  Digraph(int n, int m = 0) : vector<vector<int>>(n + 1) {
+  int n, m;
+  Digraph(int n, int m = 0) : vector<vector<int>>(n + 1), n(n), m(m) {
     for (auto &[u, v] : vector<array<Int, 2>>(m)) {
       add(u, v);
     }
@@ -46,6 +45,7 @@ struct Digraph : vector<vector<int>> {
 
 struct SCC : vector<int> {
   int count = 0;
+  vector<int> low, vis;
   SCC(const Digraph &g) : vector<int>(g.size()), low(g.size()) {
     for (int i = 0, t = 1; i < g.size(); i++) {
       if (low[i] == 0) {
@@ -53,8 +53,6 @@ struct SCC : vector<int> {
       }
     }
   }
-
-private:
   void dfs(const Digraph &g, int u, int &t) {
     auto tx = low[u] = t++;
     vis.push_back(u);
@@ -75,7 +73,6 @@ private:
       vis.resize(i);
     }
   }
-  vector<int> low, vis;
 };
 
 struct TwoSat {

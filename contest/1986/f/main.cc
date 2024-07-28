@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1986/submission/270399326
+ * https://codeforces.com/contest/1986/submission/273050413
  *
  * (c) 2024 Diego Sogari
  */
@@ -7,6 +7,15 @@
 
 using namespace std;
 using i64 = int64_t;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -18,53 +27,59 @@ template <typename T> struct Num {
 using Int = Num<int>;
 
 struct Graph : vector<vector<int>> {
-  vector<array<Int, 2>> e;
-  Graph(int n, int m = 0) : vector<vector<int>>(n), e(m) {
-    for (auto &[u, v] : e) {
+  int n, m;
+  Graph(int n, int m = 0) : vector<vector<int>>(n + 1), n(n), m(m) {
+    for (auto &[u, v] : vector<array<Int, 2>>(m)) {
       add(u, v);
     }
   }
-  void add(int u, int v) {
-    (*this)[u].push_back(v);
-    (*this)[v].push_back(u);
-  }
+  void add(int u, int v) { _add(u, v), _add(v, u); }
+  void _add(int u, int v) { (*this)[u].push_back(v); }
 };
 
-void solve(int t) {
-  Int n, m;
-  Graph g(n + 1, m);
-  vector<int> low(n + 1), size(n + 1);
-  int timer = 0, best = n;
-  const auto mid = n / 2.0;
-  auto f = [&](auto &f, int u, int p) -> void {
-    size[u] = 1;
-    auto tx = low[u] = timer++;
-    for (auto &&v : g[u]) {
+struct Bridges : vector<array<int, 2>> {
+  vector<int> low, siz;
+  Bridges(const Graph &g, int s) : low(g.size()), siz(g.size()) {
+    int t = 1;
+    dfs(g, s, s, t);
+  }
+  void dfs(const Graph &g, int u, int p, int &t) {
+    auto tx = low[u] = t++;
+    siz[u] = 1;
+    for (auto v : g[u]) {
       if (v != p) {
-        if (!size[v]) {
-          f(f, v, u);
-          size[u] += size[v];
-          if (low[v] > tx && abs(size[v] - mid) < abs(best - mid)) {
-            best = size[v]; // bridge with best split
+        if (low[v] == 0) {
+          dfs(g, v, u, t); // post-order (visit leaves first)
+          siz[u] += siz[v];
+          if (low[v] > tx) {
+            push_back({u, v});
           }
         }
         low[u] = min(low[u], low[v]);
       }
     }
-  };
-  f(f, 1, 1);
+  }
+};
+
+void solve(int t) {
+  Int n, m;
+  Graph g(n, m);
+  Bridges b(g, 1);
+  const auto mid = n / 2.0;
+  int best = n;
+  for (auto [u, v] : b) {
+    if (abs(b.siz[v] - mid) < abs(best - mid)) {
+      best = b.siz[v]; // bridge with best split
+    }
+  }
   i64 ans = (i64(best) * (best - 1) + i64(n - best) * (n - best - 1)) / 2;
-  cout << ans << endl;
+  println(ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

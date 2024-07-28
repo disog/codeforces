@@ -1,11 +1,20 @@
 /**
- * https://codeforces.com/contest/1990/submission/272022756
+ * https://codeforces.com/contest/1990/submission/273050990
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -17,7 +26,8 @@ template <typename T> struct Num {
 using Int = Num<int>;
 
 struct Graph : vector<vector<int>> {
-  Graph(int n, int m = 0) : vector<vector<int>>(n + 1) {
+  int n, m;
+  Graph(int n, int m = 0) : vector<vector<int>>(n + 1), n(n), m(m) {
     for (auto &[u, v] : vector<array<Int, 2>>(m)) {
       add(u, v);
     }
@@ -66,7 +76,7 @@ void solve(int t) {
   Tree g(n, 1);
   auto q = [&](int x) {
     assert(rem--);
-    cout << "? " << x << endl;
+    println('?', x);
 #ifdef LOCAL
     return simulate(g, mole, x);
 #else
@@ -104,7 +114,7 @@ void solve(int t) {
             break;
           }
         }
-        cout << "! " << v << endl;
+        println('!', v);
         return;
       }
       f(f, v, g.info[v].par); // cut subtree
@@ -114,13 +124,9 @@ void solve(int t) {
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

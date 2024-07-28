@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/270396611
+ * https://codeforces.com/contest/1984/submission/273047770
  *
  * (c) 2024 Diego Sogari
  */
@@ -7,6 +7,15 @@
 
 using namespace std;
 using i64 = int64_t;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -33,57 +42,54 @@ struct Zfn : vector<int> {
   }
 };
 
+i64 choices(int a1, int a2, int b1, int b2, i64 m) {
+  i64 ans = 0;
+  for (int i = a1; i <= a2; i++) {
+    ans += max<i64>(0, min<i64>(b2, m - i) - b1 + 1);
+  }
+  return ans;
+}
+
 void solve(int t) {
   Str s;
   int n = s.size();
-  vector<int> p;
+  vector<int> pos;
   for (int i = 0; i < n; i++) {
     if (s[i] != 'a') {
-      p.push_back(i);
+      pos.push_back(i);
     }
   }
-  auto m = p.size();
+  auto m = pos.size();
   if (!m) {
-    cout << n - 1 << endl;
+    println(n - 1);
     return;
   }
-  Zfn z(s, p[0]);
+  Zfn z(s, pos[0]);
   auto f = [&](int j, int len) {
     for (int i = j; i < m; i += j) {
-      if (z[p[i] - p[0]] < len) {
+      if (z[pos[i] - pos[0]] < len) {
         return false;
       }
     }
     return true;
   };
-  auto g = [&](int a, int b, int c) {
-    i64 ans = 0; // choices of x + y <= c, for x <= a and y <= b
-    for (int i = 0; i <= a; i++) {
-      ans += max(0, 1 + min(b, c - i));
-    }
-    return ans;
-  };
   i64 ans = 0;
   for (int j = 1; j <= m; j++) {
-    if (m % j == 0 && f(j, p[j - 1] - p[0] + 1)) {
-      int a = p[0], b = n - p[m - 1] - 1, c = n;
+    if (m % j == 0 && f(j, pos[j - 1] - pos[0] + 1)) {
+      int a = pos[0], b = n - pos[m - 1] - 1, c = n;
       for (int i = j; i < m; i += j) {
-        c = min(c, p[i] - p[i - 1] - 1);
+        c = min(c, pos[i] - pos[i - 1] - 1);
       }
-      ans += g(a, b, c);
+      ans += choices(0, a, 0, b, c);
     }
   }
-  cout << ans << endl;
+  println(ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

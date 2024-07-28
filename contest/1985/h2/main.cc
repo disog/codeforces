@@ -1,11 +1,20 @@
 /**
- * https://codeforces.com/contest/1985/submission/270608504
+ * https://codeforces.com/contest/1985/submission/273049018
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -27,54 +36,6 @@ template <typename T> struct Mat : vector<vector<T>> {
       row.resize(m);
     }
   }
-  static Mat ident(int n) {
-    Mat ans(n, n);
-    for (int i = 0; i < n; i++) {
-      ans[i][i] = 1;
-    }
-    return ans;
-  }
-  Mat trans() const {
-    Mat ans(m, n);
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < m; j++) {
-        ans[j][i] = (*this)[i][j];
-      }
-    }
-    return ans;
-  }
-  Mat pow(int rhs) const {
-    auto base = *this, ans = ident(n);
-    for (; rhs; rhs >>= 1, base *= base) {
-      if (rhs & 1) {
-        ans *= base;
-      }
-    }
-    return ans;
-  }
-  template <typename U> vector<U> operator*(const vector<U> &rhs) const {
-    assert(m == rhs.size());
-    vector<U> ans(n);
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < m; j++) {
-        ans[i] += (*this)[i][j] * rhs[i];
-      }
-    }
-    return ans;
-  }
-  template <typename U> Mat<U> operator*(const Mat<U> &rhs) const {
-    assert(m == rhs.n);
-    Mat<U> ans(n, rhs.m);
-    for (int i = 0; i < n; i++) {
-      for (int j = 0; j < rhs.m; j++) {
-        for (int k = 0; k < m; k++) {
-          ans[i][j] += (*this)[i][k] * rhs[k][j];
-        }
-      }
-    }
-    return ans;
-  }
-  Mat &operator*=(const Mat &rhs) { return *this = operator*(rhs); }
 };
 
 template <typename T> struct Pref2D {
@@ -120,7 +81,7 @@ void solve(int t) {
   Int n, m;
   vector<Str> g(n);
   int r1, r2, c1, c2, sz;
-  auto f = [&](auto &self, int i, int j) -> void {
+  auto f1 = [&](auto &self, int i, int j) -> void {
     if (i < 0 || i >= n || j < 0 || j >= m || g[i][j] != '#') {
       return;
     }
@@ -141,7 +102,7 @@ void solve(int t) {
     for (int j = 0; j < m; j++) {
       if (g[i][j] == '#') {
         r1 = i, r2 = i, c1 = j, c2 = j, sz = 0;
-        f(f, i, j);
+        f1(f1, i, j);
         prefsum.cross(sz, {r1, c1, r2, c2});
       } else if (g[i][j] == '.') {
         rows[i]++;
@@ -155,17 +116,13 @@ void solve(int t) {
     ans = max(ans, count - (g[i][j] == '.'));
   };
   prefsum.visit(f2);
-  cout << ans << endl;
+  println(ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

@@ -120,13 +120,14 @@ struct Bin : Fac {
     }
     return ans * inv[k] * inv[n - k];
   }
-} bin;
+};
 
 /**
  * Directed Graph
  */
 struct Digraph : vector<vector<int>> {
-  Digraph(int n, int m = 0) : vector<vector<int>>(n + 1) {
+  int n, m;
+  Digraph(int n, int m = 0) : vector<vector<int>>(n + 1), n(n), m(m) {
     for (auto &[u, v] : vector<array<Int, 2>>(m)) {
       add(u, v);
     }
@@ -138,7 +139,8 @@ struct Digraph : vector<vector<int>> {
  * Undirected Graph
  */
 struct Graph : vector<vector<int>> {
-  Graph(int n, int m = 0) : vector<vector<int>>(n + 1) {
+  int n, m;
+  Graph(int n, int m = 0) : vector<vector<int>>(n + 1), n(n), m(m) {
     for (auto &[u, v] : vector<array<Int, 2>>(m)) {
       add(u, v);
     }
@@ -151,7 +153,9 @@ struct Graph : vector<vector<int>> {
  * Weighed Directed Graph
  */
 struct WDigraph : vector<vector<array<int, 2>>> {
-  WDigraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n + 1) {
+  int n, m;
+  WDigraph(int n, int m = 0)
+      : vector<vector<array<int, 2>>>(n + 1), n(n), m(m) {
     for (auto &[u, v, w] : vector<array<Int, 3>>(m)) {
       add(u, v, w);
     }
@@ -163,7 +167,8 @@ struct WDigraph : vector<vector<array<int, 2>>> {
  * Weighed Undirected Graph
  */
 struct WGraph : vector<vector<array<int, 2>>> {
-  WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n + 1) {
+  int n, m;
+  WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n + 1), n(n), m(m) {
     for (auto &[u, v, w] : vector<array<Int, 3>>(m)) {
       add(u, v, w);
     }
@@ -199,12 +204,11 @@ struct Tree : Graph {
  */
 struct Match : vector<int> {
   int count = 0;
-  Match(const Tree &g, int s) : vector<int>(g.size(), -1), vis(g.size()) {
+  vector<bool> vis;
+  Match(const Graph &g, int s) : vector<int>(g.size(), -1), vis(g.size()) {
     dfs(g, s, s);
   }
-
-private:
-  void dfs(const Tree &g, int u, int p) {
+  void dfs(const Graph &g, int u, int p) {
     vis[u] = true;
     for (auto v : g[u]) {
       if (v != p && !vis[v]) {
@@ -217,34 +221,33 @@ private:
       }
     }
   }
-  vector<bool> vis;
 };
 
 /**
  * Bridges (of undirected connected graph)
  */
-struct Bridges : vector<pair<int, int>> {
-  Bridges(const Graph &g, int s) : low(g.size()) {
+struct Bridges : vector<array<int, 2>> {
+  vector<int> low, siz;
+  Bridges(const Graph &g, int s) : low(g.size()), siz(g.size()) {
     int t = 1;
     dfs(g, s, s, t);
   }
-
-private:
   void dfs(const Graph &g, int u, int p, int &t) {
     auto tx = low[u] = t++;
+    siz[u] = 1;
     for (auto v : g[u]) {
       if (v != p) {
         if (low[v] == 0) {
           dfs(g, v, u, t); // post-order (visit leaves first)
+          siz[u] += siz[v];
           if (low[v] > tx) {
-            emplace_back(u, v);
+            push_back({u, v});
           }
         }
         low[u] = min(low[u], low[v]);
       }
     }
   }
-  vector<int> low;
 };
 
 /**
@@ -252,6 +255,7 @@ private:
  */
 struct SCC : vector<int> {
   int count = 0;
+  vector<int> low, vis;
   SCC(const Digraph &g) : vector<int>(g.size()), low(g.size()) {
     for (int i = 0, t = 1; i < g.size(); i++) {
       if (low[i] == 0) {
@@ -259,8 +263,6 @@ struct SCC : vector<int> {
       }
     }
   }
-
-private:
   void dfs(const Digraph &g, int u, int &t) {
     auto tx = low[u] = t++;
     vis.push_back(u);
@@ -281,7 +283,6 @@ private:
       vis.resize(i);
     }
   }
-  vector<int> low, vis;
 };
 
 /**
@@ -317,7 +318,7 @@ struct TwoSat {
 /**
  * Trie (N-ary prefix or suffix tree)
  */
-template <typename T, int N> struct Trie : vector<pair<T, array<int, N>>> {
+template <typename T, size_t N> struct Trie : vector<pair<T, array<int, N>>> {
   Trie(int cap = 1) : vector<pair<T, array<int, N>>>(1) { this->reserve(cap); }
   void visit(const auto &f, const auto &x) {
     for (int i = 0, j = 0;; j++) {
@@ -374,7 +375,7 @@ struct DSU {
     a = find(a), b = find(b);
     if (a != b) {
       if (size[a] < size[b]) {
-        std::swap(a, b);
+        swap(a, b);
       }
       size[a] += size[b];
       parent[b] = a;
@@ -419,10 +420,10 @@ template <typename T> struct Mat : vector<vector<T>> {
  */
 template <typename T, typename U>
 vector<U> operator*(const Mat<T> &mat, const vector<U> &rhs) {
-  assert(m == rhs.size());
+  assert(mat.m == rhs.size());
   vector<U> ans(n);
-  for (int i = 0; i < n; i++) {
-    for (int j = 0; j < m; j++) {
+  for (int i = 0; i < mat.n; i++) {
+    for (int j = 0; j < mat.m; j++) {
       ans[i] += (*this)[i][j] * rhs[i];
     }
   }
@@ -461,7 +462,7 @@ template <typename T> Mat<T> ident(int n) {
  * Matrix exponentiation
  */
 template <typename T> Mat<T> pow(const Mat<T> &mat, int rhs) {
-  auto base = mat, ans = ident<T>(n);
+  auto base = mat, ans = ident<T>(mat.n);
   for (; rhs; rhs >>= 1, base *= base) {
     if (rhs & 1) {
       ans *= base;
@@ -600,12 +601,12 @@ int binsearch(const auto &f, int s, int e) {
 }
 
 /**
- * Choices satisfying inequality x + y <= m, for x <= a and y <= b
+ * Choices satisfying inequality x + y <= m, for a1 <= x <= a2 and b1 <= y <= b2
  */
-i64 choices(int a, int b, i64 m) {
+i64 choices(int a1, int a2, int b1, int b2, i64 m) {
   i64 ans = 0;
-  for (int i = 0; i <= a; i++) {
-    ans += max<i64>(0, 1 + min<i64>(b, m - i));
+  for (int i = a1; i <= a2; i++) {
+    ans += max<i64>(0, min<i64>(b2, m - i) - b1 + 1);
   }
   return ans;
 }
@@ -729,20 +730,27 @@ struct Hull : vector<int> {
 /**
  * Printing utilities
  */
-void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
-
 template <typename T, size_t N>
 ostream &operator<<(ostream &os, const array<T, N> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+template <typename T, size_t N>
+ostream &operator<<(ostream &os, const span<T, N> &a) {
   return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
 }
 template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
   return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
 }
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 /**
  * Test case function
  */
-void solve(int t) { Int n; }
+void solve(int t) {
+  Int n;
+  int ans = 0;
+  println(ans);
+}
 
 /**
  * Input redirection
@@ -750,9 +758,8 @@ void solve(int t) { Int n; }
 #ifdef ONLINE_JUDGE
 #define debug
 #else
-using filesystem::path;
-auto _ = freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#define debug println
+#include "debug.h"
+init(__FILE__);
 #endif
 
 /**

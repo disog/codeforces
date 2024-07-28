@@ -1,11 +1,23 @@
 /**
- * https://codeforces.com/contest/1992/submission/270066277
+ * https://codeforces.com/contest/1992/submission/273051216
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -18,23 +30,20 @@ using Int = Num<int>;
 
 void solve(int t) {
   Int n, m, k;
+  vector<int> ans;
   for (int i = n; i > m; i--) {
-    cout << i << ' ';
+    ans.push_back(i);
   }
   for (int i = 1; i <= m; i++) {
-    cout << i << ' ';
+    ans.push_back(i);
   }
-  cout << endl;
+  println(ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }

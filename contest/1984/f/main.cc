@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/270397385
+ * https://codeforces.com/contest/1984/submission/273048144
  *
  * (c) 2024 Diego Sogari
  */
@@ -7,6 +7,15 @@
 
 using namespace std;
 using i64 = int64_t;
+
+#ifdef ONLINE_JUDGE
+#define debug
+#else
+#include "debug.h"
+init(__FILE__);
+#endif
+
+void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 constexpr int _mod = 998244353;
 
@@ -86,24 +95,20 @@ void solve(int t) {
   };
   Mod ans = 0;
   set<i64> sums;
-  auto nm = i64(n) * m;
+  i64 nm = i64(n) * m;
   for (int i = 1; i < n + 2; i++) {
     auto sum = b[i] + b[i - 1];
     if (abs(sum) <= nm && sums.insert(sum).second) {
       ans += f(sum);
     }
   }
-  cout << ans << endl;
+  println(ans);
 }
 
 int main() {
-#ifdef LOCAL
-  using filesystem::path;
-  freopen(path(__FILE__).replace_filename("input").c_str(), "r", stdin);
-#endif
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
   Int t;
-  for (int i = 1; i <= t; ++i) {
+  for (int i = 1; i <= t; i++) {
     solve(i);
   }
 }
