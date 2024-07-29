@@ -16,7 +16,7 @@ using f64 = double;
 init(__FILE__);
 #endif
 
-void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
+void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
 
 constexpr int _mod = 998244353;
 

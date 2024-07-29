@@ -7,8 +7,8 @@
  * Z-function
  */
 struct Zfn : vector<int> {
-  Zfn(const auto &a, int s = 0) : Zfn(a, s, a.size()) {}
-  Zfn(const auto &a, int s, int e) : vector<int>(e - s) {
+  Zfn(auto &&a, int s = 0) : Zfn(a, s, a.size()) {}
+  Zfn(auto &&a, int s, int e) : vector<int>(e - s) {
     auto &z = *this;
     for (int i = 1, j = 1; i + s < e; i++) {
       auto &c = z[i] = max(0, min(j + z[j] - i, z[i - j]));

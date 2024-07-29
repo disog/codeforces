@@ -31,7 +31,7 @@ struct Graph : vector<set<int>> {
 
 const greater<int> gt1;
 
-int len1(const auto &b, int n, int k) {
+int len1(auto &&b, int n, int k) {
   vector<int> s(k, -1), c(k);
   auto lte = [&](int i, int j) {
     return b[i][0] <= b[j][0] && b[i][1] <= b[j][1];
@@ -55,7 +55,7 @@ int len1(const auto &b, int n, int k) {
   return ans;
 }
 
-int len2(const auto &b, int n, int k) {
+int len2(auto &&b, int n, int k) {
   Graph g(n);
   for (int i = 0; i < n; i++) {
     for (int j = i + 1; j < n; j++) {

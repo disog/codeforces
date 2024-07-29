@@ -109,7 +109,7 @@ ostream &operator<<(ostream &os, const span<T, N> &a) {
 template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
   return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
 }
-void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
+void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
 
 /**
  * Test case function

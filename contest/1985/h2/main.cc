@@ -14,7 +14,7 @@ using namespace std;
 init(__FILE__);
 #endif
 
-void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
+void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -64,7 +64,7 @@ template <typename T> struct Pref2D {
     cols(x, {c1, c2});
     rect(-x, range);
   }
-  void visit(const auto &f) {
+  void visit(auto &&f) {
     vector<T> cur(sum.m);
     for (int i = 0; i < sum.n - 1; i++) {
       for (int j = 0, prev = 0; j < sum.m - 1; j++) {

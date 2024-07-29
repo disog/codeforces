@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1995/submission/273294535
+ * https://codeforces.com/contest/1995/submission/273400670
  *
  * (c) 2024 Diego Sogari
  */
@@ -17,7 +17,7 @@ using namespace placeholders;
 init(__FILE__);
 #endif
 
-void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
+void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -56,21 +56,20 @@ template <typename T> struct Seg {
   int n;
   vector<T> nodes;
   Seg(int n) : n(n), nodes(2 * n) {}
-  Seg(int n, bool sorted) : Seg(sorted ? 1 << (1 + mssb(n - 1)) : n) {}
+  Seg(int n, bool stable) : Seg(stable ? 1 << (1 + mssb(n - 1)) : n) {}
   const T &full() const { return nodes[1]; }    // O(1)
   T &operator[](int i) { return nodes[i + n]; } // O(1)
-  void copy(const vector<T> &a) { ranges::copy(a, nodes.begin() + n); }
-  void update(const auto &f) { // O(n)
+  void update(auto &&f) {                       // O(n)
     for (int i = n - 1; i > 0; i--) {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  void update(int i, const auto &f) { // O(log n)
+  void update(int i, auto &&f) { // O(log n)
     for (i = (i + n) / 2; i > 0; i /= 2) {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  void query(int i, int j, const auto &f) const { // O(log n)
+  void query(int i, int j, auto &&f) const { // O(log n)
     i += n - 1, j += n;
     int mask = (1 << mssb(i ^ j)) - 1;
     for (int v = ~i & mask; v != 0; v &= v - 1) {

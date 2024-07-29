@@ -15,7 +15,7 @@ using i64 = int64_t;
 init(__FILE__);
 #endif
 
-void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
+void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;

@@ -17,7 +17,7 @@ init(__FILE__);
 template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
   return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
 }
-void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
+void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -52,7 +52,7 @@ struct Query {
 template <typename T, size_t N> struct Trie {
   vector<pair<T, array<int, N>>> nodes;
   Trie(int cap = 1) : nodes(1) { nodes.reserve(cap); }
-  void visit(const auto &f, const auto &x) {
+  void visit(auto &&f, auto &&x) {
     for (int i = 0, j = 0;; j++) {
       int k = f(nodes[i], j, x);
       if (k < 0) {

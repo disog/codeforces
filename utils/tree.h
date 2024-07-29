@@ -53,12 +53,12 @@ struct DSU {
 template <typename T> struct Fen {
   vector<T> nodes;
   Fen(int n) : nodes(n + 1) {}
-  void query(int i, const auto &f) { // O(log n)
+  void query(int i, auto &&f) const { // O(log n)
     for (; i > 0; i -= i & -i) {
       f(nodes[i]);
     }
   }
-  void update(int i, const auto &f) { // O(log n)
+  void update(int i, auto &&f) { // O(log n)
     assert(i > 0);
     for (; i < nodes.size(); i += i & -i) {
       f(nodes[i]);
@@ -72,7 +72,7 @@ template <typename T> struct Fen {
 template <typename T, size_t N> struct Trie {
   vector<pair<T, array<int, N>>> nodes;
   Trie(int cap = 1) : nodes(1) { nodes.reserve(cap); }
-  void visit(const auto &f, const auto &x) {
+  void visit(auto &&f, auto &&x) {
     for (int i = 0, j = 0;; j++) {
       int k = f(nodes[i], j, x);
       if (k < 0) {
@@ -131,17 +131,17 @@ template <typename T> struct Seg {
   Seg(int n, bool stable) : Seg(stable ? 1 << (1 + mssb(n - 1)) : n) {}
   const T &full() const { return nodes[1]; }    // O(1)
   T &operator[](int i) { return nodes[i + n]; } // O(1)
-  void update(const auto &f) {                  // O(n)
+  void update(auto &&f) {                       // O(n)
     for (int i = n - 1; i > 0; i--) {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  void update(int i, const auto &f) { // O(log n)
+  void update(int i, auto &&f) { // O(log n)
     for (i = (i + n) / 2; i > 0; i /= 2) {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  void query(int i, int j, const auto &f) const { // O(log n)
+  void query(int i, int j, auto &&f) const { // O(log n)
     i += n - 1, j += n;
     int mask = (1 << mssb(i ^ j)) - 1;
     for (int v = ~i & mask; v != 0; v &= v - 1) {

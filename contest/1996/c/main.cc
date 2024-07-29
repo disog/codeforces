@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1996/submission/273397756
+ * https://codeforces.com/contest/1996/submission/273398230
  *
  * (c) 2024 Diego Sogari
  */
@@ -14,7 +14,7 @@ using namespace std;
 init(__FILE__);
 #endif
 
-void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
+void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -32,12 +32,12 @@ struct Str : string {
 template <typename T> struct Fen {
   vector<T> nodes;
   Fen(int n) : nodes(n + 1) {}
-  void query(int i, const auto &f) { // O(log n)
+  void query(int i, auto &&f) { // O(log n)
     for (; i > 0; i -= i & -i) {
       f(nodes[i]);
     }
   }
-  void update(int i, const auto &f) { // O(log n)
+  void update(int i, auto &&f) { // O(log n)
     assert(i > 0);
     for (; i < nodes.size(); i += i & -i) {
       f(nodes[i]);
@@ -52,7 +52,7 @@ void solve(int t) {
   Str a, b;
   vector<array<Int, 2>> qs(q);
   vector<Fen<int>> ca(c, {n}), cb(c, {n});
-  auto inc = [&](auto &node) { node++; };
+  auto inc = [](auto &node) { node++; };
   for (int i = 0; i < n; i++) {
     ca[a[i] - 'a'].update(i + 1, inc);
     cb[b[i] - 'a'].update(i + 1, inc);

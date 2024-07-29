@@ -14,7 +14,7 @@ using namespace std;
 init(__FILE__);
 #endif
 
-void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
+void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -54,7 +54,7 @@ struct Tree : Graph {
   }
 };
 
-int binsearch(const auto &f, int s, int e) {
+int binsearch(auto &&f, int s, int e) {
   while (s < e) {
     auto m = (s + e + 1) / 2;
     f(m) ? s = m : e = m - 1;
