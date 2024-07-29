@@ -7,7 +7,7 @@
  * Common compilation flags
  */
 #pragma GCC optimize("O3,unroll-loops")
-#pragma GCC target("avx2,popcnt")
+#pragma GCC target("avx2,popcnt,lzcnt")
 
 /**
  * Common namespaces
@@ -318,21 +318,22 @@ struct TwoSat {
 /**
  * Trie (N-ary prefix or suffix tree)
  */
-template <typename T, size_t N> struct Trie : vector<pair<T, array<int, N>>> {
-  Trie(int cap = 1) : vector<pair<T, array<int, N>>>(1) { this->reserve(cap); }
+template <typename T, size_t N> struct Trie {
+  vector<pair<T, array<int, N>>> nodes;
+  Trie(int cap = 1) : nodes(1) { nodes.reserve(cap); }
   void visit(const auto &f, const auto &x) {
     for (int i = 0, j = 0;; j++) {
-      int k = f((*this)[i], j, x);
+      int k = f(nodes[i], j, x);
       if (k < 0) {
         break;
       }
       assert(k < N);
-      auto &child = (*this)[i].second[k];
+      auto &child = nodes[i].second[k];
       if (!child) {
-        child = this->size();
-        this->emplace_back(); // might invalidate references
+        child = nodes.size();
+        nodes.emplace_back(); // might invalidate references
       }
-      i = (*this)[i].second[k];
+      i = nodes[i].second[k];
     }
   }
 };
@@ -390,30 +391,33 @@ struct DSU {
 struct Fen {
   vector<int> nodes;
   Fen(int n) : nodes(n + 1) {}
-  void query(int y, const auto &f) {
-    for (; y > 0; y -= y & -y) {
-      f(y, nodes[y]);
+  void query(int i, const auto &f) { // O(log n)
+    for (; i > 0; i -= i & -i) {
+      f(nodes[i]);
     }
   }
-  void update(int x, const auto &f) {
-    assert(x > 0);
-    for (; x < nodes.size(); x += x & -x) {
-      f(x, nodes[x]);
+  void update(int i, const auto &f) { // O(log n)
+    assert(i > 0);
+    for (; i < nodes.size(); i += i & -i) {
+      f(nodes[i]);
     }
   }
 };
 
 /**
+ * Vector Multiply-and-add
+ */
+void madd(auto &lhs, const auto &rhs, const auto &c) {
+  for (int i = 0; i < lhs.size(); i++) {
+    lhs[i] += rhs[i] * c;
+  }
+}
+
+/**
  * Static Matrix (2-D Array)
  */
 template <typename T, size_t N, size_t M = N>
-struct SMat : array<array<T, M>, N> {
-  SMat(T s = {}) {
-    for (auto &row : *this) {
-      row.fill(s);
-    }
-  }
-};
+using SMat = array<array<T, M>, N>;
 
 /**
  * Static Matrix-array multiplication
@@ -437,30 +441,11 @@ SMat<U, N, M2> operator*(const SMat<T, N, M1> &lhs,
                          const SMat<U, M1, M2> &rhs) {
   SMat<U, N, M2> ans = {};
   for (int i = 0; i < N; i++) {
-    for (int j = 0; j < M2; j++) {
-      for (int k = 0; k < M1; k++) {
-        ans[i][j] += lhs[i][k] * rhs[k][j];
-      }
+    for (int j = 0; j < M1; j++) {
+      madd(ans[i], rhs[j], lhs[i][j]);
     }
   }
   return ans;
-}
-
-/**
- * In-place Static Matrix multiplication
- */
-template <typename T, size_t N, typename U>
-SMat<T, N> &operator*=(SMat<T, N> &lhs, const SMat<U, N> &rhs) {
-  for (int i = 0; i < N; i++) {
-    auto row = lhs[i]; // copy
-    for (int j = 0; j < N; j++) {
-      lhs[i][j] = 0; // reset
-      for (int k = 0; k < N; k++) {
-        lhs[i][j] += row[k] * rhs[k][j];
-      }
-    }
-  }
-  return lhs;
 }
 
 /**
@@ -498,31 +483,11 @@ Mat<U> operator*(const Mat<T> &lhs, const Mat<U> &rhs) {
   assert(lhs.m == rhs.n);
   Mat<U> ans(lhs.n, rhs.m);
   for (int i = 0; i < lhs.n; i++) {
-    for (int j = 0; j < rhs.m; j++) {
-      for (int k = 0; k < lhs.m; k++) {
-        ans[i][j] += lhs[i][k] * rhs[k][j];
-      }
+    for (int j = 0; j < lhs.m; j++) {
+      madd(ans[i], rhs[j], lhs[i][j]);
     }
   }
   return ans;
-}
-
-/**
- * In-place Dynamic Matrix multiplication
- */
-template <typename T, typename U>
-Mat<T> &operator*=(Mat<T> &lhs, const Mat<U> &rhs) {
-  assert(lhs.n == lhs.m && rhs.n == rhs.m && lhs.n == rhs.n);
-  for (int i = 0; i < lhs.n; i++) {
-    auto row = lhs[i]; // copy
-    for (int j = 0; j < lhs.n; j++) {
-      lhs[i][j] = 0; // reset
-      for (int k = 0; k < lhs.n; k++) {
-        lhs[i][j] += row[k] * rhs[k][j];
-      }
-    }
-  }
-  return lhs;
 }
 
 /**
@@ -817,36 +782,31 @@ constexpr int mssb(unsigned x) { return 31 - countl_zero(x); }
 template <typename T> struct Seg {
   int n;
   vector<T> nodes;
-  Seg(int n, bool sorted)
-      : n(n), nodes(sorted ? 1 << (2 + mssb(n - 1)) : 2 * n) {}
-  Seg(const vector<T> &a, bool sorted) : Seg(a.size(), sorted) { // O(n)
-    ranges::copy(a, nodes.begin() + n);
-    for (int i = n - 1; i > 0; i--) {
-      (nodes[i] = nodes[2 * i]).join(nodes[2 * i + 1]);
-    }
-  }
-  void update(int i) { // O(log n)
-    for (i = (i + n) / 2; i > 0; i /= 2) {
-      (nodes[i] = nodes[2 * i]).join(nodes[2 * i + 1]);
-    }
-  }
+  Seg(int n) : n(n), nodes(2 * n) {}
+  Seg(int n, bool sorted) : Seg(sorted ? 1 << (1 + mssb(n - 1)) : n) {}
   const T &full() const { return nodes[1]; }    // O(1)
   T &operator[](int i) { return nodes[i + n]; } // O(1)
-  T query(int i, int j) const {                 // O(log n)
-    T ans = {};
-    range(i, j, [&](int k) { return ans.join(nodes[k]); });
-    return ans;
+  void copy(const vector<T> &a) { ranges::copy(a, nodes.begin() + n); }
+  void update(const auto &f) { // O(n)
+    for (int i = n - 1; i > 0; i--) {
+      nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
+    }
   }
-  void range(int i, int j, const auto &f) const { // O(log n)
+  void update(int i, const auto &f) { // O(log n)
+    for (i = (i + n) / 2; i > 0; i /= 2) {
+      nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
+    }
+  }
+  void query(int i, int j, const auto &f) const { // O(log n)
     i += n - 1, j += n;
     int mask = (1 << mssb(i ^ j)) - 1;
     for (int v = ~i & mask; v != 0; v &= v - 1) {
-      if (!f((i >> lssb(v)) + 1)) {
+      if (!f(nodes[(i >> lssb(v)) + 1])) {
         return; // early return
       }
     }
     for (int v = j & mask; v != 0; v ^= 1 << mssb(v)) {
-      if (!f((j >> mssb(v)) - 1)) {
+      if (!f(nodes[(j >> mssb(v)) - 1])) {
         return; // early return
       }
     }

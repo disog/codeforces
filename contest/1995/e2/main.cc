@@ -1,12 +1,14 @@
 /**
- * https://codeforces.com/contest/1995/submission/273272745
+ * https://codeforces.com/contest/1995/submission/273294535
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
+#pragma GCC optimize("O3,unroll-loops")
+
 using namespace std;
-using i64 = int64_t;
+using namespace placeholders;
 
 #ifdef ONLINE_JUDGE
 #define debug
@@ -15,9 +17,6 @@ using i64 = int64_t;
 init(__FILE__);
 #endif
 
-template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
-  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
-}
 void println(const auto &...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
@@ -29,27 +28,25 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-template <typename T, size_t N, size_t M = N>
-struct SMat : array<array<T, M>, N> {
-  SMat(T s = {}) {
-    for (auto &row : *this) {
-      row.fill(s);
-    }
+void madd(auto &lhs, const auto &rhs, const auto &c) {
+  for (int i = 0; i < lhs.size(); i++) {
+    lhs[i] += rhs[i] * c;
   }
-};
+}
 
-template <typename T, size_t N, typename U>
-SMat<T, N> &operator*=(SMat<T, N> &lhs, const SMat<U, N> &rhs) {
+template <typename T, size_t N, size_t M = N>
+using SMat = array<array<T, M>, N>;
+
+template <typename T, size_t N, size_t M1, typename U, size_t M2>
+SMat<U, N, M2> operator*(const SMat<T, N, M1> &lhs,
+                         const SMat<U, M1, M2> &rhs) {
+  SMat<U, N, M2> ans = {};
   for (int i = 0; i < N; i++) {
-    auto row = lhs[i]; // copy
-    for (int j = 0; j < N; j++) {
-      lhs[i][j] = 0; // reset
-      for (int k = 0; k < N; k++) {
-        lhs[i][j] += row[k] * rhs[k][j];
-      }
+    for (int j = 0; j < M1; j++) {
+      madd(ans[i], rhs[j], lhs[i][j]);
     }
   }
-  return lhs;
+  return ans;
 }
 
 constexpr int lssb(unsigned x) { return countr_zero(x); }
@@ -58,36 +55,31 @@ constexpr int mssb(unsigned x) { return 31 - countl_zero(x); }
 template <typename T> struct Seg {
   int n;
   vector<T> nodes;
-  Seg(int n, bool sorted)
-      : n(n), nodes(sorted ? 1 << (2 + mssb(n - 1)) : 2 * n) {}
-  Seg(const vector<T> &a, bool sorted) : Seg(a.size(), sorted) { // O(n)
-    ranges::copy(a, nodes.begin() + n);
-    for (int i = n - 1; i > 0; i--) {
-      (nodes[i] = nodes[2 * i]).join(nodes[2 * i + 1]);
-    }
-  }
-  void update(int i) { // O(log n)
-    for (i = (i + n) / 2; i > 0; i /= 2) {
-      (nodes[i] = nodes[2 * i]).join(nodes[2 * i + 1]);
-    }
-  }
+  Seg(int n) : n(n), nodes(2 * n) {}
+  Seg(int n, bool sorted) : Seg(sorted ? 1 << (1 + mssb(n - 1)) : n) {}
   const T &full() const { return nodes[1]; }    // O(1)
   T &operator[](int i) { return nodes[i + n]; } // O(1)
-  T query(int i, int j) const {                 // O(log n)
-    T ans = {};
-    range(i, j, [&](int k) { return ans.join(nodes[k]); });
-    return ans;
+  void copy(const vector<T> &a) { ranges::copy(a, nodes.begin() + n); }
+  void update(const auto &f) { // O(n)
+    for (int i = n - 1; i > 0; i--) {
+      nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
+    }
   }
-  void range(int i, int j, const auto &f) const { // O(log n)
+  void update(int i, const auto &f) { // O(log n)
+    for (i = (i + n) / 2; i > 0; i /= 2) {
+      nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
+    }
+  }
+  void query(int i, int j, const auto &f) const { // O(log n)
     i += n - 1, j += n;
     int mask = (1 << mssb(i ^ j)) - 1;
     for (int v = ~i & mask; v != 0; v &= v - 1) {
-      if (!f((i >> lssb(v)) + 1)) {
+      if (!f(nodes[(i >> lssb(v)) + 1])) {
         return; // early return
       }
     }
     for (int v = j & mask; v != 0; v ^= 1 << mssb(v)) {
-      if (!f((j >> mssb(v)) - 1)) {
+      if (!f(nodes[(j >> mssb(v)) - 1])) {
         return; // early return
       }
     }
@@ -95,7 +87,9 @@ template <typename T> struct Seg {
 };
 
 struct Desk : SMat<bool, 2> {
-  void join(const Desk &other) { *this *= other; }
+  Desk join(const Desk &other) const {
+    return static_cast<Desk>(*this * other);
+  }
   bool good() const { return (*this)[0][0] || (*this)[1][1]; }
 };
 
@@ -130,23 +124,20 @@ void solve(int t) {
     add(i, (i + n + 1) % (2 * n));
   }
   ranges::sort(edges, cmp);
-  Seg<Desk> seg(n, true);
+  Seg<Desk> seg(n);
   auto use = [&](int k, bool val) { // O(log n)
     auto [_, i, j] = edges[k];
     auto &desk = seg[i % n];
     desk[i % 2 == 0][j % 2] = val;
-    seg.update(i % n);
+    seg.update(i % n, bind(&Desk::join, _1, _2));
   };
   int ans = INT_MAX;
-  for (int l = 0, r = 0, e = edges.size(); ans > 0 && r < e;) {
-    while (r < e && !seg.full().good()) {
-      use(r++, true);
-    }
+  for (int l = 0, r = 0; ans > 0 && r < edges.size();) {
     if (seg.full().good()) {
       ans = min(ans, edges[r - 1][0] - edges[l][0]);
-      while (l < r && edges[r - 1][0] - edges[l][0] >= ans) {
-        use(l++, false);
-      }
+      use(l++, false);
+    } else {
+      use(r++, true);
     }
   }
   println(ans);

@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/273047300
+ * https://codeforces.com/contest/1980/submission/273276088
  *
  * (c) 2024 Diego Sogari
  */
@@ -49,21 +49,22 @@ struct Query {
   }
 };
 
-template <typename T, size_t N> struct Trie : vector<pair<T, array<int, N>>> {
-  Trie(int cap = 1) : vector<pair<T, array<int, N>>>(1) { this->reserve(cap); }
+template <typename T, size_t N> struct Trie {
+  vector<pair<T, array<int, N>>> nodes;
+  Trie(int cap = 1) : nodes(1) { nodes.reserve(cap); }
   void visit(const auto &f, const auto &x) {
     for (int i = 0, j = 0;; j++) {
-      int k = f((*this)[i], j, x);
+      int k = f(nodes[i], j, x);
       if (k < 0) {
         break;
       }
       assert(k < N);
-      auto &child = (*this)[i].second[k];
+      auto &child = nodes[i].second[k];
       if (!child) {
-        child = this->size();
-        this->emplace_back(); // might invalidate references
+        child = nodes.size();
+        nodes.emplace_back(); // might invalidate references
       }
-      i = (*this)[i].second[k];
+      i = nodes[i].second[k];
     }
   }
 };
@@ -74,7 +75,7 @@ auto bpadd = [](auto &node, int j, int x) { return node.first++, bpget(j, x); };
 auto bprem = [](auto &node, int j, int x) { return node.first--, bpget(j, x); };
 
 auto findmax = [](auto &trie, int x) {
-  if (!trie[0].first) {
+  if (!trie.nodes[0].first) {
     return -1;
   }
   int res = 0;
@@ -88,7 +89,7 @@ auto findmax = [](auto &trie, int x) {
     if (off) {
       swap(c1, c2);
     }
-    if (c1 && trie[c1].first) {
+    if (c1 && trie.nodes[c1].first) {
       res |= bit;
       return off;
     }

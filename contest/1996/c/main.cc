@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1996/submission/273052107
+ * https://codeforces.com/contest/1996/submission/273276195
  *
  * (c) 2024 Diego Sogari
  */
@@ -32,15 +32,15 @@ struct Str : string {
 struct Fen {
   vector<int> nodes;
   Fen(int n) : nodes(n + 1) {}
-  void query(int y, const auto &f) {
-    for (; y > 0; y -= y & -y) {
-      f(y, nodes[y]);
+  void query(int i, const auto &f) {
+    for (; i > 0; i -= i & -i) {
+      f(nodes[i]);
     }
   }
-  void update(int x, const auto &f) {
-    assert(x > 0);
-    for (; x < nodes.size(); x += x & -x) {
-      f(x, nodes[x]);
+  void update(int i, const auto &f) {
+    assert(i > 0);
+    for (; i < nodes.size(); i += i & -i) {
+      f(nodes[i]);
     }
   }
 };
@@ -52,15 +52,15 @@ void solve(int t) {
   Str a, b;
   vector<array<Int, 2>> qs(q);
   vector<Fen> ca(c, Fen(n)), cb(c, Fen(n));
-  auto inc = [&](int i, auto &c) { c++; };
+  auto inc = [&](auto &node) { node++; };
   for (int i = 0; i < n; i++) {
     ca[a[i] - 'a'].update(i + 1, inc);
     cb[b[i] - 'a'].update(i + 1, inc);
   }
   for (auto &[l, r] : qs) {
     int ans = 0, sum = 0;
-    auto acc = [&](int i, auto &c) { sum += c; };
-    auto dec = [&](int i, auto &c) { sum -= c; };
+    auto acc = [&](auto &node) { sum += node; };
+    auto dec = [&](auto &node) { sum -= node; };
     for (int j = 0; j < c; j++, sum = 0) {
       cb[j].query(r, acc);
       cb[j].query(l - 1, dec);
