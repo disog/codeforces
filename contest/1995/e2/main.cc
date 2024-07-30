@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1995/submission/273417994
+ * https://codeforces.com/contest/1995/submission/273631907
  *
  * (c) 2024 Diego Sogari
  */
@@ -52,11 +52,11 @@ SMat<U, N, M2> operator*(const SMat<T, N, M1> &lhs,
 constexpr int lssb(unsigned x) { return countr_zero(x); }
 constexpr int mssb(unsigned x) { return 31 - countl_zero(x); }
 
-template <typename T> struct Seg {
+template <typename T, T unit = T{}> struct SegTree {
   int n;
   vector<T> nodes;
-  Seg(int n) : n(n), nodes(2 * n) {}
-  Seg(int n, bool stable) : Seg(stable ? 1 << (1 + mssb(n - 1)) : n) {}
+  SegTree(int n) : n(n), nodes(2 * n, unit) {}
+  SegTree(int n, bool stable) : SegTree(stable ? 1 << (1 + mssb(n - 1)) : n) {}
   const T &full() const { return nodes[1]; }    // O(1)
   T &operator[](int i) { return nodes[i + n]; } // O(1)
   void update(auto &&f) {                       // O(n)
@@ -69,24 +69,26 @@ template <typename T> struct Seg {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  void query(int l, int r, auto &&f) const { // O(log n)
+  T query(int l, int r, auto &&f) const { // O(log n)
+    T ans = unit;
     for (l += n, r += n; l <= r; l /= 2, r /= 2) {
       if (l % 2) {
-        f(nodes[l++]);
+        ans = f(ans, nodes[l++]);
       }
       if (r % 2 == 0) {
-        f(nodes[r--]);
+        ans = f(ans, nodes[r--]);
       }
     }
+    return ans;
   }
 };
 
-struct Desk : SMat<bool, 2> {
-  Desk join(const Desk &other) const {
-    return static_cast<Desk>(*this * other);
-  }
+struct Seg : SMat<bool, 2> {
+  Seg join(const Seg &other) const { return static_cast<Seg>(*this * other); }
   bool good() const { return (*this)[0][0] || (*this)[1][1]; }
 };
+
+auto joinseg = bind(&Seg::join, _1, _2);
 
 void solve(int t) {
   Int n;
@@ -119,12 +121,12 @@ void solve(int t) {
     add(i, (i + n + 1) % (2 * n));
   }
   ranges::sort(edges, cmp);
-  Seg<Desk> seg(n);
+  SegTree<Seg> seg(n);
   auto use = [&](int k, bool val) { // O(log n)
     auto [_, i, j] = edges[k];
     auto &desk = seg[i % n];
     desk[i % 2 == 0][j % 2] = val;
-    seg.update(i % n, bind(&Desk::join, _1, _2));
+    seg.update(i % n, joinseg);
   };
   int ans = INT_MAX;
   for (int l = 0, r = 0; ans > 0 && r < edges.size();) {

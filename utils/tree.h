@@ -50,24 +50,26 @@ struct DSU {
 /**
  * Fenwick Tree (Binary indexed tree)
  */
-template <typename T> struct Fen {
+template <typename T, T unit = T{}> struct Fen {
   vector<T> nodes;
-  Fen(int n) : nodes(n + 1) {}
+  Fen(int n) : nodes(n + 1, unit) {}
   T &operator[](int i) { return nodes[i + 1]; } // O(1)
-  void query(int i, auto &&f) const {           // O(log n)
+  T query(int i, auto &&f) const {              // O(log n)
+    T ans = unit;
     for (i++; i > 0; i -= i & -i) {
-      f(nodes[i]);
+      ans = f(ans, nodes[i]);
     }
+    return ans;
   }
-  void update(int i, auto &&f) { // O(log n)
+  void update(int i, auto &&f, const T &val) { // O(log n)
     assert(i >= 0);
     for (i++; i < nodes.size(); i += i & -i) {
-      f(nodes[i]);
+      nodes[i] = f(nodes[i], val);
     }
   }
   void update(auto &&f) { // O(n)
     for (int i = 1, j = 2; j < nodes.size(); i++, j = i + (i & -i)) {
-      f(nodes[i], nodes[j]);
+      nodes[j] = f(nodes[j], nodes[i]);
     }
   }
 };
@@ -98,11 +100,11 @@ template <typename T, size_t N> struct Trie {
 /**
  * Segment Tree
  */
-template <typename T> struct Seg {
+template <typename T, T unit = T{}> struct SegTree {
   int n;
   vector<T> nodes;
-  Seg(int n) : n(n), nodes(2 * n) {}
-  Seg(int n, bool stable) : Seg(stable ? 1 << (1 + mssb(n - 1)) : n) {}
+  SegTree(int n) : n(n), nodes(2 * n, unit) {}
+  SegTree(int n, bool stable) : SegTree(stable ? 1 << (1 + mssb(n - 1)) : n) {}
   const T &full() const { return nodes[1]; }    // O(1)
   T &operator[](int i) { return nodes[i + n]; } // O(1)
   void update(auto &&f) {                       // O(n)
@@ -115,39 +117,29 @@ template <typename T> struct Seg {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  void query(int l, int r, auto &&f) const { // O(log n)
+  T query(int l, int r, auto &&f) const { // O(log n)
+    T ans = unit;
     for (l += n, r += n; l <= r; l /= 2, r /= 2) {
       if (l % 2) {
-        f(nodes[l++]);
+        ans = f(ans, nodes[l++]);
       }
       if (r % 2 == 0) {
-        f(nodes[r--]);
+        ans = f(ans, nodes[r--]);
       }
     }
+    return ans;
   }
 };
 
-// Fenwick Tree manipulation
-auto nodeinc = [](auto &node) { node++; };
-auto nodedec = [](auto &node) { node--; };
-auto nodeadd = [](auto val, auto &node) { node += val; };
-auto nodesub = [](auto val, auto &node) { node -= val; };
-auto nodemax = [](auto val, auto &node) { node = max(node, val); };
-auto nodemin = [](auto val, auto &node) { node = min(node, val); };
-
-// Segment Tree manipulation
-auto joinadd = [](auto &lhs, auto &rhs) { return lhs + rhs; };
-auto joinmul = [](auto &lhs, auto &rhs) { return lhs * rhs; };
-auto joinmax = [](auto &lhs, auto &rhs) { return max(lhs, rhs); };
-auto joinmin = [](auto &lhs, auto &rhs) { return min(lhs, rhs); };
-
-// Result aggregation (use std::ref)
-auto ansadd = [](auto &ans, auto &node) { ans += node; };
-auto anssub = [](auto &ans, auto &node) { ans -= node; };
-auto ansmax = [](auto &ans, auto &node) { ans = max(ans, node); };
-auto ansmin = [](auto &ans, auto &node) { ans = min(ans, node); };
+// Tree manipulation
+auto tadd = [](auto &lhs, auto &rhs) { return lhs + rhs; };
+auto tmul = [](auto &lhs, auto &rhs) { return lhs * rhs; };
+auto tmin = [](auto &lhs, auto &rhs) { return min(lhs, rhs); };
+auto tmax = [](auto &lhs, auto &rhs) { return max(lhs, rhs); };
 
 // Trie manipulation
+auto nodeinc = [](auto &node) { node++; };
+auto nodedec = [](auto &node) { node--; };
 auto nodevis = [](auto &&fn, auto &&fx, auto &node, int j, auto &&x) {
   return fn(node.first), fx(j, x);
 };

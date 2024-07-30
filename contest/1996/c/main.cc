@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1996/submission/273628213
+ * https://codeforces.com/contest/1996/submission/273631563
  *
  * (c) 2024 Diego Sogari
  */
@@ -30,30 +30,31 @@ struct Str : string {
   Str() { cin >> *this; }
 };
 
-template <typename T> struct Fen {
+template <typename T, T unit = T{}> struct Fen {
   vector<T> nodes;
-  Fen(int n) : nodes(n + 1) {}
+  Fen(int n) : nodes(n + 1, unit) {}
   T &operator[](int i) { return nodes[i + 1]; } // O(1)
-  void query(int i, auto &&f) const {           // O(log n)
+  T query(int i, auto &&f) const {              // O(log n)
+    T ans = unit;
     for (i++; i > 0; i -= i & -i) {
-      f(nodes[i]);
+      ans = f(ans, nodes[i]);
     }
+    return ans;
   }
-  void update(int i, auto &&f) { // O(log n)
+  void update(int i, auto &&f, const T &val) { // O(log n)
+    assert(i >= 0);
     for (i++; i < nodes.size(); i += i & -i) {
-      f(nodes[i]);
+      nodes[i] = f(nodes[i], val);
     }
   }
   void update(auto &&f) { // O(n)
     for (int i = 1, j = 2; j < nodes.size(); i++, j = i + (i & -i)) {
-      f(nodes[i], nodes[j]);
+      nodes[j] = f(nodes[j], nodes[i]);
     }
   }
 };
 
-auto nodeinc = [](auto &node) { node++; };
-auto ansadd = [](auto &ans, auto &node) { ans += node; };
-auto anssub = [](auto &ans, auto &node) { ans -= node; };
+auto tadd = [](auto &a, auto &b) { return a + b; };
 
 constexpr int c = 'z' - 'a' + 1;
 
@@ -63,20 +64,20 @@ void solve(int t) {
   vector<array<Int, 2>> qs(q);
   vector<Fen<int>> ca(c, {n}), cb(c, {n});
   for (int i = 0; i < n; i++) {
-    ca[a[i] - 'a'].update(i, nodeinc);
-    cb[b[i] - 'a'].update(i, nodeinc);
+    ca[a[i] - 'a'].update(i, tadd, 1);
+    cb[b[i] - 'a'].update(i, tadd, 1);
   }
+  auto f = [&](int j, int l, int r) {
+    int sum = ca[j].query(r - 1, tadd);
+    sum -= ca[j].query(l - 2, tadd);
+    sum -= cb[j].query(r - 1, tadd);
+    sum += cb[j].query(l - 2, tadd);
+    return max(0, sum);
+  };
   for (auto &[l, r] : qs) {
-    int ans = 0, sum = 0;
-    auto add = bind(ansadd, ref(sum), _1);
-    auto sub = bind(anssub, ref(sum), _1);
-    for (int j = 0; j < c; j++, sum = 0) {
-      cb[j].query(r - 1, add);
-      cb[j].query(l - 2, sub);
-      sum = -sum;
-      ca[j].query(r - 1, add);
-      ca[j].query(l - 2, sub);
-      ans += max(0, sum);
+    int ans = 0;
+    for (int j = 0; j < c; j++) {
+      ans += f(j, l, r);
     }
     println(ans);
   }

@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1990/submission/273418257
+ * https://codeforces.com/contest/1990/submission/273632039
  *
  * (c) 2024 Diego Sogari
  */
@@ -31,11 +31,11 @@ using I64 = Num<i64>;
 constexpr int lssb(unsigned x) { return countr_zero(x); }
 constexpr int mssb(unsigned x) { return 31 - countl_zero(x); }
 
-template <typename T> struct Seg {
+template <typename T, T unit = T{}> struct SegTree {
   int n;
   vector<T> nodes;
-  Seg(int n) : n(n), nodes(2 * n) {}
-  Seg(int n, bool noshift) : Seg(noshift ? 1 << (1 + mssb(n - 1)) : n) {}
+  SegTree(int n) : n(n), nodes(2 * n, unit) {}
+  SegTree(int n, bool stable) : SegTree(stable ? 1 << (1 + mssb(n - 1)) : n) {}
   const T &full() const { return nodes[1]; }    // O(1)
   T &operator[](int i) { return nodes[i + n]; } // O(1)
   void update(auto &&f) {                       // O(n)
@@ -48,41 +48,32 @@ template <typename T> struct Seg {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  void query(int l, int r, auto &&f) const { // O(log n)
+  T query(int l, int r, auto &&f) const { // O(log n)
+    T ans = unit;
     for (l += n, r += n; l <= r; l /= 2, r /= 2) {
       if (l % 2) {
-        f(nodes[l++]);
+        ans = f(ans, nodes[l++]);
       }
       if (r % 2 == 0) {
-        f(nodes[r--]);
+        ans = f(ans, nodes[r--]);
       }
     }
+    return ans;
   }
 };
 
-struct Element {
+struct Seg {
   i64 sum, mx;
-  int mpos, lpos, rpos;
-  Element *child;
-  ~Element() { delete child; }
-  Element join(const Element &other) const {
-    return {sum + other.sum, max(mx, other.mx),
-            mx < other.mx ? other.mpos : mpos, min(lpos, other.lpos),
-            max(rpos, other.rpos)};
-  }
-  void merge(const Element &other) {
-    auto child1 = new Element(mx < other.mx ? *this : other);
-    sum += other.sum;
-    mx = max(mx, other.mx);
-    mpos = mx < other.mx ? other.mpos : mpos;
-    lpos = min(lpos, other.lpos);
-    rpos = max(rpos, other.rpos);
-    child = child1;
+  int pos;
+  Seg join(const Seg &other) const {
+    auto ans = mx < other.mx ? other : *this;
+    ans.sum = sum + other.sum;
+    return ans;
   }
   bool good() const { return 2 * mx < sum; }
 };
 
-auto joinmax = bind(&Element::join, _1, _2);
+auto joinseg = bind(&Seg::join, _1, _2);
 
 struct Query {
   Int type, x;
@@ -93,27 +84,27 @@ void solve(int t) {
   Int n, q;
   vector<I64> a(n);
   vector<Query> qs(q);
-  Seg<Element> seg(n);
+  SegTree<Seg> seg(n);
   for (int i = 0; i < n; i++) {
-    seg[i] = {a[i], a[i], i, i, i};
+    seg[i] = {a[i], a[i], i};
   }
-  seg.update(joinmax);
-  Element el;
-  auto reduce = bind(&Element::merge, &el, _1);
-  auto query = [&](auto &self, int l, int r) -> int { // O(n)
-    el = {};
-    seg.query(l, r, reduce);
-    auto p = &el;
-    for (; p && !p->good(); p = p->child)
-      ;
-    return p ? p->rpos - p->lpos + 1 : -1;
+  seg.update(joinseg);
+  auto query = [&](auto &self, int l, int r) -> int { // O(n*log n)
+    while (r - l >= 2) {
+      auto el = seg.query(l, r, joinseg);
+      if (el.good()) {
+        return r - l + 1;
+      }
+      return max(self(self, l, el.pos - 1), self(self, el.pos + 1, r));
+    }
+    return -1;
   };
   for (auto &[type, x, y] : qs) {
     if (type == 1) {
       println(query(query, x - 1, y - 1));
     } else {
-      seg[x - 1] = {y, y, x - 1, x - 1, x - 1};
-      seg.update(x - 1, joinmax);
+      seg[x - 1] = {y, y, x - 1};
+      seg.update(x - 1, joinseg);
     }
   }
 }
