@@ -20,7 +20,6 @@ using namespace placeholders;
  */
 using i64 = int64_t;
 using f64 = double;
-using str = const string &;
 using MaxHeap = priority_queue<int>;
 using MinHeap = priority_queue<int, vector<int>, greater<int>>;
 
@@ -96,6 +95,12 @@ i64 maxsum(int a, int ca, int b, int cb, i64 m) {
 }
 
 /**
+ * Most/least significant set bits
+ */
+constexpr int lssb(unsigned x) { return countr_zero(x); }
+constexpr int mssb(unsigned x) { return 31 - countl_zero(x); }
+
+/**
  * Printing utilities
  */
 template <typename T, size_t N>
@@ -116,8 +121,7 @@ void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
  */
 void solve(int t) {
   Int n;
-  int ans = 0;
-  println(ans);
+  println(0);
 }
 
 /**

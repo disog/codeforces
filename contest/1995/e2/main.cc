@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1995/submission/273400670
+ * https://codeforces.com/contest/1995/submission/273417994
  *
  * (c) 2024 Diego Sogari
  */
@@ -69,17 +69,13 @@ template <typename T> struct Seg {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  void query(int i, int j, auto &&f) const { // O(log n)
-    i += n - 1, j += n;
-    int mask = (1 << mssb(i ^ j)) - 1;
-    for (int v = ~i & mask; v != 0; v &= v - 1) {
-      if (!f(nodes[(i >> lssb(v)) + 1])) {
-        return; // early return
+  void query(int l, int r, auto &&f) const { // O(log n)
+    for (l += n, r += n; l <= r; l /= 2, r /= 2) {
+      if (l % 2) {
+        f(nodes[l++]);
       }
-    }
-    for (int v = j & mask; v != 0; v ^= 1 << mssb(v)) {
-      if (!f(nodes[(j >> mssb(v)) - 1])) {
-        return; // early return
+      if (r % 2 == 0) {
+        f(nodes[r--]);
       }
     }
   }

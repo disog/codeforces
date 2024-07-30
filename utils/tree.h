@@ -30,38 +30,44 @@ struct Tree : Graph {
  * Disjoint set union (Union find)
  */
 struct DSU {
-  vector<int> parent, size;
-  DSU(int n) : parent(n), size(n) {}
-  int add(int v) { return size[v] = 1, parent[v] = v; }
-  int find(int v) { return v == parent[v] ? v : parent[v] = find(parent[v]); }
+  vector<int> par, siz;
+  DSU(int n) : par(n), siz(n) {}
+  int add(int v) { return siz[v] = 1, par[v] = v; }
+  int find(int v) { return v == par[v] ? v : par[v] = find(par[v]); }
   int merge(int a, int b) {
     a = find(a), b = find(b);
     if (a != b) {
-      if (size[a] < size[b]) {
+      if (siz[a] < siz[b]) {
         swap(a, b);
       }
-      size[a] += size[b];
-      parent[b] = a;
+      siz[a] += siz[b];
+      par[b] = a;
     }
     return a;
   }
 };
 
 /**
- * Fenwick tree (Binary indexed tree)
+ * Fenwick Tree (Binary indexed tree)
  */
 template <typename T> struct Fen {
   vector<T> nodes;
   Fen(int n) : nodes(n + 1) {}
-  void query(int i, auto &&f) const { // O(log n)
-    for (; i > 0; i -= i & -i) {
+  T &operator[](int i) { return nodes[i + 1]; } // O(1)
+  void query(int i, auto &&f) const {           // O(log n)
+    for (i++; i > 0; i -= i & -i) {
       f(nodes[i]);
     }
   }
   void update(int i, auto &&f) { // O(log n)
-    assert(i > 0);
-    for (; i < nodes.size(); i += i & -i) {
+    assert(i >= 0);
+    for (i++; i < nodes.size(); i += i & -i) {
       f(nodes[i]);
+    }
+  }
+  void update(auto &&f) { // O(n)
+    for (int i = 1, j = 2; j < nodes.size(); i++, j = i + (i & -i)) {
+      f(nodes[i], nodes[j]);
     }
   }
 };
@@ -89,38 +95,6 @@ template <typename T, size_t N> struct Trie {
   }
 };
 
-// Trie manipulation
-auto bit = [](int j, int x) { return x & (1 << j); };
-auto chr = [](int j, str s) { return s[j] - 'a'; };
-
-// Bit prefixes
-auto bpget = [](int j, int x) { return j < 32 ? bit(31 - j, x) != 0 : -1; };
-auto bpadd = [](auto &node, int j, int x) { return node.first++, bpget(j, x); };
-auto bprem = [](auto &node, int j, int x) { return node.first--, bpget(j, x); };
-
-// Bit suffixes
-auto bsget = [](int j, int x) { return j < 32 ? bit(j, x) != 0 : -1; };
-auto bsadd = [](auto &node, int j, int x) { return node.first++, bsget(j, x); };
-auto bsrem = [](auto &node, int j, int x) { return node.first--, bsget(j, x); };
-
-// String prefixes
-auto spget = [](int j, str s) { return j < s.size() ? chr(j, s) : -1; };
-auto spadd = [](auto &node, int j, str s) { return node.first++, spget(j, s); };
-auto sprem = [](auto &node, int j, str s) { return node.first--, spget(j, s); };
-
-// String suffixes
-auto ssget = [](int j, str s) {
-  return j < s.size() ? chr(s.size() - j - 1, s) : -1;
-};
-auto ssadd = [](auto &node, int j, str s) { return node.first++, ssget(j, s); };
-auto ssrem = [](auto &node, int j, str s) { return node.first--, ssget(j, s); };
-
-/**
- * Most/least significant set bits
- */
-constexpr int lssb(unsigned x) { return countr_zero(x); }
-constexpr int mssb(unsigned x) { return 31 - countl_zero(x); }
-
 /**
  * Segment Tree
  */
@@ -141,18 +115,65 @@ template <typename T> struct Seg {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  void query(int i, int j, auto &&f) const { // O(log n)
-    i += n - 1, j += n;
-    int mask = (1 << mssb(i ^ j)) - 1;
-    for (int v = ~i & mask; v != 0; v &= v - 1) {
-      if (!f(nodes[(i >> lssb(v)) + 1])) {
-        return; // early return
+  void query(int l, int r, auto &&f) const { // O(log n)
+    for (l += n, r += n; l <= r; l /= 2, r /= 2) {
+      if (l % 2) {
+        f(nodes[l++]);
       }
-    }
-    for (int v = j & mask; v != 0; v ^= 1 << mssb(v)) {
-      if (!f(nodes[(j >> mssb(v)) - 1])) {
-        return; // early return
+      if (r % 2 == 0) {
+        f(nodes[r--]);
       }
     }
   }
 };
+
+// Fenwick Tree manipulation
+auto nodeinc = [](auto &node) { node++; };
+auto nodedec = [](auto &node) { node--; };
+auto nodeadd = [](auto val, auto &node) { node += val; };
+auto nodesub = [](auto val, auto &node) { node -= val; };
+auto nodemax = [](auto val, auto &node) { node = max(node, val); };
+auto nodemin = [](auto val, auto &node) { node = min(node, val); };
+
+// Segment Tree manipulation
+auto joinadd = [](auto &lhs, auto &rhs) { return lhs + rhs; };
+auto joinmul = [](auto &lhs, auto &rhs) { return lhs * rhs; };
+auto joinmax = [](auto &lhs, auto &rhs) { return max(lhs, rhs); };
+auto joinmin = [](auto &lhs, auto &rhs) { return min(lhs, rhs); };
+
+// Result aggregation (use std::ref)
+auto ansadd = [](auto &ans, auto &node) { ans += node; };
+auto anssub = [](auto &ans, auto &node) { ans -= node; };
+auto ansmax = [](auto &ans, auto &node) { ans = max(ans, node); };
+auto ansmin = [](auto &ans, auto &node) { ans = min(ans, node); };
+
+// Trie manipulation
+auto nodevis = [](auto &&fn, auto &&fx, auto &node, int j, auto &&x) {
+  return fn(node.first), fx(j, x);
+};
+
+// Bit prefixes
+auto bitpref = [](int j, unsigned x) {
+  return j < 32 ? (x & (1 << (31 - j))) != 0 : -1;
+};
+auto bpinc = bind(nodevis, nodeinc, bitpref, _1, _2, _3);
+auto bpdec = bind(nodevis, nodedec, bitpref, _1, _2, _3);
+
+// Bit suffixes
+auto bitsuff = [](int j, unsigned x) {
+  return j < 32 ? (x & (1 << j)) != 0 : -1;
+};
+auto bsinc = bind(nodevis, nodeinc, bitsuff, _1, _2, _3);
+auto bsdec = bind(nodevis, nodedec, bitsuff, _1, _2, _3);
+
+// String prefixes
+auto strpref = [](int j, auto &&s) { return j < s.size() ? s[j] - 'a' : -1; };
+auto spinc = bind(nodevis, nodeinc, strpref, _1, _2, _3);
+auto spdec = bind(nodevis, nodedec, strpref, _1, _2, _3);
+
+// String suffixes
+auto strsuff = [](int j, auto &&s) {
+  return j < s.size() ? s[s.size() - j - 1] - 'a' : -1;
+};
+auto ssinc = bind(nodevis, nodeinc, strsuff, _1, _2, _3);
+auto ssdec = bind(nodevis, nodedec, strsuff, _1, _2, _3);

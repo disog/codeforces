@@ -1,4 +1,6 @@
 /**
+ * https://codeforces.com/contest/1990/submission/273418257
+ *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
@@ -26,22 +28,6 @@ template <typename T> struct Num {
 using Int = Num<int>;
 using I64 = Num<i64>;
 
-template <typename T> struct Fen {
-  vector<T> nodes;
-  Fen(int n) : nodes(n + 1) {}
-  void query(int i, auto &&f) const { // O(log n)
-    for (; i > 0; i -= i & -i) {
-      f(nodes[i]);
-    }
-  }
-  void update(int i, auto &&f) { // O(log n)
-    assert(i > 0);
-    for (; i < nodes.size(); i += i & -i) {
-      f(nodes[i]);
-    }
-  }
-};
-
 constexpr int lssb(unsigned x) { return countr_zero(x); }
 constexpr int mssb(unsigned x) { return 31 - countl_zero(x); }
 
@@ -49,7 +35,7 @@ template <typename T> struct Seg {
   int n;
   vector<T> nodes;
   Seg(int n) : n(n), nodes(2 * n) {}
-  Seg(int n, bool stable) : Seg(stable ? 1 << (1 + mssb(n - 1)) : n) {}
+  Seg(int n, bool noshift) : Seg(noshift ? 1 << (1 + mssb(n - 1)) : n) {}
   const T &full() const { return nodes[1]; }    // O(1)
   T &operator[](int i) { return nodes[i + n]; } // O(1)
   void update(auto &&f) {                       // O(n)
@@ -62,70 +48,72 @@ template <typename T> struct Seg {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  void query(int i, int j, auto &&f) const { // O(log n)
-    i += n - 1, j += n;
-    int mask = (1 << mssb(i ^ j)) - 1;
-    for (int v = ~i & mask; v != 0; v &= v - 1) {
-      if (!f(nodes[(i >> lssb(v)) + 1])) {
-        return; // early return
+  void query(int l, int r, auto &&f) const { // O(log n)
+    for (l += n, r += n; l <= r; l /= 2, r /= 2) {
+      if (l % 2) {
+        f(nodes[l++]);
       }
-    }
-    for (int v = j & mask; v != 0; v ^= 1 << mssb(v)) {
-      if (!f(nodes[(j >> mssb(v)) - 1])) {
-        return; // early return
+      if (r % 2 == 0) {
+        f(nodes[r--]);
       }
     }
   }
 };
 
+struct Element {
+  i64 sum, mx;
+  int mpos, lpos, rpos;
+  Element *child;
+  ~Element() { delete child; }
+  Element join(const Element &other) const {
+    return {sum + other.sum, max(mx, other.mx),
+            mx < other.mx ? other.mpos : mpos, min(lpos, other.lpos),
+            max(rpos, other.rpos)};
+  }
+  void merge(const Element &other) {
+    auto child1 = new Element(mx < other.mx ? *this : other);
+    sum += other.sum;
+    mx = max(mx, other.mx);
+    mpos = mx < other.mx ? other.mpos : mpos;
+    lpos = min(lpos, other.lpos);
+    rpos = max(rpos, other.rpos);
+    child = child1;
+  }
+  bool good() const { return 2 * mx < sum; }
+};
+
+auto joinmax = bind(&Element::join, _1, _2);
+
 struct Query {
-  Int type, x, y;
+  Int type, x;
+  I64 y;
 };
 
 void solve(int t) {
   Int n, q;
   vector<I64> a(n);
   vector<Query> qs(q);
-  Fen<int> fen(n);
-  Seg<int> seg(n);
-  auto updmax = [](int a, int b) { return max(a, b); };
-  auto updsum = [](int diff, auto &node) { node += diff; };
-  auto incsum = [](int &sum, auto &&node) { sum += node; };
-  auto decsum = [](int &sum, auto &&node) { sum -= node; };
-  auto getmax = [](int &mx, auto &&node) {
-    mx = max(mx, node);
-    return true;
-  };
-  auto check = [&](int l, int r) {
-    if (r - l < 2) {
-      return false;
-    }
-    int sum = 0, mx = 0;
-    fen.query(r, bind(incsum, sum, _1));
-    fen.query(l - 1, bind(decsum, sum, _1));
-    seg.query(l, r, bind(getmax, mx, _1));
-    return 2 * mx > sum;
-  };
-  auto query = [&](int l, int r) {
-    int ans = n;
-    for (int i = l, j = l + 2; j <= r;) {
-      if (check(i, j)) {
-        ans = min(ans, j - i + 1);
-        i++;
-      } else {
-        j++;
-      }
-    }
-    return ans;
+  Seg<Element> seg(n);
+  for (int i = 0; i < n; i++) {
+    seg[i] = {a[i], a[i], i, i, i};
+  }
+  seg.update(joinmax);
+  Element el;
+  auto reduce = bind(&Element::merge, &el, _1);
+  auto query = [&](auto &self, int l, int r) -> int { // O(n)
+    el = {};
+    seg.query(l, r, reduce);
+    auto p = &el;
+    for (; p && !p->good(); p = p->child)
+      ;
+    return p ? p->rpos - p->lpos + 1 : -1;
   };
   for (auto &[type, x, y] : qs) {
     if (type == 1) {
-      println(query(x, y));
+      println(query(query, x - 1, y - 1));
     } else {
-      auto diff = y - seg[x];
-      seg[x] = y;
-      seg.update(x, updmax);
-      fen.update(x, bind(updsum, diff, _1));
+      seg[x - 1] = {y, y, x - 1, x - 1, x - 1};
+      seg.update(x - 1, joinmax);
     }
   }
 }

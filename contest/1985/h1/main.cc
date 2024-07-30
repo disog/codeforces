@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1985/submission/273048921
+ * https://codeforces.com/contest/1985/submission/273628102
  *
  * (c) 2024 Diego Sogari
  */
@@ -26,18 +26,18 @@ template <typename T> struct Num {
 using Int = Num<int>;
 
 struct DSU {
-  vector<int> parent, size;
-  DSU(int n) : parent(n), size(n) {}
-  int add(int v) { return size[v] = 1, parent[v] = v; }
-  int find(int v) { return v == parent[v] ? v : parent[v] = find(parent[v]); }
+  vector<int> par, siz;
+  DSU(int n) : par(n), siz(n) {}
+  int add(int v) { return siz[v] = 1, par[v] = v; }
+  int find(int v) { return v == par[v] ? v : par[v] = find(par[v]); }
   int merge(int a, int b) {
     a = find(a), b = find(b);
     if (a != b) {
-      if (size[a] < size[b]) {
+      if (siz[a] < siz[b]) {
         swap(a, b);
       }
-      size[a] += size[b];
-      parent[b] = a;
+      siz[a] += siz[b];
+      par[b] = a;
     }
     return a;
   }
@@ -84,7 +84,7 @@ void solve(int t) {
         }
       }
       for (auto r : roots) {
-        total += dsu.size[r];
+        total += dsu.siz[r];
       }
       ans = max(ans, total);
     }

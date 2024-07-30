@@ -1,11 +1,12 @@
 /**
- * https://codeforces.com/contest/1980/submission/273276088
+ * https://codeforces.com/contest/1980/submission/273405459
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+using namespace placeholders;
 
 #ifdef ONLINE_JUDGE
 #define debug
@@ -69,10 +70,16 @@ template <typename T, size_t N> struct Trie {
   }
 };
 
-auto bit = [](int j, int x) { return x & (1 << j); };
-auto bpget = [](int j, int x) { return j < 32 ? bit(31 - j, x) != 0 : -1; };
-auto bpadd = [](auto &node, int j, int x) { return node.first++, bpget(j, x); };
-auto bprem = [](auto &node, int j, int x) { return node.first--, bpget(j, x); };
+auto nodeinc = [](auto &node) { node++; };
+auto nodedec = [](auto &node) { node--; };
+auto nodevis = [](auto &&fn, auto &&fx, auto &node, int j, auto &&x) {
+  return fn(node.first), fx(j, x);
+};
+auto bitpref = [](int j, unsigned x) {
+  return j < 32 ? (x & (1 << (31 - j))) != 0 : -1;
+};
+auto bpinc = bind(nodevis, nodeinc, bitpref, _1, _2, _3);
+auto bpdec = bind(nodevis, nodedec, bitpref, _1, _2, _3);
 
 auto findmax = [](auto &trie, int x) {
   if (!trie.nodes[0].first) {
@@ -108,7 +115,7 @@ void solve(int t) {
   auto f1 = [&](auto &self, int u, int p, int x, int h) -> void {
     a[u] = x;
     b[u] = h & 1;
-    tries[b[u]].visit(bpadd, x);
+    tries[b[u]].visit(bpinc, x);
     for (auto [v, w] : g[u]) {
       if (v != p) {
         self(self, v, u, x ^ w, h + 1);
@@ -118,10 +125,10 @@ void solve(int t) {
   f1(f1, 1, 1, 0, 0);
   int y = 0;
   auto f2 = [&](int v, int x) {
-    tries[b[v]].visit(bprem, a[v]);
+    tries[b[v]].visit(bpdec, a[v]);
     auto w1 = findmax(tries[b[v]], a[v] ^ x);
     auto w2 = findmax(tries[1 - b[v]], a[v] ^ x ^ y);
-    tries[b[v]].visit(bpadd, a[v]);
+    tries[b[v]].visit(bpinc, a[v]);
     return max(w1, w2);
   };
   vector<int> ans;

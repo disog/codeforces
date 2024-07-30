@@ -1,11 +1,12 @@
 /**
- * https://codeforces.com/contest/1996/submission/273398230
+ * https://codeforces.com/contest/1996/submission/273628213
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+using namespace placeholders;
 
 #ifdef ONLINE_JUDGE
 #define debug
@@ -32,18 +33,27 @@ struct Str : string {
 template <typename T> struct Fen {
   vector<T> nodes;
   Fen(int n) : nodes(n + 1) {}
-  void query(int i, auto &&f) { // O(log n)
-    for (; i > 0; i -= i & -i) {
+  T &operator[](int i) { return nodes[i + 1]; } // O(1)
+  void query(int i, auto &&f) const {           // O(log n)
+    for (i++; i > 0; i -= i & -i) {
       f(nodes[i]);
     }
   }
   void update(int i, auto &&f) { // O(log n)
-    assert(i > 0);
-    for (; i < nodes.size(); i += i & -i) {
+    for (i++; i < nodes.size(); i += i & -i) {
       f(nodes[i]);
     }
   }
+  void update(auto &&f) { // O(n)
+    for (int i = 1, j = 2; j < nodes.size(); i++, j = i + (i & -i)) {
+      f(nodes[i], nodes[j]);
+    }
+  }
 };
+
+auto nodeinc = [](auto &node) { node++; };
+auto ansadd = [](auto &ans, auto &node) { ans += node; };
+auto anssub = [](auto &ans, auto &node) { ans -= node; };
 
 constexpr int c = 'z' - 'a' + 1;
 
@@ -52,21 +62,20 @@ void solve(int t) {
   Str a, b;
   vector<array<Int, 2>> qs(q);
   vector<Fen<int>> ca(c, {n}), cb(c, {n});
-  auto inc = [](auto &node) { node++; };
   for (int i = 0; i < n; i++) {
-    ca[a[i] - 'a'].update(i + 1, inc);
-    cb[b[i] - 'a'].update(i + 1, inc);
+    ca[a[i] - 'a'].update(i, nodeinc);
+    cb[b[i] - 'a'].update(i, nodeinc);
   }
   for (auto &[l, r] : qs) {
     int ans = 0, sum = 0;
-    auto acc = [&](auto &node) { sum += node; };
-    auto dec = [&](auto &node) { sum -= node; };
+    auto add = bind(ansadd, ref(sum), _1);
+    auto sub = bind(anssub, ref(sum), _1);
     for (int j = 0; j < c; j++, sum = 0) {
-      cb[j].query(r, acc);
-      cb[j].query(l - 1, dec);
+      cb[j].query(r - 1, add);
+      cb[j].query(l - 2, sub);
       sum = -sum;
-      ca[j].query(r, acc);
-      ca[j].query(l - 1, dec);
+      ca[j].query(r - 1, add);
+      ca[j].query(l - 2, sub);
       ans += max(0, sum);
     }
     println(ans);
