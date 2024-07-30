@@ -131,6 +131,85 @@ template <typename T, T unit = T{}> struct SegTree {
   }
 };
 
+/**
+ * Interval Tree
+ */
+template <typename T> struct IntTree {
+  struct Node {
+    int L, R, M; // [L, R)
+    set<array<int, 2>> by_l, by_r;
+    void ins(int l, int r) {
+      by_l.insert({l, r});
+      by_r.insert({r, l});
+    }
+    void del(int l, int r) {
+      by_l.erase({l, r});
+      by_r.erase({r, l});
+    }
+  };
+  int n;
+  vector<Node> nodes;
+  map<array<int, 2>, T> cache;
+  IntTree(int n) : n(n), nodes(4 * n) { build(0, 0, n); }
+  void build(int i, int l, int r) { // [l, r)
+    int mid = (l + r) / 2;
+    nodes[i] = {l, r, mid};
+    if (l + 1 != r) {
+      build(2 * i + 1, l, mid);
+      build(2 * i + 2, mid, r);
+    }
+  }
+  void insert(int i, int l, int r) { // [l, r)
+    if (nodes[i].L + 1 == nodes[i].R) {
+      nodes[i].ins(l, r);
+    } else if (l >= nodes[i].M) {
+      insert(2 * i + 2, l, r);
+    } else if (r <= nodes[i].M) {
+      insert(2 * i + 1, l, r);
+    } else {
+      nodes[i].ins(l, r);
+    }
+  }
+  void delpref(int i, int x) {
+    auto &st = nodes[i].by_l;
+    while (!st.empty()) {
+      auto [l, r] = *begin(st);
+      if (l <= x) {
+        nodes[i].del(l, r);
+        cache.erase({l, r});
+      } else {
+        break;
+      }
+    }
+  }
+  void delsuff(int i, int x) {
+    auto &st = nodes[i].by_r;
+    while (!st.empty()) {
+      auto [r, l] = *rbegin(st);
+      if (r > x) {
+        nodes[i].del(l, r);
+        cache.erase({l, r});
+      } else {
+        break;
+      }
+    }
+  }
+  void erase(int i, int x) { // all covering point x
+    if (x < nodes[i].M) {
+      delpref(i, x);
+    } else {
+      delsuff(i, x);
+    }
+    if (nodes[i].L + 1 != nodes[i].R) {
+      if (x < nodes[i].M) {
+        erase(2 * i + 1, x);
+      } else {
+        erase(2 * i + 2, x);
+      }
+    }
+  }
+};
+
 // Tree manipulation
 auto tadd = [](auto &lhs, auto &rhs) { return lhs + rhs; };
 auto tmul = [](auto &lhs, auto &rhs) { return lhs * rhs; };
