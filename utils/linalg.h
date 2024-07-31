@@ -51,7 +51,7 @@ SMat<U, N, M2> operator*(const SMat<T, N, M1> &lhs,
  * Dynamic Matrix (2-D Vector)
  */
 template <typename T> struct Mat : vector<vector<T>> {
-  int n, m;
+  const int n, m;
   Mat(int n, int m, T s = {}) : vector<vector<T>>(n), n(n), m(m) {
     for (auto &row : *this) {
       row.assign(m, s);

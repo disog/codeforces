@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1996/submission/273051887
+ * https://codeforces.com/contest/1996/submission/273663893
  *
  * (c) 2024 Diego Sogari
  */
@@ -27,9 +27,7 @@ using Int = Num<int>;
 
 void solve(int t) {
   Int n;
-  int a = n / 4;
-  int b = (n - a * 4) / 2;
-  println(a + b);
+  println((n + 2) / 4);
 }
 
 int main() {

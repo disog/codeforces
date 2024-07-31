@@ -7,7 +7,7 @@
  * Directed Graph
  */
 struct Digraph : vector<vector<int>> {
-  int n, m;
+  const int n, m;
   Digraph(int n, int m = 0) : vector<vector<int>>(n + 1), n(n), m(m) {
     for (auto &[u, v] : vector<array<Int, 2>>(m)) {
       add(u, v);
@@ -20,7 +20,7 @@ struct Digraph : vector<vector<int>> {
  * Undirected Graph
  */
 struct Graph : vector<vector<int>> {
-  int n, m;
+  const int n, m;
   Graph(int n, int m = 0) : vector<vector<int>>(n + 1), n(n), m(m) {
     for (auto &[u, v] : vector<array<Int, 2>>(m)) {
       add(u, v);
@@ -34,7 +34,7 @@ struct Graph : vector<vector<int>> {
  * Weighed Directed Graph
  */
 struct WDigraph : vector<vector<array<int, 2>>> {
-  int n, m;
+  const int n, m;
   WDigraph(int n, int m = 0)
       : vector<vector<array<int, 2>>>(n + 1), n(n), m(m) {
     for (auto &[u, v, w] : vector<array<Int, 3>>(m)) {
@@ -48,7 +48,7 @@ struct WDigraph : vector<vector<array<int, 2>>> {
  * Weighed Undirected Graph
  */
 struct WGraph : vector<vector<array<int, 2>>> {
-  int n, m;
+  const int n, m;
   WGraph(int n, int m = 0) : vector<vector<array<int, 2>>>(n + 1), n(n), m(m) {
     for (auto &[u, v, w] : vector<array<Int, 3>>(m)) {
       add(u, v, w);
@@ -148,7 +148,7 @@ struct SCC : vector<int> {
  * 2-Satisfiability solver
  */
 struct TwoSat {
-  int n;
+  const int n;
   Digraph g;
   TwoSat(int n) : g(2 * n), n(n) {}
   void add(int a, int b) { g.add(n + a, n + b); }

@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1990/submission/273639773
+ * https://codeforces.com/contest/1990/submission/273800213
  *
  * (c) 2024 Diego Sogari
  */
@@ -28,58 +28,44 @@ template <typename T> struct Num {
 using Int = Num<int>;
 using I64 = Num<i64>;
 
-struct IntNode {
-  int left, right, mid; // [left, right)
-  set<array<int, 2>> by_l, by_r;
-  void insert(int l, int r) {
-    by_l.insert({l, r});
-    by_r.insert({r, l});
-  }
-  void erase(int l, int r, auto &&f) {
-    f(l, r);
-    by_l.erase({l, r});
-    by_r.erase({r, l});
-  }
-  void erase(int x, auto &&f) {
-    bool isleft = x < mid;
-    auto &set = isleft ? by_l : by_r;
-    while (set.size()) {
-      auto [l, r] = isleft ? *set.begin() : *set.rbegin();
-      if ((l > x) ^ isleft) {
-        isleft ? erase(l, r, f) : erase(r, l, f);
-      } else {
-        break;
-      }
+template <typename T> struct Interval {
+  T mid;
+  list<array<T, 2>> contained;
+  void insert(T l, T r) { contained.push_back({l, r}); } // O(1)
+  void visit(T x, auto &&f) {                            // O(n)
+    for (auto it = contained.begin(); it != contained.end();) {
+      auto [l, r] = *it;
+      it = l <= x && x < r && f(l, r) ? contained.erase(it) : next(it);
     }
   }
 };
 
 template <typename T> struct IntTree {
-  int n;
-  vector<IntNode> nodes;
-  map<array<int, 2>, T> values;
-  function<void(int, int)> prune = [&](int l, int r) { values.erase({l, r}); };
-  IntTree(int n) : n(n), nodes(4 * n) { build(0, n); }
-  void build(int l, int r, int i = 0) { // [l, r)
-    int mid = (l + r) / 2;
-    nodes[i] = {l, r, mid};
-    if (l + 1 != r) {
-      build(l, mid, 2 * i + 1);
-      build(mid, r, 2 * i + 2);
+  const int n;
+  vector<Interval<T>> nodes;
+  IntTree(int n) : n(n), nodes(2 * n) {}
+  IntTree(int n, T l, T r) : IntTree(n) { build(l, r); }
+  void build(T l, T r, int i = 1) { // [l, r) O(n)
+    auto mid = nodes[i].mid = (l + r) / 2;
+    if (i < n) {
+      build(l, mid, 2 * i);
+      build(mid, r, 2 * i + 1);
     }
   }
-  void insert(int l, int r, int i = 0) { // [l, r)
-    if (l < nodes[i].mid && r > nodes[i].mid) {
-      nodes[i].insert(l, r);
-    } else {
-      insert(l, r, 2 * i + 1 + (l >= nodes[i].mid));
+  void insert(T l, T r) { // [l, r) O(log n)
+    assert(l < r);
+    int i = 1;
+    while (i < n && (l >= nodes[i].mid || r <= nodes[i].mid)) {
+      i = 2 * i + (l >= nodes[i].mid);
     }
+    nodes[i].insert(l, r);
   }
-  void erase(int x, int i = 0) { // all covering point x
-    nodes[i].erase(x, prune);
-    if (nodes[i].left + 1 != nodes[i].right) {
-      erase(x, 2 * i + 1 + (x >= nodes[i].mid));
+  void visit(T x, auto &&f) { // O(n^2) all covering point x
+    int i = 1;
+    for (; i < n; i = 2 * i + (x >= nodes[i].mid)) {
+      nodes[i].visit(x, f); // internal node
     }
+    nodes[i].visit(x, f); // leaf node
   }
 };
 
@@ -91,19 +77,16 @@ template <typename T, T unit = T{}> struct SegTree {
   vector<T> nodes;
   SegTree(int n) : n(n), nodes(2 * n, unit) {}
   SegTree(int n, bool stable) : SegTree(stable ? 1 << (1 + mssb(n - 1)) : n) {}
-  const T &full() const { return nodes[1]; }    // O(1)
-  T &operator[](int i) { return nodes[i + n]; } // O(1)
-  void update(auto &&f) {                       // O(n)
-    for (int i = n - 1; i > 0; i--) {
-      nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
-    }
-  }
-  void update(int i, auto &&f) { // O(log n)
-    for (i = (i + n) / 2; i > 0; i /= 2) {
+  const T &full() const { return nodes[1]; }         // O(1)
+  T &operator[](int i) { return nodes[i + n]; }      // O(1)
+  void update(int i, auto &&f, bool single = true) { // O(log n) / O(n)
+    assert(i >= 0 && i < n);
+    for (i = (i + n) / 2; i > 0; i = single ? i / 2 : i - 1) {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
   T query(int l, int r, auto &&f) const { // O(log n)
+    assert(l >= 0 && l <= r && r < n);
     T ans = unit;
     for (l += n, r += n; l <= r; l /= 2, r /= 2) {
       if (l % 2) {
@@ -119,13 +102,12 @@ template <typename T, T unit = T{}> struct SegTree {
 
 struct Seg {
   i64 sum, mx;
-  int pos;
+  int mpos;
   Seg join(const Seg &other) const {
     auto ans = mx < other.mx ? other : *this;
     ans.sum = sum + other.sum;
     return ans;
   }
-  bool good() const { return 2 * mx < sum; }
 };
 
 auto joinseg = bind(&Seg::join, _1, _2);
@@ -138,38 +120,38 @@ struct Query {
 void solve(int t) {
   Int n, q;
   vector<I64> a(n);
-  vector<Query> qs(q);
-  SegTree<Seg> seg(n);
-  IntTree<int> intervals(n);
+  vector<Query> queries(q);
+  SegTree<Seg> segments(n);
   for (int i = 0; i < n; i++) {
-    seg[i] = {a[i], a[i], i};
+    segments[i] = {a[i], a[i], i};
   }
-  seg.update(joinseg);
+  segments.update(n - 1, joinseg, false);
+  IntTree<int> intervals(n, 0, n);
+  map<array<int, 2>, int> cache;
+  auto prune = [&](int l, int r) { return cache.erase({l, r}), true; };
   auto query = [&](auto &self, int l, int r) -> int { // O(log n)
     if (r - l < 2) {
       return -1;
     }
-    auto [it, ok] = intervals.values.emplace(array<int, 2>{l, r + 1}, 0);
+    auto [it, ok] = cache.insert({{l, r + 1}, 0});
     auto &ans = it->second;
     if (!ok) {
       return ans;
     }
     intervals.insert(l, r + 1);
-    auto el = seg.query(l, r, joinseg);
-    if (el.good()) {
+    auto [sum, mx, mpos] = segments.query(l, r, joinseg);
+    if (2 * mx < sum) {
       return ans = r - l + 1;
     }
-    auto ansl = self(self, l, el.pos - 1);
-    auto ansr = self(self, el.pos + 1, r);
-    return ans = max(ansl, ansr);
+    return ans = max(self(self, l, mpos - 1), self(self, mpos + 1, r));
   };
-  for (auto &[type, x, y] : qs) {
+  for (auto &[type, x, y] : queries) {
     if (type == 1) {
       println(query(query, x - 1, y - 1));
     } else {
-      seg[x - 1] = {y, y, x - 1};
-      seg.update(x - 1, joinseg);
-      intervals.erase(x - 1);
+      segments[x - 1] = {y, y, x - 1};
+      segments.update(x - 1, joinseg);
+      intervals.visit(x - 1, prune);
     }
   }
 }

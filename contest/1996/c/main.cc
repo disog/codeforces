@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1996/submission/273631563
+ * https://codeforces.com/contest/1996/submission/273779605
  *
  * (c) 2024 Diego Sogari
  */
@@ -31,10 +31,12 @@ struct Str : string {
 };
 
 template <typename T, T unit = T{}> struct Fen {
+  int n;
   vector<T> nodes;
-  Fen(int n) : nodes(n + 1, unit) {}
+  Fen(int n) : n(n), nodes(n + 1, unit) {}
   T &operator[](int i) { return nodes[i + 1]; } // O(1)
   T query(int i, auto &&f) const {              // O(log n)
+    assert(i < n);
     T ans = unit;
     for (i++; i > 0; i -= i & -i) {
       ans = f(ans, nodes[i]);
@@ -43,12 +45,12 @@ template <typename T, T unit = T{}> struct Fen {
   }
   void update(int i, auto &&f, const T &val) { // O(log n)
     assert(i >= 0);
-    for (i++; i < nodes.size(); i += i & -i) {
+    for (i++; i <= n; i += i & -i) {
       nodes[i] = f(nodes[i], val);
     }
   }
   void update(auto &&f) { // O(n)
-    for (int i = 1, j = 2; j < nodes.size(); i++, j = i + (i & -i)) {
+    for (int i = 1, j = 2; j <= n; i++, j = i + (i & -i)) {
       nodes[j] = f(nodes[j], nodes[i]);
     }
   }
