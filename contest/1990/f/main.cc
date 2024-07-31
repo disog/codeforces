@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1990/submission/273634673
+ * https://codeforces.com/contest/1990/submission/273639773
  *
  * (c) 2024 Diego Sogari
  */
@@ -28,78 +28,57 @@ template <typename T> struct Num {
 using Int = Num<int>;
 using I64 = Num<i64>;
 
+struct IntNode {
+  int left, right, mid; // [left, right)
+  set<array<int, 2>> by_l, by_r;
+  void insert(int l, int r) {
+    by_l.insert({l, r});
+    by_r.insert({r, l});
+  }
+  void erase(int l, int r, auto &&f) {
+    f(l, r);
+    by_l.erase({l, r});
+    by_r.erase({r, l});
+  }
+  void erase(int x, auto &&f) {
+    bool isleft = x < mid;
+    auto &set = isleft ? by_l : by_r;
+    while (set.size()) {
+      auto [l, r] = isleft ? *set.begin() : *set.rbegin();
+      if ((l > x) ^ isleft) {
+        isleft ? erase(l, r, f) : erase(r, l, f);
+      } else {
+        break;
+      }
+    }
+  }
+};
+
 template <typename T> struct IntTree {
-  struct Node {
-    int L, R, M; // [L, R)
-    set<array<int, 2>> by_l, by_r;
-    void ins(int l, int r) {
-      by_l.insert({l, r});
-      by_r.insert({r, l});
-    }
-    void del(int l, int r) {
-      by_l.erase({l, r});
-      by_r.erase({r, l});
-    }
-  };
   int n;
-  vector<Node> nodes;
-  map<array<int, 2>, T> cache;
-  IntTree(int n) : n(n), nodes(4 * n) { build(0, 0, n); }
-  void build(int i, int l, int r) { // [l, r)
+  vector<IntNode> nodes;
+  map<array<int, 2>, T> values;
+  function<void(int, int)> prune = [&](int l, int r) { values.erase({l, r}); };
+  IntTree(int n) : n(n), nodes(4 * n) { build(0, n); }
+  void build(int l, int r, int i = 0) { // [l, r)
     int mid = (l + r) / 2;
     nodes[i] = {l, r, mid};
     if (l + 1 != r) {
-      build(2 * i + 1, l, mid);
-      build(2 * i + 2, mid, r);
+      build(l, mid, 2 * i + 1);
+      build(mid, r, 2 * i + 2);
     }
   }
-  void insert(int i, int l, int r) { // [l, r)
-    if (nodes[i].L + 1 == nodes[i].R) {
-      nodes[i].ins(l, r);
-    } else if (l >= nodes[i].M) {
-      insert(2 * i + 2, l, r);
-    } else if (r <= nodes[i].M) {
-      insert(2 * i + 1, l, r);
+  void insert(int l, int r, int i = 0) { // [l, r)
+    if (l < nodes[i].mid && r > nodes[i].mid) {
+      nodes[i].insert(l, r);
     } else {
-      nodes[i].ins(l, r);
+      insert(l, r, 2 * i + 1 + (l >= nodes[i].mid));
     }
   }
-  void delpref(int i, int x) {
-    auto &st = nodes[i].by_l;
-    while (!st.empty()) {
-      auto [l, r] = *begin(st);
-      if (l <= x) {
-        nodes[i].del(l, r);
-        cache.erase({l, r});
-      } else {
-        break;
-      }
-    }
-  }
-  void delsuff(int i, int x) {
-    auto &st = nodes[i].by_r;
-    while (!st.empty()) {
-      auto [r, l] = *rbegin(st);
-      if (r > x) {
-        nodes[i].del(l, r);
-        cache.erase({l, r});
-      } else {
-        break;
-      }
-    }
-  }
-  void erase(int i, int x) { // all covering point x
-    if (x < nodes[i].M) {
-      delpref(i, x);
-    } else {
-      delsuff(i, x);
-    }
-    if (nodes[i].L + 1 != nodes[i].R) {
-      if (x < nodes[i].M) {
-        erase(2 * i + 1, x);
-      } else {
-        erase(2 * i + 2, x);
-      }
+  void erase(int x, int i = 0) { // all covering point x
+    nodes[i].erase(x, prune);
+    if (nodes[i].left + 1 != nodes[i].right) {
+      erase(x, 2 * i + 1 + (x >= nodes[i].mid));
     }
   }
 };
@@ -170,12 +149,12 @@ void solve(int t) {
     if (r - l < 2) {
       return -1;
     }
-    auto [it, ok] = intervals.cache.emplace(array<int, 2>{l, r + 1}, 0);
+    auto [it, ok] = intervals.values.emplace(array<int, 2>{l, r + 1}, 0);
     auto &ans = it->second;
     if (!ok) {
       return ans;
     }
-    intervals.insert(0, l, r + 1);
+    intervals.insert(l, r + 1);
     auto el = seg.query(l, r, joinseg);
     if (el.good()) {
       return ans = r - l + 1;
@@ -190,7 +169,7 @@ void solve(int t) {
     } else {
       seg[x - 1] = {y, y, x - 1};
       seg.update(x - 1, joinseg);
-      intervals.erase(0, x - 1);
+      intervals.erase(x - 1);
     }
   }
 }
