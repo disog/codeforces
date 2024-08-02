@@ -74,3 +74,48 @@ struct Bin : Fac {
     return ans * inv[k] * inv[n - k];
   }
 };
+
+/**
+ * Precomputed integer factors (Divisors)
+ */
+struct Div : vector<vector<int>> {
+  Div(int n) : vector<vector<int>>(n + 1) { // O(n*log n)
+    for (int i = 1; i <= n; i++) {
+      for (int j = i; j <= n; j += i) {
+        (*this)[j].push_back(i);
+      }
+    }
+  }
+};
+
+/**
+ * Choices satisfying equality x + y == m, for a1 <= x <= a2 and b1 <= y <= b2
+ */
+i64 choices_eq(int a1, int a2, int b1, int b2, i64 m) {
+  assert(a1 <= a2 && b1 <= b2);
+  auto d1 = m - a1, d2 = m - a2;
+  return b1 <= d1 && b2 >= d2 ? min<i64>(b2, d1) - max<i64>(b1, d2) + 1 : 0;
+}
+
+/**
+ * Choices satisfying inequality x + y <= m, for a1 <= x <= a2 and b1 <= y <= b2
+ */
+i64 choices_lte(int a1, int a2, int b1, int b2, i64 m) {
+  assert(a1 <= a2 && b1 <= b2);
+  i64 ans = 0;
+  for (int i = min<i64>(a2, m - b1); i >= a1; i--) {
+    ans += max<i64>(0, min<i64>(b2, m - i) - b1 + 1);
+  }
+  return ans;
+}
+
+/**
+ * Maximum sum satisfying inequality a * x + b * y <= m, for x <= ca and y <= cb
+ */
+i64 maxsum(int a, int ca, int b, int cb, i64 m) {
+  assert(a > 0 && a < b);
+  auto ua = min<i64>(ca, m / a);
+  auto ub = min<i64>(cb, (m - ua * a) / b);
+  auto ra = min<i64>({ua, cb - ub, (m - ua * a - ub * b) / (b - a)});
+  return (ua - ra) * a + (ub + ra) * b;
+}
