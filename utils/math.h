@@ -104,7 +104,7 @@ i64 choices_lte(int a1, int a2, int b1, int b2, i64 m) {
   assert(a1 <= a2 && b1 <= b2);
   i64 ans = 0;
   for (int i = min<i64>(a2, m - b1); i >= a1; i--) {
-    ans += max<i64>(0, min<i64>(b2, m - i) - b1 + 1);
+    ans += min<i64>(b2, m - i) - b1 + 1;
   }
   return ans;
 }

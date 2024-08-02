@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1996/submission/274012109
+ * https://codeforces.com/contest/1996/submission/274014719
  *
  * (c) 2024 Diego Sogari
  */
@@ -28,15 +28,10 @@ using Int = Num<int>;
 
 void solve(int t) {
   Int n, x;
-  int amx = min<int>(x - 2, sqrt<int>(n));
   i64 ans = 0;
-  for (int a = 1; a <= amx; a++) {
-    for (int b = a; b <= amx; b++) {
-      auto y = a * b, z = a + b;
-      if (b + z <= x && y + b * z <= n) { // a <= b <= c
-        auto cmax = min(x - z, (n - y) / z);
-        ans += (a == b ? 1 : 3) + (cmax - b) * (a == b ? 3 : 6);
-      }
+  for (int a = 1; a <= x - 2 && a <= n - 2; a++) {
+    for (int b = 1; a + b <= x - 1 && a * b <= n - 2; b++) {
+      ans += min(x - (a + b), (n - a * b) / (a + b));
     }
   }
   println(ans);

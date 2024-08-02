@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/273047770
+ * https://codeforces.com/contest/1984/submission/274024711
  *
  * (c) 2024 Diego Sogari
  */
@@ -42,10 +42,11 @@ struct Zfn : vector<int> {
   }
 };
 
-i64 choices(int a1, int a2, int b1, int b2, i64 m) {
+i64 choices_lte(int a1, int a2, int b1, int b2, i64 m) {
+  assert(a1 <= a2 && b1 <= b2);
   i64 ans = 0;
-  for (int i = a1; i <= a2; i++) {
-    ans += max<i64>(0, min<i64>(b2, m - i) - b1 + 1);
+  for (int i = min<i64>(a2, m - b1); i >= a1; i--) {
+    ans += min<i64>(b2, m - i) - b1 + 1;
   }
   return ans;
 }
@@ -80,7 +81,7 @@ void solve(int t) {
       for (int i = j; i < m; i += j) {
         c = min(c, pos[i] - pos[i - 1] - 1);
       }
-      ans += choices(0, a, 0, b, c);
+      ans += choices_lte(0, a, 0, b, c);
     }
   }
   println(ans);
