@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1996/submission/273966787
+ * https://codeforces.com/contest/1996/submission/273970965
  *
  * (c) 2024 Diego Sogari
  */
@@ -22,7 +22,7 @@ int binsearch(auto &&f, int s, int e) {
     auto m = (s + e + 1) / 2;
     f(m) ? s = m : e = m - 1;
   }
-  return e;
+  return e; // last such that f is true
 }
 
 template <typename T> struct Num {
@@ -37,50 +37,22 @@ using Int = Num<int>;
 void solve(int t) {
   Int n, k;
   vector<Int> a(n), b(n);
-  i64 ans = 0, ck = -k;
-  int amx = 0;
-  for (int i = 0; i < n; i++) {
-    i64 c = (a[i] - 1) / b[i] + 1;
-    ans += c * a[i] - c * (c - 1) * b[i] / 2;
-    amx = max<int>(amx, a[i]);
-    ck += c;
-  }
-  auto f = [&](int m) {
-    i64 count = 0;
+  auto f = [&](int x) -> pair<i64, i64> { // O(n)
+    i64 cnt = 0, sum = 0;
     for (int i = 0; i < n; i++) {
-      auto mn = (a[i] - 1) % b[i] + 1;
-      if (m >= mn) {
-        count += (min<int>(m, a[i]) - mn) / b[i] + 1;
+      if (a[i] >= x) {
+        i64 c = (a[i] - x) / b[i] + 1;
+        sum += c * a[i] - c * (c - 1) * b[i] / 2;
+        cnt += c;
       }
     }
-    return count < ck;
+    return {cnt, sum};
   };
-  auto m = binsearch(f, 1, amx);
-  vector<int> idx(n);
-  iota(idx.begin(), idx.end(), 0);
-  auto cmp = [&](int i, int j) { return b[i] < b[j]; };
-  ranges::sort(idx, cmp);
-  if (m > 0) {
-    for (int i = 0; i < n && ck > 0; i++) {
-      int ai = a[idx[i]], bi = b[idx[i]];
-      auto mn = (ai - 1) % bi + 1;
-      if (m >= mn) {
-        i64 c = min<i64>(ck, (min<int>(m, ai) - mn) / bi + 1);
-        ans -= c * mn + c * (c - 1) * bi / 2;
-        ck -= c;
-      }
-    }
-  }
-  m++;
-  for (int i = 0; i < n && ck > 0; i++) {
-    int ai = a[idx[i]], bi = b[idx[i]];
-    auto mn = (ai - 1) % bi + 1;
-    if (m >= mn && m <= ai && (m - mn) % bi == 0) {
-      i64 c = (m - mn) / bi + 1;
-      ans -= mn + (c - 1) * bi;
-      ck--;
-    }
-  }
+  auto chk = [&](int x) { return f(x).first >= k; };
+  int amx = *ranges::max_element(a);
+  int best = binsearch(chk, 0, amx); // O(n*log amx)
+  auto [cnt, sum] = f(best);
+  i64 ans = sum - (cnt - k) * best;
   println(ans);
 }
 

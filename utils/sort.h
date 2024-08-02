@@ -19,13 +19,14 @@ const auto gta2 = [](auto &lhs, auto &rhs) {
 
 /**
  * Binary search
+ * (assumes that f(s) is true and does not check it)
  */
 int binsearch(auto &&f, int s, int e) {
   while (s < e) {
     auto m = (s + e + 1) / 2;
     f(m) ? s = m : e = m - 1;
   }
-  return e;
+  return e; // last such that f is true
 }
 
 /**
