@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1996/submission/273779605
+ * https://codeforces.com/contest/1996/submission/274193359
  *
  * (c) 2024 Diego Sogari
  */
@@ -31,11 +31,12 @@ struct Str : string {
 };
 
 template <typename T, T unit = T{}> struct Fen {
-  int n;
+  const int n;
   vector<T> nodes;
-  Fen(int n) : n(n), nodes(n + 1, unit) {}
+  function<T(const T &, const T &)> f;
+  Fen(int n, auto &&f) : n(n), f(f), nodes(n + 1, unit) {}
   T &operator[](int i) { return nodes[i + 1]; } // O(1)
-  T query(int i, auto &&f) const {              // O(log n)
+  T query(int i) const {                        // O(log n)
     assert(i < n);
     T ans = unit;
     for (i++; i > 0; i -= i & -i) {
@@ -43,13 +44,13 @@ template <typename T, T unit = T{}> struct Fen {
     }
     return ans;
   }
-  void update(int i, auto &&f, const T &val) { // O(log n)
+  void update(int i, const T &val) { // O(log n)
     assert(i >= 0);
     for (i++; i <= n; i += i & -i) {
       nodes[i] = f(nodes[i], val);
     }
   }
-  void update(auto &&f) { // O(n)
+  void update() { // O(n)
     for (int i = 1, j = 2; j <= n; i++, j = i + (i & -i)) {
       nodes[j] = f(nodes[j], nodes[i]);
     }
@@ -64,16 +65,16 @@ void solve(int t) {
   Int n, q;
   Str a, b;
   vector<array<Int, 2>> qs(q);
-  vector<Fen<int>> ca(c, {n}), cb(c, {n});
+  vector<Fen<int>> ca(c, {n, tadd}), cb(c, {n, tadd});
   for (int i = 0; i < n; i++) {
-    ca[a[i] - 'a'].update(i, tadd, 1);
-    cb[b[i] - 'a'].update(i, tadd, 1);
+    ca[a[i] - 'a'].update(i, 1);
+    cb[b[i] - 'a'].update(i, 1);
   }
   auto f = [&](int j, int l, int r) {
-    int sum = ca[j].query(r - 1, tadd);
-    sum -= ca[j].query(l - 2, tadd);
-    sum -= cb[j].query(r - 1, tadd);
-    sum += cb[j].query(l - 2, tadd);
+    int sum = ca[j].query(r - 1);
+    sum -= ca[j].query(l - 2);
+    sum -= cb[j].query(r - 1);
+    sum += cb[j].query(l - 2);
     return max(0, sum);
   };
   for (auto &[l, r] : qs) {

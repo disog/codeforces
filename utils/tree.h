@@ -48,35 +48,6 @@ struct DSU {
 };
 
 /**
- * Fenwick Tree (Binary indexed tree)
- */
-template <typename T, T unit = T{}> struct Fen {
-  const int n;
-  vector<T> nodes;
-  Fen(int n) : n(n), nodes(n + 1, unit) {}
-  T &operator[](int i) { return nodes[i + 1]; } // O(1)
-  T query(int i, auto &&f) const {              // O(log n)
-    assert(i < n);
-    T ans = unit;
-    for (i++; i > 0; i -= i & -i) {
-      ans = f(ans, nodes[i]);
-    }
-    return ans;
-  }
-  void update(int i, auto &&f, const T &val) { // O(log n)
-    assert(i >= 0);
-    for (i++; i <= n; i += i & -i) {
-      nodes[i] = f(nodes[i], val);
-    }
-  }
-  void update(auto &&f) { // O(n)
-    for (int i = 1, j = 2; j <= n; i++, j = i + (i & -i)) {
-      nodes[j] = f(nodes[j], nodes[i]);
-    }
-  }
-};
-
-/**
  * Trie (N-ary prefix or suffix tree)
  */
 template <typename T, size_t N> struct Trie {
@@ -100,22 +71,54 @@ template <typename T, size_t N> struct Trie {
 };
 
 /**
+ * Fenwick Tree (Binary indexed tree)
+ */
+template <typename T, T unit = T{}> struct Fen {
+  const int n;
+  vector<T> nodes;
+  function<T(const T &, const T &)> f;
+  Fen(int n, auto &&f) : n(n), f(f), nodes(n + 1, unit) {}
+  T &operator[](int i) { return nodes[i + 1]; } // O(1)
+  T query(int i) const {                        // O(log n)
+    assert(i < n);
+    T ans = unit;
+    for (i++; i > 0; i -= i & -i) {
+      ans = f(ans, nodes[i]);
+    }
+    return ans;
+  }
+  void update(int i, const T &val) { // O(log n)
+    assert(i >= 0);
+    for (i++; i <= n; i += i & -i) {
+      nodes[i] = f(nodes[i], val);
+    }
+  }
+  void update() { // O(n)
+    for (int i = 1, j = 2; j <= n; i++, j = i + (i & -i)) {
+      nodes[j] = f(nodes[j], nodes[i]);
+    }
+  }
+};
+
+/**
  * Segment Tree
  */
 template <typename T, T unit = T{}> struct SegTree {
   const int n;
   vector<T> nodes;
-  SegTree(int n) : n(n), nodes(2 * n, unit) {}
-  SegTree(int n, bool stable) : SegTree(stable ? 1 << (1 + mssb(n - 1)) : n) {}
-  const T &full() const { return nodes[1]; }         // O(1)
-  T &operator[](int i) { return nodes[i + n]; }      // O(1)
-  void update(int i, auto &&f, bool single = true) { // O(log n) / O(n)
+  function<T(const T &, const T &)> f;
+  SegTree(int n, auto &&f) : n(n), f(f), nodes(2 * n, unit) {}
+  SegTree(int n, auto &&f, bool stable)
+      : SegTree(stable ? 1 << (1 + mssb(n - 1)) : n) {}
+  const T &full() const { return nodes[1]; }    // O(1)
+  T &operator[](int i) { return nodes[i + n]; } // O(1)
+  void update(int i, bool single = true) {      // O(log n) / O(n)
     assert(i >= 0 && i < n);
     for (i = (i + n) / 2; i > 0; i = single ? i / 2 : i - 1) {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
   }
-  T query(int l, int r, auto &&f) const { // [l, r] O(log n)
+  T query(int l, int r) const { // [l, r] O(log n)
     assert(l >= 0 && l <= r && r < n);
     T ans = unit;
     for (l += n, r += n; l <= r; l /= 2, r /= 2) {
