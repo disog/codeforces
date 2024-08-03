@@ -1,9 +1,12 @@
 /**
+ * https://codeforces.com/contest/1996/submission/274135679
+ *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+using i64 = int64_t;
 
 #ifdef ONLINE_JUDGE
 #define debug
@@ -23,7 +26,65 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-void solve(int t) {}
+struct Str : string {
+  Str() { cin >> *this; }
+};
+
+constexpr int _mod = 1000000007;
+
+struct Mod {
+  int x, m;
+  Mod(i64 x = 0, int m = _mod) : x(x % m), m(m) {}
+  operator int() const { return x; }
+  Mod operator+(int rhs) const { return Mod(x, m) += rhs; }
+  Mod operator-(int rhs) const { return Mod(x, m) -= rhs; }
+  Mod operator*(int rhs) const { return Mod(x, m) *= rhs; }
+  Mod operator/(int rhs) const { return Mod(x, m) /= rhs; }
+  Mod &operator+=(int rhs) {
+    return rhs < 0 ? operator-=(-rhs) : ((x += rhs) >= m ? x -= m : x, *this);
+  }
+  Mod &operator-=(int rhs) {
+    return rhs < 0 ? operator+=(-rhs) : ((x -= rhs) < 0 ? x += m : x, *this);
+  }
+  Mod &operator*=(int rhs) { return x = (i64(x) * rhs) % m, *this; }
+  Mod &operator/=(int rhs) { return operator*=(Mod(rhs, m).inv()); }
+  Mod inv() const { return pow(m - 2); } // inv of zero gives zero
+  Mod pow(int rhs) const {
+    Mod base(x, m), ans(!!x, m);
+    for (; base && rhs; rhs >>= 1, base *= base) {
+      if (rhs & 1) {
+        ans *= base;
+      }
+    }
+    return ans;
+  }
+};
+
+void solve(int t) {
+  Str s;
+  int n = s.size();
+  vector<int> sum(n + 1);
+  for (int i = 0; i < n; i++) {
+    sum[i + 1] += sum[i] + 2 * (s[i] - '0') - 1;
+  }
+  map<int, vector<pair<int, Mod>>> cnt;
+  for (int i = 0; i < n; i++) {
+    auto &c = cnt[sum[i + 1]];
+    if (c.empty()) {
+      c.push_back({-1, 0});
+    }
+    c.push_back({i, c.back().second + n - i});
+  }
+  Mod ans = 0;
+  for (int i = 0; i < n; i++) {
+    auto it1 = cnt.find(sum[i]);
+    if (it1 != cnt.end()) {
+      auto it2 = ranges::lower_bound(it1->second, pair<int, Mod>{i, 0});
+      ans += (it1->second.back().second - (*prev(it2)).second) * (i + 1);
+    }
+  }
+  println(ans);
+}
 
 int main() {
   cin.tie(nullptr)->tie(nullptr)->sync_with_stdio(false);
