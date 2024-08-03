@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1996/submission/274135679
+ * https://codeforces.com/contest/1996/submission/274148616
  *
  * (c) 2024 Diego Sogari
  */
@@ -63,24 +63,23 @@ struct Mod {
 void solve(int t) {
   Str s;
   int n = s.size();
-  vector<int> sum(n + 1);
+  vector<int> sum(n + 1); // will hold values in the range [-n,n]
   for (int i = 0; i < n; i++) {
     sum[i + 1] += sum[i] + 2 * (s[i] - '0') - 1;
   }
-  map<int, vector<pair<int, Mod>>> cnt;
-  for (int i = 0; i < n; i++) {
-    auto &c = cnt[sum[i + 1]];
-    if (c.empty()) {
-      c.push_back({-1, 0});
-    }
-    c.push_back({i, c.back().second + n - i});
+  vector<vector<int>> idx_by_sum(2 * n + 1); // will hold 1-based indices
+  for (int i = 0; i <= n; i++) {
+    idx_by_sum[sum[i] + n].push_back(i);
   }
   Mod ans = 0;
-  for (int i = 0; i < n; i++) {
-    auto it1 = cnt.find(sum[i]);
-    if (it1 != cnt.end()) {
-      auto it2 = ranges::lower_bound(it1->second, pair<int, Mod>{i, 0});
-      ans += (it1->second.back().second - (*prev(it2)).second) * (i + 1);
+  for (auto &idx : idx_by_sum) { // O(n) because there are at most n indices
+    int m = idx.size();
+    vector<Mod> cnt(m); // one less, because the first index doesn't count
+    for (int i = 0; i < m - 1; i++) {
+      cnt[i + 1] += cnt[i] + n - idx[i + 1] + 1;
+    }
+    for (int i = 0; i < m - 1; i++) {
+      ans += (cnt.back() - cnt[i]) * (idx[i] + 1);
     }
   }
   println(ans);
