@@ -60,10 +60,11 @@ struct Str : string {
 };
 
 /**
- * Most/least significant set bits
+ * Most/least significant set bits/next power of 2
  */
 constexpr int lssb(unsigned x) { return countr_zero(x); }
 constexpr int mssb(unsigned x) { return 31 - countl_zero(x); }
+constexpr int nxp2(unsigned x) { return 1 << (1 + mssb(x - 1)); }
 
 /**
  * Printing utilities

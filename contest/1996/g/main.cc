@@ -6,13 +6,21 @@
 using namespace std;
 
 #ifdef ONLINE_JUDGE
-#define debug
+// #define debug
 #else
 #include "debug.h"
 init(__FILE__);
 #endif
 
+template <typename T, size_t N>
+ostream &operator<<(ostream &os, const array<T, N> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ','; }), os;
+}
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ','; }), os;
+}
 void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
+void println2(auto &&...args) { ((cout << args << ';'), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -23,72 +31,95 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-template <typename T, T unit = T{}> struct Fen {
-  const int n;
-  vector<T> nodes;
-  function<T(const T &, const T &)> f;
-  Fen(int n, auto &&f) : n(n), f(f), nodes(n + 1, unit) {}
-  T &operator[](int i) { return nodes[i + 1]; } // O(1)
-  T query(int i) const {                        // O(log n)
-    assert(i < n);
-    T ans = unit;
-    for (i++; i > 0; i -= i & -i) {
-      ans = f(ans, nodes[i]);
-    }
-    return ans;
-  }
-  void update(int i, const T &val) { // O(log n)
-    assert(i >= 0);
-    for (i++; i <= n; i += i & -i) {
-      nodes[i] = f(nodes[i], val);
+struct Graph : vector<vector<int>> {
+  const int n, m;
+  vector<array<Int, 2>> e;
+  Graph(int n, int m = 0) : vector<vector<int>>(n + 1), n(n), m(m), e(m) {
+    for (auto &[u, v] : e) {
+      add(u, v);
     }
   }
-  void update() { // O(n)
-    for (int i = 1, j = 2; j <= n; i++, j = i + (i & -i)) {
-      nodes[j] = f(nodes[j], nodes[i]);
+  void add(int u, int v) { _add(u, v), _add(v, u); }
+  void _add(int u, int v) { (*this)[u].push_back(v); }
+};
+
+struct DSU {
+  vector<int> par, siz;
+  DSU(int n) : par(n), siz(n) {}
+  int add(int v) { return siz[v] = 1, par[v] = v; }
+  int find(int v) { return v == par[v] ? v : par[v] = find(par[v]); }
+  int merge(int a, int b) {
+    a = find(a), b = find(b);
+    if (a != b) {
+      if (siz[a] < siz[b]) {
+        swap(a, b);
+      }
+      siz[a] += siz[b];
+      par[b] = a;
     }
+    return a;
   }
 };
 
-auto tadd = [](auto &lhs, auto &rhs) { return lhs + rhs; };
-
 void solve(int t) {
   Int n, m;
-  vector<array<Int, 2>> fs(m);
-  map<int, vector<array<int, 2>>> map;
-  for (auto &[a, b] : fs) {
-    map[min(b - a, n - b + a)].push_back({a, b});
+  Graph g(n, m);
+  // if (t == 91) {
+  //   println2(n, m, g.e);
+  //   return;
+  // }
+  DSU dsu(n + 1);
+  for (int u = 1; u <= n; u++) {
+    dsu.add(u);
   }
-  vector<bool> taken(n);
-  Fen<int> fen(n, tadd);
-  int ans = 0;
-  auto f = [&](int i) {
-    if (!taken[i]) {
-      fen.update(i, 1);
-      taken[i] = true;
-      ans++;
+  for (int u = 1; u <= n; u++) {
+    for (auto &v : g[u]) {
+      dsu.merge(u, v);
     }
-  };
-  for (auto &[_, pairs] : map) {
-    for (auto &[a, b] : pairs) {
-      auto ca = fen.query(a - 1);
-      auto cb = fen.query(b - 1);
-      auto cn = fen.query(n - 1);
-      if ((a + n - b) - (ca + cn - cb) < (b - a) - (cb - ca)) {
-        for (int i = 0; i < a; i++) {
-          f(i);
+  }
+  list<int> lst;
+  for (int u = 1; u <= n; u++) {
+    for (auto &v : g[u]) {
+      if (v < u) {
+        assert(lst.size());
+        auto it = prev(lst.end());
+        for (; *it != v; it--) {
+          dsu.merge(v, *it);
         }
-        for (int i = b; i < n; i++) {
-          f(i);
-        }
+        lst.erase(it);
       } else {
-        for (int i = a; i < b; i++) {
-          f(i);
-        }
+        lst.push_back(u);
       }
     }
   }
-  cout << ans << endl;
+  vector<vector<int>> islets(n + 1);
+  int mxcut = 0;
+  for (int u = 1, c = 0, streak = 0, last = 0; c <= n; c++, u = u % n + 1) {
+    if (g[u].empty()) {
+      if (c == 0) {
+        c = -1;
+        continue; // need to find the first set
+      }
+      streak++;
+    } else {
+      auto p = dsu.find(u);
+      if (streak > 0) {
+        if (p == last) {
+          islets[p].push_back(streak);
+        } else {
+          mxcut += streak + 1; // number of edges to cut
+        }
+        streak = 0;
+      }
+      last = p;
+    }
+  }
+  for (auto &sizes : islets) {
+    if (sizes.size()) {
+      mxcut += *ranges::max_element(sizes) + 1;
+    }
+  }
+  cout << n - max(1, mxcut) << endl;
 }
 
 int main() {

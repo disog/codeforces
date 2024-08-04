@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1996/submission/274193359
+ * https://codeforces.com/contest/1996/submission/274265846
  *
  * (c) 2024 Diego Sogari
  */
@@ -30,15 +30,15 @@ struct Str : string {
   Str() { cin >> *this; }
 };
 
-template <typename T, T unit = T{}> struct Fen {
+template <typename T> struct Fen {
   const int n;
   vector<T> nodes;
   function<T(const T &, const T &)> f;
-  Fen(int n, auto &&f) : n(n), f(f), nodes(n + 1, unit) {}
+  Fen(int n, auto &&f, T val = {}) : n(n), f(f), nodes(n + 1, val) {}
   T &operator[](int i) { return nodes[i + 1]; } // O(1)
   T query(int i) const {                        // O(log n)
     assert(i < n);
-    T ans = unit;
+    T ans = nodes[0];
     for (i++; i > 0; i -= i & -i) {
       ans = f(ans, nodes[i]);
     }

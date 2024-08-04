@@ -73,15 +73,15 @@ template <typename T, size_t N> struct Trie {
 /**
  * Fenwick Tree (Binary indexed tree)
  */
-template <typename T, T unit = T{}> struct Fen {
+template <typename T> struct Fen {
   const int n;
   vector<T> nodes;
   function<T(const T &, const T &)> f;
-  Fen(int n, auto &&f) : n(n), f(f), nodes(n + 1, unit) {}
+  Fen(int n, auto &&f, T val = {}) : n(n), f(f), nodes(n + 1, val) {}
   T &operator[](int i) { return nodes[i + 1]; } // O(1)
   T query(int i) const {                        // O(log n)
     assert(i < n);
-    T ans = unit;
+    T ans = nodes[0];
     for (i++; i > 0; i -= i & -i) {
       ans = f(ans, nodes[i]);
     }
@@ -103,33 +103,28 @@ template <typename T, T unit = T{}> struct Fen {
 /**
  * Segment Tree
  */
-template <typename T, T unit = T{}> struct SegTree {
+template <typename T> struct SegTree {
   const int n;
   vector<T> nodes;
   function<T(const T &, const T &)> f;
-  SegTree(int n, auto &&f) : n(n), f(f), nodes(2 * n, unit) {}
-  SegTree(int n, auto &&f, bool stable)
-      : SegTree(stable ? 1 << (1 + mssb(n - 1)) : n) {}
+  SegTree(int n, auto &&f, T val = {}) : n(n), f(f), nodes(2 * n, val) {}
   const T &full() const { return nodes[1]; }    // O(1)
   T &operator[](int i) { return nodes[i + n]; } // O(1)
-  void update(int i, bool single = true) {      // O(log n) / O(n)
+  T query(int l, int r) const {                 // [l, r] O(log n)
+    assert(l >= 0 && l <= r && r < n);
+    return inner(l + n, r + n);
+  }
+  T inner(int l, int r) const { // [l, r] O(log n)
+    return l == r       ? nodes[l]
+           : l % 2      ? f(nodes[l], inner(l + 1, r))
+           : r % 2 == 0 ? f(inner(l, r - 1), nodes[r])
+                        : inner(l / 2, r / 2);
+  }
+  void update(int i, bool single = true) { // O(log n) / O(n)
     assert(i >= 0 && i < n);
     for (i = (i + n) / 2; i > 0; i = single ? i / 2 : i - 1) {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);
     }
-  }
-  T query(int l, int r) const { // [l, r] O(log n)
-    assert(l >= 0 && l <= r && r < n);
-    T ans = unit;
-    for (l += n, r += n; l <= r; l /= 2, r /= 2) {
-      if (l % 2) {
-        ans = f(ans, nodes[l++]);
-      }
-      if (r % 2 == 0) {
-        ans = f(ans, nodes[r--]);
-      }
-    }
-    return ans;
   }
 };
 
