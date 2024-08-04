@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1993/submission/274441961
+ * https://codeforces.com/contest/1993/submission/274447212
  *
  * (c) 2024 Diego Sogari
  */
@@ -25,6 +25,26 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
+template <typename T> struct MinQueue {
+  deque<T> queue;
+  function<bool(const T &, const T &)> f;
+  MinQueue(auto &&f) : f(f) {}
+  const T &top() const { return queue.front(); }
+  void push(const T &val) {
+    while (queue.size() && f(val, queue.back())) {
+      queue.pop_back();
+    }
+    queue.push_back(val);
+  };
+  void pop(const T &val) {
+    if (queue.size() && !f(queue.front(), val)) {
+      queue.pop_front();
+    }
+  };
+};
+
+const auto gta1 = [](auto &lhs, auto &rhs) { return lhs[0] > rhs[0]; };
+
 void solve(int t) {
   Int n, k;
   vector<Int> a(n);
@@ -35,22 +55,18 @@ void solve(int t) {
     bi = max<int>(bi, ai);
     c[ai % m]++;
   }
-  vector<int> sum(m + k);
-  map<int, int> window;
+  MinQueue<array<int, 2>> q(gta1);
   int ans = INT_MAX;
-  for (int i = 1; i < m + k; i++) {
-    sum[i] += sum[i - 1] + c[(i - 1) % m];
-    if (b[(i - 1) % m]) {
-      window.emplace(b[(i - 1) % m], i);
-    }
+  for (int i = 1, cnt = 0; i < m + k; i++) {
+    cnt += c[(i - 1) % m];
+    q.push({b[(i - 1) % m], i});
     if (i >= k) {
-      if (sum[i] - sum[i - k] == n) {
-        auto [mx, j] = *window.rbegin();
+      if (cnt == n) {
+        auto [mx, j] = q.top();
         ans = min(ans, mx + (i - j) % m);
       }
-      if (b[(i - k) % m]) {
-        window.erase(b[(i - 1) % m]);
-      }
+      cnt -= c[i - k];
+      q.pop({b[i - k], 0});
     }
   }
   println(ans == INT_MAX ? -1 : ans);
