@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1980/submission/273405459
+ * https://codeforces.com/contest/1980/submission/274282774
  *
  * (c) 2024 Diego Sogari
  */
@@ -70,18 +70,18 @@ template <typename T, size_t N> struct Trie {
   }
 };
 
-auto nodeinc = [](auto &node) { node++; };
-auto nodedec = [](auto &node) { node--; };
-auto nodevis = [](auto &&fn, auto &&fx, auto &node, int j, auto &&x) {
+const auto nodeinc = [](auto &node) { node++; };
+const auto nodedec = [](auto &node) { node--; };
+const auto nodevis = [](auto &&fn, auto &&fx, auto &node, int j, auto &&x) {
   return fn(node.first), fx(j, x);
 };
-auto bitpref = [](int j, unsigned x) {
+const auto bitpref = [](int j, unsigned x) {
   return j < 32 ? (x & (1 << (31 - j))) != 0 : -1;
 };
-auto bpinc = bind(nodevis, nodeinc, bitpref, _1, _2, _3);
-auto bpdec = bind(nodevis, nodedec, bitpref, _1, _2, _3);
+const auto bpinc = bind(nodevis, nodeinc, bitpref, _1, _2, _3);
+const auto bpdec = bind(nodevis, nodedec, bitpref, _1, _2, _3);
 
-auto findmax = [](auto &trie, int x) {
+const auto findmax = [](auto &trie, int x) {
   if (!trie.nodes[0].first) {
     return -1;
   }

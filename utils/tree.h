@@ -78,8 +78,7 @@ template <typename T> struct FenTree {
   vector<T> nodes;
   function<T(const T &, const T &)> f;
   FenTree(int n, auto &&f, T val = {}) : n(n), f(f), nodes(n + 1, val) {}
-  T &operator[](int i) { return nodes[i + 1]; } // O(1)
-  T query(int i) const {                        // O(log n)
+  T query(int i) const { // O(log n)
     assert(i < n);
     T ans = nodes[0];
     for (i++; i > 0; i -= i & -i) {
@@ -96,23 +95,27 @@ template <typename T> struct FenTree {
 };
 
 /**
- * Fenwick Tree with linear update operations for ranges
+ * Fenwick Tree with linear range updates
  */
 template <typename T> struct FenTreePlus : FenTree<T> {
-  void update_from(int l) { // [l, n] O(n)
+  using FenTree<T>::FenTree;
+  void update_from(int l, auto it) { // [l, n] O(n)
     assert(l >= 0);
-    l++;
-    for (int r = l + (l & -l); r <= n; l++, r = l + (l & -l)) {
-      nodes[r] = f(nodes[r], nodes[l]);
+    for (l++; l <= this->n; l++, it++) {
+      this->nodes[l] = this->f(this->nodes[l], *it);
+      int r = l + (l & -l);
+      if (r <= this->n) {
+        this->nodes[r] = this->f(this->nodes[r], *it);
+      }
     }
   }
   void update_from(int l, const T &val) { // [l, n] O(n)
-    assert(l >= 0);
-    l++;
-    for (int r = l + (l & -l); r <= n; l++, r = l + (l & -l)) {
-      nodes[l] = f(nodes[l], val);
-      nodes[r] = f(nodes[r], val);
-    }
+    struct {
+      const T &val;
+      const T &operator*() { return val; }
+      void operator++(int) {}
+    } it{val};
+    update_from(l, it);
   }
 };
 
