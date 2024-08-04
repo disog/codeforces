@@ -20,8 +20,13 @@ using namespace placeholders;
  */
 using i64 = int64_t;
 using f64 = double;
-using MaxHeap = priority_queue<int>;
-using MinHeap = priority_queue<int, vector<int>, greater<int>>;
+
+/**
+ * Min/Max heap
+ */
+template <typename T> using MaxHeap = priority_queue<T>;
+template <typename T>
+using MinHeap = priority_queue<T, vector<int>, greater<int>>;
 
 /**
  * Input redirection
