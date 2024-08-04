@@ -1,4 +1,6 @@
 /**
+ * https://codeforces.com/contest/1993/submission/274441961
+ *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
@@ -27,24 +29,31 @@ void solve(int t) {
   Int n, k;
   vector<Int> a(n);
   int m = 2 * k;
-  vector<int> b(m, INT_MAX), c(m);
+  vector<int> b(m), c(m);
   for (auto &ai : a) {
     auto &bi = b[ai % m];
-    bi = min<int>(bi, ai);
+    bi = max<int>(bi, ai);
     c[ai % m]++;
   }
   vector<int> sum(m + k);
-  for (int i = 0; i < m + k - 1; i++) {
-    sum[i + 1] += sum[i] + c[i % m];
-  }
-  bool ok = false;
-  for (int i = 0; i < m && !ok; i++) {
-    if (sum[i + k] - sum[i] == n) {
-      ok = true;
+  map<int, int> window;
+  int ans = INT_MAX;
+  for (int i = 1; i < m + k; i++) {
+    sum[i] += sum[i - 1] + c[(i - 1) % m];
+    if (b[(i - 1) % m]) {
+      window.emplace(b[(i - 1) % m], i);
+    }
+    if (i >= k) {
+      if (sum[i] - sum[i - k] == n) {
+        auto [mx, j] = *window.rbegin();
+        ans = min(ans, mx + (i - j) % m);
+      }
+      if (b[(i - k) % m]) {
+        window.erase(b[(i - 1) % m]);
+      }
     }
   }
-  int ans = ok ? 0 : -1;
-  println(ans);
+  println(ans == INT_MAX ? -1 : ans);
 }
 
 int main() {
