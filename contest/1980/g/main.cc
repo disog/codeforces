@@ -12,7 +12,7 @@ using namespace placeholders;
 #define debug
 #else
 #include "debug.h"
-init(__FILE__);
+init();
 #endif
 
 template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {

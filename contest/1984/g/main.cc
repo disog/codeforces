@@ -12,7 +12,7 @@ using i64 = int64_t;
 #define debug
 #else
 #include "debug.h"
-init(__FILE__);
+init();
 #endif
 
 template <typename T, size_t N>

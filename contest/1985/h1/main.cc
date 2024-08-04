@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1985/submission/273628102
+ * https://codeforces.com/contest/1985/submission/274274338
  *
  * (c) 2024 Diego Sogari
  */
@@ -11,7 +11,7 @@ using namespace std;
 #define debug
 #else
 #include "debug.h"
-init(__FILE__);
+init();
 #endif
 
 void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
@@ -27,7 +27,7 @@ using Int = Num<int>;
 
 struct DSU {
   vector<int> par, siz;
-  DSU(int n) : par(n), siz(n) {}
+  DSU(int n) : par(n + 1), siz(n + 1) {}
   int add(int v) { return siz[v] = 1, par[v] = v; }
   int find(int v) { return v == par[v] ? v : par[v] = find(par[v]); }
   int merge(int a, int b) {

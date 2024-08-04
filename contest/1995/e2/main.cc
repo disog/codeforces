@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1995/submission/274266148
+ * https://codeforces.com/contest/1995/submission/274273786
  *
  * (c) 2024 Diego Sogari
  */
@@ -8,13 +8,12 @@
 #pragma GCC optimize("O3,unroll-loops")
 
 using namespace std;
-using namespace placeholders;
 
 #ifdef ONLINE_JUDGE
 #define debug
 #else
 #include "debug.h"
-init(__FILE__);
+init();
 #endif
 
 void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
@@ -28,7 +27,7 @@ template <typename T> struct Num {
 };
 using Int = Num<int>;
 
-void madd(auto &lhs, const auto &rhs, const auto &c) {
+inline void madd(auto &lhs, const auto &rhs, const auto &c) {
   for (int i = 0; i < lhs.size(); i++) {
     lhs[i] += rhs[i] * c;
   }
@@ -56,17 +55,17 @@ template <typename T> struct SegTree {
   SegTree(int n, auto &&f, T val = {}) : n(n), f(f), nodes(2 * n, val) {}
   const T &full() const { return nodes[1]; }    // O(1)
   T &operator[](int i) { return nodes[i + n]; } // O(1)
-  T query(int l, int r) const {                 // [l, r] O(log n)
+  T query(int l, int r) const {                 // O(log n)
     assert(l >= 0 && l <= r && r < n);
-    return inner(l + n, r + n);
+    return _inner(l + n, r + n);
   }
-  T inner(int l, int r) const { // [l, r] O(log n)
+  T _inner(int l, int r) const { // [l, r] O(log n)
     return l == r       ? nodes[l]
-           : l % 2      ? f(nodes[l], inner(l + 1, r))
-           : r % 2 == 0 ? f(inner(l, r - 1), nodes[r])
-                        : inner(l / 2, r / 2);
+           : l % 2      ? f(nodes[l], _inner(l + 1, r))
+           : r % 2 == 0 ? f(_inner(l, r - 1), nodes[r])
+                        : _inner(l / 2, r / 2);
   }
-  void update(int i, bool single = true) { // O(log n) / O(n)
+  void update(int i, bool single = true) { // O(log n) / [0, i] O(n)
     assert(i >= 0 && i < n);
     for (i = (i + n) / 2; i > 0; i = single ? i / 2 : i - 1) {
       nodes[i] = f(nodes[2 * i], nodes[2 * i + 1]);

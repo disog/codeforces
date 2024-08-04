@@ -6,7 +6,7 @@
 /**
  * Vector Multiply-and-add
  */
-void madd(auto &lhs, const auto &rhs, const auto &c) {
+inline void madd(auto &lhs, const auto &rhs, const auto &c) {
   for (int i = 0; i < lhs.size(); i++) {
     lhs[i] += rhs[i] * c;
   }

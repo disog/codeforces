@@ -1,18 +1,17 @@
 /**
- * https://codeforces.com/contest/1996/submission/274265846
+ * https://codeforces.com/contest/1996/submission/274276789
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using namespace placeholders;
 
 #ifdef ONLINE_JUDGE
 #define debug
 #else
 #include "debug.h"
-init(__FILE__);
+init();
 #endif
 
 void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
@@ -30,11 +29,11 @@ struct Str : string {
   Str() { cin >> *this; }
 };
 
-template <typename T> struct Fen {
+template <typename T> struct FenTree {
   const int n;
   vector<T> nodes;
   function<T(const T &, const T &)> f;
-  Fen(int n, auto &&f, T val = {}) : n(n), f(f), nodes(n + 1, val) {}
+  FenTree(int n, auto &&f, T val = {}) : n(n), f(f), nodes(n + 1, val) {}
   T &operator[](int i) { return nodes[i + 1]; } // O(1)
   T query(int i) const {                        // O(log n)
     assert(i < n);
@@ -50,14 +49,9 @@ template <typename T> struct Fen {
       nodes[i] = f(nodes[i], val);
     }
   }
-  void update() { // O(n)
-    for (int i = 1, j = 2; j <= n; i++, j = i + (i & -i)) {
-      nodes[j] = f(nodes[j], nodes[i]);
-    }
-  }
 };
 
-auto tadd = [](auto &a, auto &b) { return a + b; };
+const auto tadd = [](auto &a, auto &b) { return a + b; };
 
 constexpr int c = 'z' - 'a' + 1;
 
@@ -65,7 +59,7 @@ void solve(int t) {
   Int n, q;
   Str a, b;
   vector<array<Int, 2>> qs(q);
-  vector<Fen<int>> ca(c, {n, tadd}), cb(c, {n, tadd});
+  vector<FenTree<int>> ca(c, {n, tadd}), cb(c, {n, tadd});
   for (int i = 0; i < n; i++) {
     ca[a[i] - 'a'].update(i, 1);
     cb[b[i] - 'a'].update(i, 1);

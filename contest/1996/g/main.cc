@@ -9,18 +9,10 @@ using namespace std;
 // #define debug
 #else
 #include "debug.h"
-init(__FILE__);
+init();
 #endif
 
-template <typename T, size_t N>
-ostream &operator<<(ostream &os, const array<T, N> &a) {
-  return ranges::for_each(a, [&os](auto &ai) { os << ai << ','; }), os;
-}
-template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
-  return ranges::for_each(a, [&os](auto &ai) { os << ai << ','; }), os;
-}
 void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
-void println2(auto &&...args) { ((cout << args << ';'), ...) << endl; }
 
 template <typename T> struct Num {
   T x;
@@ -45,7 +37,7 @@ struct Graph : vector<vector<int>> {
 
 struct DSU {
   vector<int> par, siz;
-  DSU(int n) : par(n), siz(n) {}
+  DSU(int n) : par(n + 1), siz(n + 1) {}
   int add(int v) { return siz[v] = 1, par[v] = v; }
   int find(int v) { return v == par[v] ? v : par[v] = find(par[v]); }
   int merge(int a, int b) {
@@ -64,11 +56,7 @@ struct DSU {
 void solve(int t) {
   Int n, m;
   Graph g(n, m);
-  // if (t == 91) {
-  //   println2(n, m, g.e);
-  //   return;
-  // }
-  DSU dsu(n + 1);
+  DSU dsu(n);
   for (int u = 1; u <= n; u++) {
     dsu.add(u);
   }
