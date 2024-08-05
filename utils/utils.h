@@ -35,7 +35,7 @@ using MinHeap = priority_queue<T, vector<int>, greater<int>>;
 #define debug
 #else
 #include "debug.h"
-init(__FILE__);
+init();
 #endif
 
 /**

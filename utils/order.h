@@ -1,0 +1,149 @@
+/**
+ * (c) 2024 Diego Sogari
+ */
+#include "utils.h"
+
+/**
+ * Vector Indices
+ */
+struct Iota : vector<int> {
+  Iota(int n, int s = 0) : vector<int>(n) { iota(begin(), end(), s); }
+  Iota(int n, auto &&f, int s = 0) : Iota(n, s) { ranges::sort(*this, f); }
+};
+
+/**
+ * Binary search
+ * (assumes that f(s) is true and does not check it)
+ */
+int binsearch(auto &&f, int s, int e) {
+  while (s < e) {
+    auto m = (s + e + 1) / 2;
+    f(m) ? s = m : e = m - 1;
+  }
+  return e; // last such that f is true
+}
+
+/**
+ * Inversion count and cyclic shift (of sorted array)
+ */
+pair<int, int> invshift(auto &&a, int sa = 0, int sp = 1) {
+  int inv = 0, shift = a[sa] - sp, n = a.size();
+  for (int i = sa, sum = 0; i < n; i++) {
+    for (int j = i + 1; j < n; j++) {
+      if (a[i] > a[j]) {
+        inv++;
+      }
+    }
+    if (shift >= 0) {
+      auto d = a[i] - sp - (i - sa);
+      if (shift != (n - sa + d) % (n - sa)) {
+        shift = -1;
+      }
+    }
+  }
+  return {inv, shift};
+}
+
+/**
+ * Minimum Queue (not preserving elements)
+ */
+template <typename T> struct MinQueue {
+  deque<T> queue;
+  function<bool(const T &, const T &)> f;
+  MinQueue(auto &&f) : f(f) {}
+  const T &top() const { return queue.front(); } // O(1)
+  void push(const T &val) {                      // O(1)
+    while (queue.size() && f(val, queue.back())) {
+      queue.pop_back();
+    }
+    queue.push_back(val);
+  };
+  void pop(const T &val) { // O(1)
+    if (queue.size() && !f(queue.front(), val)) {
+      queue.pop_front();
+    }
+  };
+};
+
+/**
+ * Minimum Stack
+ */
+template <typename T> struct MinStack {
+  stack<pair<T, T>> st;
+  function<bool(const T &, const T &)> f;
+  MinStack(auto &&f) : f(f) {}
+  size_t size() const { return st.size(); };       // O(1)
+  const T &top() const { return st.top().second; } // O(1)
+  bool _chk(const T &val) const { return st.empty() || f(val, top()); }
+  void push(const T &val) { st.emplace(val, _chk(val) ? val : top()); }; // O(1)
+  T pop() {                                                              // O(1)
+    auto val = st.top().first;
+    return st.pop(), val;
+  };
+};
+
+/**
+ * Minimum Queue (preserving elements)
+ */
+template <typename T> struct MinQueue2 {
+  MinStack<T> s1, s2;
+  MinQueue2(auto &&f) : s1(f), s2(f) {}
+  size_t size() const { return s1.size() + s2.size(); };                 // O(1)
+  const T &top() const { return (s1.size() && _chk() ? s1 : s2).top(); } // O(1)
+  bool _chk() const { return !s2.size() || s2.f(s1.top(), s2.top()); }
+  void push(const T &val) { s1.push(val); } // O(1)
+  T pop() {                                 // O(1)
+    if (!s2.size()) {
+      while (s1.size()) {
+        s2.push(s1.pop());
+      }
+    }
+    return s2.pop();
+  };
+};
+
+/**
+ * Median Queue
+ */
+template <typename T> struct MedQueue {
+  function<bool(const T &, const T &)> f;
+  multiset<T, decltype(f)> s1, s2;
+  MedQueue(auto &&f) : s1(bind(f, _2, _1)), s2(f), f(f) {}
+  size_t size() const { return s1.size() + s2.size(); }; // O(1)
+  const T &top() const { return *s1.begin(); }           // O(1)
+  bool _chk(const T &val) const { return !s2.size() || f(val, *s2.begin()); }
+  void push(const T &val) { // O(log n)
+    (_chk(val) ? s1 : s2).insert(val);
+    _rebalance();
+  }
+  void pop(const T &val) { // O(log n)
+    auto &set = _chk(val) ? s1 : s2;
+    auto it = set.find(val);
+    assert(it != set.end());
+    set.erase(it);
+    _rebalance();
+  }
+  void _rebalance() { // O(1)
+    if (s1.size() > s2.size() + 1) {
+      s2.insert(s2.begin(), s1.extract(s1.begin()));
+    } else if (s1.size() < s2.size()) {
+      s1.insert(s1.begin(), s2.extract(s2.begin()));
+    }
+  }
+};
+
+// Comparison operators
+const less<int> lt1;
+const greater<int> gt1;
+const less<array<int, 2>> lt2;
+const greater<array<int, 2>> gt2;
+
+// Custom comparison
+const auto lta1 = [](auto &lhs, auto &rhs) { return lhs[0] < rhs[0]; };
+const auto gta1 = [](auto &lhs, auto &rhs) { return lhs[0] > rhs[0]; };
+const auto lta2 = [](auto &lhs, auto &rhs) {
+  return lhs[0] < rhs[0] || (lhs[0] == rhs[0] && lhs[1] < rhs[1]);
+};
+const auto gta2 = [](auto &lhs, auto &rhs) {
+  return lhs[0] > rhs[0] || (lhs[0] == rhs[0] && lhs[1] > rhs[1]);
+};

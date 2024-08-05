@@ -1,9 +1,12 @@
 /**
+ * https://codeforces.com/contest/1993/submission/274561427
+ *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
+using namespace placeholders;
 
 #ifdef ONLINE_JUDGE
 #define debug
@@ -31,8 +34,10 @@ struct Iota : vector<int> {
 void solve(int t) {
   Int n, k;
   vector<Int> a(n);
-  auto cmp = [&](int i, int j) { return a[i] < a[j]; };
-  Iota idx(n, cmp);
+  vector<array<vector<int>, 2>> b(n - k + 1);
+  int ans = 0;
+
+  println(ans);
 }
 
 int main() {

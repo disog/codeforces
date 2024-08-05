@@ -160,6 +160,10 @@ template <typename T> struct Interval {
       it = l <= x && x < r && f(l, r) ? contained.erase(it) : next(it);
     }
   }
+  bool contains(T x) const {
+    auto f = [&](auto &pair) { return pair[0] <= x && x < pair[1]; };
+    return ranges::find_if(contained, f) != contained.end();
+  }
 };
 
 /**
@@ -191,6 +195,15 @@ template <typename T> struct IntTree {
       nodes[i].visit(x, f); // internal node
     }
     nodes[i].visit(x, f); // leaf node
+  }
+  bool contains(T x) const {
+    int i = 1;
+    for (; i < n; i = 2 * i + (x >= nodes[i].mid)) {
+      if (nodes[i].contains(x)) { // internal node
+        return true;
+      }
+    }
+    return nodes[i].contains(x); // leaf node
   }
 };
 
