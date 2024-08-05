@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1995/submission/273051685
+ * https://codeforces.com/contest/1995/submission/274501872
  *
  * (c) 2024 Diego Sogari
  */
@@ -35,16 +35,19 @@ i64 maxsum(int a, int ca, int b, int cb, i64 m) {
   return (ua - ra) * a + (ub + ra) * b;
 }
 
+struct Iota : vector<int> {
+  Iota(int n, int s = 0) : vector<int>(n) { iota(begin(), end(), s); }
+  Iota(int n, auto &&f, int s = 0) : Iota(n, s) { ranges::sort(*this, f); }
+};
+
 void solve(int t) {
   Int n;
   I64 m;
   vector<Int> a(n), c(n);
   a.push_back(INT_MAX);
   c.push_back(0);
-  vector<int> ids(n + 1);
-  iota(ids.begin(), ids.end(), 0);
   auto cmp = [&](int i, int j) { return a[i] < a[j]; };
-  ranges::sort(ids, cmp);
+  Iota ids(n + 1, cmp);
   i64 ans = 0;
   for (int i = 0; i < n; i++) {
     int j = ids[i], k = ids[i + 1];

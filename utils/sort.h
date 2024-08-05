@@ -4,6 +4,14 @@
 #include "utils.h"
 
 /**
+ * Vector Indices
+ */
+struct Iota : vector<int> {
+  Iota(int n, int s = 0) : vector<int>(n) { iota(begin(), end(), s); }
+  Iota(int n, auto &&f, int s = 0) : Iota(n, s) { ranges::sort(*this, f); }
+};
+
+/**
  * Binary search
  * (assumes that f(s) is true and does not check it)
  */

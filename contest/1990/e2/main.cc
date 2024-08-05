@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1990/submission/273050990
+ * https://codeforces.com/contest/1990/submission/274501348
  *
  * (c) 2024 Diego Sogari
  */
@@ -55,6 +55,11 @@ struct Tree : Graph {
   }
 };
 
+struct Iota : vector<int> {
+  Iota(int n, int s = 0) : vector<int>(n) { iota(begin(), end(), s); }
+  Iota(int n, auto &&f, int s = 0) : Iota(n, s) { ranges::sort(*this, f); }
+};
+
 int simulate(Tree &g, int &mole, int x) {
   int i = mole;
   while (i != 1 && i != x) {
@@ -69,7 +74,7 @@ int simulate(Tree &g, int &mole, int x) {
 
 void solve(int t) {
   Int n;
-#ifdef LOCAL
+#ifndef ONLINE_JUDGE
   Int mole;
 #endif
   int rem = 160;
@@ -77,7 +82,7 @@ void solve(int t) {
   auto q = [&](int x) {
     assert(rem--);
     println('?', x);
-#ifdef LOCAL
+#ifndef ONLINE_JUDGE
     return simulate(g, mole, x);
 #else
     return Int();
@@ -92,10 +97,8 @@ void solve(int t) {
       }
     }
   };
-  vector<int> ids(n);
-  iota(ids.begin(), ids.end(), 1);
   auto cmp = [&](int i, int j) { return g.info[i].dep > g.info[j].dep; };
-  ranges::sort(ids, cmp);
+  Iota ids(n, cmp, 1);
   for (int u : ids) {
     if (!vis[u]) {
       int v = u;

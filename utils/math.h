@@ -89,6 +89,18 @@ struct Div : vector<vector<int>> {
 };
 
 /**
+ * Uniform Distribution using Mersenne Twister engine
+ */
+struct Dist : uniform_int_distribution<int> {
+  Dist(int s, int e) : uniform_int_distribution<int>(s, e) {}
+  int operator()() {
+    static random_device device;
+    static mt19937 engine{device()};
+    return uniform_int_distribution<int>::operator()(engine);
+  }
+};
+
+/**
  * Choices satisfying equality x + y == m, for a1 <= x <= a2 and b1 <= y <= b2
  */
 i64 choices_eq(int a1, int a2, int b1, int b2, i64 m) {
