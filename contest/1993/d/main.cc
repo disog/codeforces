@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1993/submission/274985421
+ * https://codeforces.com/contest/1993/submission/274988721
  *
  * (c) 2024 Diego Sogari
  */
@@ -38,41 +38,25 @@ int binsearch(auto &&f, int s, int e) { // (s, e] O(log n)
   return e; // last such that f is true
 }
 
-array<int, 2> lis(auto &&f, int s, int e) { // [s, e) O(n*log n)
-  vector<int> inc = {s};
-  for (int i = s + 1; i < e; i++) {
-    if (f(inc.back(), i)) {
-      inc.push_back(i);
-    } else {
-      *ranges::lower_bound(inc, i, f) = i;
-    }
-  }
-  return {(int)inc.size() - (s >= e), inc.back()};
-}
-
 void solve(int t) {
   Int n, k;
   vector<Int> a(n);
-  int m = n % k ? n % k : int(k); // count of resulting elements
-  int c = (n - 1) / k + 1;        // count of indices for each resulting index
-  vector<int> good(c * m, n);     // indices of elements greater than x
-  auto cmp2 = [&](int i, int j) { return good[i] < good[j]; };
   auto cmp1 = [&](int i, int j) { return a[i] < a[j]; };
-  auto cmp3 = [&](int i, int j) { return a[i] == a[j]; };
-  Iota idx(n, cmp1);    // indices of a in non-decreasing order
-  auto f = [&](int x) { // O(n*log n)
+  Iota idx(n, cmp1);              // indices of a in non-decreasing order
+  int m = n % k ? n % k : int(k); // length of resulting array
+  auto f = [&](int x) {           // O(n)
+    vector<int> dp(m + 1);        // count of ai greater or equal to x
     for (int i = 0; i < n; i++) {
-      if (i % k < m) {
-        int j = (i % k + 1) * c - 1 - i / k;
-        good[j] = a[i] >= a[idx[x]] ? i : int(n);
+      int j = i % k; // index of ai in resulting array
+      if (j < m) {   // if ai occurs in resulting array, include it in the count
+        dp[j + 1] = max(dp[j + 1], dp[j] + (a[i] >= a[idx[x]]));
       }
     }
-    auto [cnt, j] = lis(cmp2, 0, c * m);
-    cnt -= good[j] == n; // hack
-    return cnt > m / 2;  // does x lie to the left of median?
+    return dp[m] > m / 2; // does x lie to the left of median?
   };
-  int e = ranges::unique(idx, cmp3).begin() - idx.begin();
-  int ans = binsearch(f, 0, e - 1); // O(n*log^2 n)
+  auto cmp2 = [&](int i, int j) { return a[i] == a[j]; };
+  int e = ranges::unique(idx, cmp2).begin() - idx.begin(); // remove duplicates
+  int ans = binsearch(f, 0, e - 1);                        // O(n*log n)
   println(a[idx[ans]]);
 }
 
