@@ -1,5 +1,5 @@
 /**
- * https://codeforces.com/contest/1984/submission/273048222
+ * https://codeforces.com/contest/1984/submission/274685138
  *
  * (c) 2024 Diego Sogari
  */
@@ -63,35 +63,42 @@ struct Mod {
   }
 };
 
-pair<int, int> invshift(auto &a, int sa = 0, int sp = 1) {
-  int inv = 0, shift = a[sa] - sp, n = a.size();
-  for (int i = sa, sum = 0; i < n; i++) {
-    for (int j = i + 1; j < n; j++) {
-      if (a[i] > a[j]) {
-        inv++;
-      }
-    }
-    if (shift >= 0) {
-      auto d = a[i] - sp - (i - sa);
-      if (shift != (n - sa + d) % (n - sa)) {
-        shift = -1;
-      }
+int invcount(auto &&f, int s, int e) { // [s, e) O(n^2)
+  int ans = 0;
+  for (int i = s; i < e; i++) {
+    for (int j = i + 1; j < e; j++) {
+      ans += f(j, i);
     }
   }
-  return {inv, shift};
+  return ans;
+}
+
+int cyclicshift(auto &&f, int s, int e) { // [s, e) O(n)
+  int ans = 0;
+  for (int i = s + 1; i < e; i++) {
+    if (f(i, i - 1)) {
+      if (ans) {
+        return -1; // array must contain at most one such inversion
+      }
+      ans = i;
+    }
+  }
+  return ans && s < e - 2 && f(s, e - 1) ? -1 : ans;
 }
 
 void solve(int t) {
   Int n;
   vector<Int> a(n);
   vector<array<int, 2>> ops;
-  auto [inv, shift] = invshift(a);
+  auto cmp = [&](int i, int j) { return a[i] < a[j]; };
+  auto shift = cyclicshift(cmp, 0, n);
   int ans = n;
   if (shift > 0) {
-    for (ans--; shift--;) {
+    for (ans--; shift < n; shift++) {
       ops.push_back({1, 2});
     }
   } else if (shift < 0) {
+    auto inv = invcount(cmp, 0, n);
     ans -= 2;
     if (n % 2 == 0) {
       ans -= inv % 2;

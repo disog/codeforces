@@ -12,10 +12,9 @@ struct Iota : vector<int> {
 };
 
 /**
- * Binary search
- * (assumes that f(s) is true and does not check it)
+ * Binary Search
  */
-int binsearch(auto &&f, int s, int e) {
+int binsearch(auto &&f, int s, int e) { // (s, e] O(log n)
   while (s < e) {
     auto m = (s + e + 1) / 2;
     f(m) ? s = m : e = m - 1;
@@ -24,24 +23,47 @@ int binsearch(auto &&f, int s, int e) {
 }
 
 /**
- * Inversion count and cyclic shift (of sorted array)
+ * Longest Increasing Subsequence
  */
-pair<int, int> invshift(auto &&a, int sa = 0, int sp = 1) {
-  int inv = 0, shift = a[sa] - sp, n = a.size();
-  for (int i = sa, sum = 0; i < n; i++) {
-    for (int j = i + 1; j < n; j++) {
-      if (a[i] > a[j]) {
-        inv++;
-      }
-    }
-    if (shift >= 0) {
-      auto d = a[i] - sp - (i - sa);
-      if (shift != (n - sa + d) % (n - sa)) {
-        shift = -1;
-      }
+int lis(auto &&f, int s, int e) { // [s, e) O(n*log n)
+  vector<int> inc = {s};
+  for (int i = s + 1; i < e; i++) {
+    if (f(inc.back(), i)) {
+      inc.push_back(i);
+    } else {
+      *ranges::lower_bound(inc, i, f) = i;
     }
   }
-  return {inv, shift};
+  return inc.size() - (s >= e);
+}
+
+/**
+ * Inversion Count
+ */
+int invcount(auto &&f, int s, int e) { // [s, e) O(n^2)
+  int ans = 0;
+  for (int i = s; i < e; i++) {
+    for (int j = i + 1; j < e; j++) {
+      ans += f(j, i);
+    }
+  }
+  return ans;
+}
+
+/**
+ * Cyclic Shift (of sorted array, rightwise)
+ */
+int cyclicshift(auto &&f, int s, int e) { // [s, e) O(n)
+  int ans = 0;
+  for (int i = s + 1; i < e; i++) {
+    if (f(i, i - 1)) {
+      if (ans) {
+        return -1; // array must contain at most one such inversion
+      }
+      ans = i;
+    }
+  }
+  return ans && s < e - 2 && f(s, e - 1) ? -1 : ans;
 }
 
 /**
@@ -103,12 +125,37 @@ template <typename T> struct MinQueue2 {
 };
 
 /**
- * Median Queue
+ * Median Queue (using one set)
  */
 template <typename T> struct MedQueue {
   function<bool(const T &, const T &)> f;
+  multiset<T, decltype(f)> set;
+  decltype(set)::iterator mid;
+  MedQueue(auto &&f) : f(f), set(f), mid(set.end()) {}
+  size_t size() const { return set.size(); }; // O(1)
+  const T &top() const { return *mid; }       // O(1)
+  int _inc(const T &val) {
+    return size() == 1 ? -1 : size() % 2 - f(val, *mid);
+  }
+  void push(const T &val) { // O(log n)
+    set.insert(val);
+    mid = next(mid, _inc());
+  }
+  void pop(const T &val) { // O(log n)
+    mid = next(mid, -_inc());
+    auto it = set.find(val);
+    assert(it != set.end());
+    set.erase(it);
+  }
+};
+
+/**
+ * Median Queue (using two sets)
+ */
+template <typename T> struct MedQueue2 {
+  function<bool(const T &, const T &)> f;
   multiset<T, decltype(f)> s1, s2;
-  MedQueue(auto &&f) : s1(bind(f, _2, _1)), s2(f), f(f) {}
+  MedQueue(auto &&f) : f(f), s1(bind(f, _2, _1)), s2(f) {}
   size_t size() const { return s1.size() + s2.size(); }; // O(1)
   const T &top() const { return *s1.begin(); }           // O(1)
   bool _chk(const T &val) const { return !s2.size() || f(val, *s2.begin()); }
@@ -131,6 +178,8 @@ template <typename T> struct MedQueue {
     }
   }
 };
+
+// consider using ranges::nth_element
 
 // Comparison operators
 const less<int> lt1;
