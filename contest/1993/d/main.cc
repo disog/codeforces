@@ -1,12 +1,11 @@
 /**
- * https://codeforces.com/contest/1993/submission/274561427
+ * https://codeforces.com/contest/1993/submission/274985421
  *
  * (c) 2024 Diego Sogari
  */
 #include <bits/stdc++.h>
 
 using namespace std;
-using namespace placeholders;
 
 #ifdef ONLINE_JUDGE
 #define debug
@@ -15,10 +14,6 @@ using namespace placeholders;
 init();
 #endif
 
-template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
-  return ranges::for_each(a, [&os](auto &ai) { os << ai << ','; }), os;
-}
-void println2(auto &&...args) { ((cout << args << ';'), ...) << endl; }
 void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
@@ -35,7 +30,15 @@ struct Iota : vector<int> {
   Iota(int n, auto &&f, int s = 0) : Iota(n, s) { ranges::sort(*this, f); }
 };
 
-int lis(auto &&f, int s, int e) { // [s, e) O(n*log n)
+int binsearch(auto &&f, int s, int e) { // (s, e] O(log n)
+  while (s < e) {
+    auto m = (s + e + 1) / 2;
+    f(m) ? s = m : e = m - 1;
+  }
+  return e; // last such that f is true
+}
+
+array<int, 2> lis(auto &&f, int s, int e) { // [s, e) O(n*log n)
   vector<int> inc = {s};
   for (int i = s + 1; i < e; i++) {
     if (f(inc.back(), i)) {
@@ -44,40 +47,33 @@ int lis(auto &&f, int s, int e) { // [s, e) O(n*log n)
       *ranges::lower_bound(inc, i, f) = i;
     }
   }
-  return inc.size() - (s >= e);
+  return {(int)inc.size() - (s >= e), inc.back()};
 }
 
 void solve(int t) {
   Int n, k;
   vector<Int> a(n);
-  if (t == 603) {
-    println2(n, k, a);
-    return;
-  }
-  if (n <= k) {
-    ranges::nth_element(a, a.begin() + (n - 1) / 2);
-    println(a[(n - 1) / 2]);
-    return;
-  }
-  auto cmp = [&](int i, int j) { return a[i] > a[j]; };
-  Iota idx(n, cmp);
   int m = n % k ? n % k : int(k); // count of resulting elements
-  vector<int> good(m, INT_MAX);
+  int c = (n - 1) / k + 1;        // count of indices for each resulting index
+  vector<int> good(c * m, n);     // indices of elements greater than x
   auto cmp2 = [&](int i, int j) { return good[i] < good[j]; };
-  int ans = 0;
-  for (int i = 0; i < n; i++) { // O(n*m*log m)
-    int j = idx[i] % k;
-    if (j >= m) {
-      continue;
+  auto cmp1 = [&](int i, int j) { return a[i] < a[j]; };
+  auto cmp3 = [&](int i, int j) { return a[i] == a[j]; };
+  Iota idx(n, cmp1);    // indices of a in non-decreasing order
+  auto f = [&](int x) { // O(n*log n)
+    for (int i = 0; i < n; i++) {
+      if (i % k < m) {
+        int j = (i % k + 1) * c - 1 - i / k;
+        good[j] = a[i] >= a[idx[x]] ? i : int(n);
+      }
     }
-    good[j] = min(good[j], idx[i]);
-    int cnt = lis(cmp2, 0, m); // O(m*log m)
-    if (cnt > m / 2) {
-      ans = a[idx[i]];
-      break;
-    }
-  }
-  println(ans);
+    auto [cnt, j] = lis(cmp2, 0, c * m);
+    cnt -= good[j] == n; // hack
+    return cnt > m / 2;  // does x lie to the left of median?
+  };
+  int e = ranges::unique(idx, cmp3).begin() - idx.begin();
+  int ans = binsearch(f, 0, e - 1); // O(n*log^2 n)
+  println(a[idx[ans]]);
 }
 
 int main() {

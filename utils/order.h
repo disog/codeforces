@@ -38,6 +38,21 @@ int lis(auto &&f, int s, int e) { // [s, e) O(n*log n)
 }
 
 /**
+ * Maximum Sum of Subsequences of Length R Mod K
+ * A good subsequence is one where there are a multiple of k elements in between
+ * any 2 elements.
+ * @see https://cfstep.com/codeforces/contests/contest-1993/problem-d/code/
+ */
+int max_sum_subseq_mod_k(const vector<int> &a, int k, int r) {
+  vector<int> dp(k + 1);
+  for (int i = 0; i < a.size(); i++) {
+    int len = 1 + i % k;
+    dp[len] = max(dp[len], dp[len - 1] + a[i]);
+  }
+  return dp[r];
+}
+
+/**
  * Inversion Count
  */
 int invcount(auto &&f, int s, int e) { // [s, e) O(n^2)
@@ -184,8 +199,10 @@ template <typename T> struct MedQueue2 {
 // Comparison operators
 const less<int> lt1;
 const greater<int> gt1;
+const equal_to<int> eq1;
 const less<array<int, 2>> lt2;
 const greater<array<int, 2>> gt2;
+const equal_to<array<int, 2>> eq2;
 
 // Custom comparison
 const auto lta1 = [](auto &lhs, auto &rhs) { return lhs[0] < rhs[0]; };
