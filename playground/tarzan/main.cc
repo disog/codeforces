@@ -28,7 +28,6 @@ void solve(int t) {
   vector<Int> a(n);
   vector<int> dp(n, n - 1);
   dp[0] = 0;
-  int ans = 0;
   for (int i = 0, r = 1; r < n; i++) { // O(n)
     for (; r < n && r <= i + a[i]; r++) {
       dp[r] = min(dp[r], dp[i] + 1);
