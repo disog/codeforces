@@ -14,6 +14,13 @@ using namespace std;
 init();
 #endif
 
+template <typename T, size_t N>
+ostream &operator<<(ostream &os, const array<T, N> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
+template <typename T> ostream &operator<<(ostream &os, const vector<T> &a) {
+  return ranges::for_each(a, [&os](auto &ai) { os << ai << ' '; }), os;
+}
 void println(auto &&...args) { ((cout << args << ' '), ...) << endl; }
 
 template <typename T> struct Num {
@@ -64,21 +71,21 @@ int lis(auto &&f, int s, int e) { // [s, e) O(n*log n)
 }
 
 void solve(int t) {
-  Int n;
-  vector<array<Int, 2>> b(n);
-  // int n = 10;
-  // vector<array<int, 2>> b(n);
-  // for (auto &&bi : b) {
-  //   bi[0] = rand() % n + 1;
-  //   bi[1] = rand() % n + 1;
-  // }
+  // Int n;
+  // vector<array<Int, 2>> b(n);
+  int n = 12;
+  vector<array<int, 2>> b(n);
+  for (auto &&bi : b) {
+    bi[0] = rand() % n + 1;
+    bi[1] = rand() % n + 1;
+  }
   ranges::sort(b); // O(n*log n)
   auto cmp = [&](int i, int j) { return b[i][1] > b[j][1]; };
   int k = lis(cmp, 0, n); // O(n*log n)
   int l1 = len1(b, n, k);
   int l2 = len2(b, n, k);
   // assert(l1 == l2);
-  println(k, l1, l2);
+  println(b, k, l1, l2);
 }
 
 int main() {
